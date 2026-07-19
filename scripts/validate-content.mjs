@@ -1,66 +1,183 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-const legacyRequired = ["id", "kind", "status", "title", "slug", "category", "summary", "body", "seo", "video", "social", "review"];
 const folders = ["automation/drafts", "automation/approved"];
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-let failures = 0;
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+const knowledgeCategories = new Set([
+  "SEO", "Web制作", "アクセス解析", "システム", "AI活用",
+  "マーケティング", "UX", "Webディレクション",
+]);
+const newsCategories = new Set([
+  "AI", "検索・SEO", "アクセス解析・広告", "ブラウザ・Web標準",
+  "Web制作・CMS", "クラウド・インフラ", "セキュリティ・プライバシー", "Webサービス",
+]);
 
-function validateLegacy(value) {
-  const missing = legacyRequired.filter((key) => !(key in value));
-  return [
-    ...missing.map((key) => `missing ${key}`),
-    ...(!slugPattern.test(value.slug ?? "") ? ["invalid slug"] : []),
-    ...(value.kind === "news" && !value.sources?.some((source) => source.isPrimary && /^https:\/\//.test(source.url))
-      ? ["news requires a primary HTTPS source"]
-      : []),
-  ];
+let failures = 0;
+const knowledgeIndex = JSON.parse(await readFile("content/knowledge/articles.json", "utf8"));
+const newsIndex = JSON.parse(await readFile("content/news/news.json", "utf8"));
+
+function isText(value, min = 1) {
+  return typeof value === "string" && value.trim().length >= min;
 }
 
-function validateDailyBundle(value, folder) {
-  const errors = [];
-  if (!value.runDate) errors.push("missing runDate");
-  if (!value.knowledge) errors.push("missing knowledge");
-  if (!value.news) errors.push("missing news");
-  if (!value.shortVideo) errors.push("missing shortVideo");
-  if (!value.reviewChecklist) errors.push("missing reviewChecklist");
+function isHttpsUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !["localhost", "127.0.0.1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
+}
 
-  if (value.knowledge && !slugPattern.test(value.knowledge.slug ?? "")) errors.push("invalid knowledge slug");
-  if (value.news && !slugPattern.test(value.news.slug ?? "")) errors.push("invalid news slug");
-  if (value.news && !value.news.sources?.some((source) => source.isPrimary && /^https:\/\//.test(source.url))) {
-    errors.push("news requires a primary HTTPS source");
+function validateSources(sources, label, { requirePrimary = false } = {}) {
+  const errors = [];
+  if (!Array.isArray(sources) || sources.length === 0) return [`${label} requires sources`];
+  const urls = new Set();
+
+  for (const [index, source] of sources.entries()) {
+    const path = `${label}.sources[${index}]`;
+    if (!isText(source?.name)) errors.push(`${path} requires a name`);
+    if (!isHttpsUrl(source?.url)) errors.push(`${path} requires an HTTPS URL`);
+    if (!isText(source?.publishedAt)) errors.push(`${path} requires publishedAt`);
+    if (urls.has(source?.url)) errors.push(`${path} duplicates a source URL`);
+    urls.add(source?.url);
+  }
+
+  if (requirePrimary && !sources.some((source) => source?.isPrimary === true && isHttpsUrl(source.url))) {
+    errors.push(`${label} requires a primary HTTPS source`);
+  }
+  return errors;
+}
+
+function validateArticleBody(body, label) {
+  const errors = [];
+  for (const key of ["conclusion", "definition", "importance", "practice", "mistakes", "example"]) {
+    if (!isText(body?.[key], 40)) errors.push(`${label}.body.${key} is too short or missing`);
+  }
+  if (!Array.isArray(body?.highlights) || body.highlights.length < 3) errors.push(`${label} requires at least 3 highlights`);
+  if (!Array.isArray(body?.glossary) || body.glossary.length < 5) errors.push(`${label} requires at least 5 glossary terms`);
+  if (!isText(body?.quiz?.question) || !Array.isArray(body?.quiz?.choices) || body.quiz.choices.length < 3) {
+    errors.push(`${label} requires a complete quiz`);
+  }
+  if (!isText(body?.quiz?.answer) || !body?.quiz?.choices?.includes(body.quiz.answer)) {
+    errors.push(`${label} quiz answer must match a choice`);
+  }
+  return errors;
+}
+
+function validateIndex(index, label) {
+  const errors = [];
+  const slugs = new Set();
+  for (const [position, item] of index.entries()) {
+    if (!slugPattern.test(item?.slug ?? "")) errors.push(`${label}[${position}] has an invalid slug`);
+    if (!isText(item?.title)) errors.push(`${label}[${position}] requires a title`);
+    if (slugs.has(item?.slug)) errors.push(`${label} contains duplicate slug ${item.slug}`);
+    slugs.add(item?.slug);
+  }
+  return errors;
+}
+
+function validateNoCollision(post, index, label) {
+  const errors = [];
+  const sameSlug = index.find((item) => item.slug === post?.slug);
+  const sameTitle = index.find((item) => item.title === post?.title);
+  if (sameSlug && sameSlug.title !== post?.title) errors.push(`${label} slug already belongs to another title`);
+  if (sameTitle && sameTitle.slug !== post?.slug) errors.push(`${label} title already belongs to another slug`);
+  return errors;
+}
+
+function validateDailyBundle(value, folder, file) {
+  const errors = [];
+  const expectedDate = file.match(/^daily-(\d{4}-\d{2}-\d{2})\.json$/)?.[1];
+  if (!datePattern.test(value?.runDate ?? "")) errors.push("missing or invalid runDate");
+  if (expectedDate && value.runDate !== expectedDate) errors.push("runDate does not match filename");
+
+  const knowledge = value?.knowledge;
+  const news = value?.news;
+  if (!knowledge) errors.push("missing knowledge");
+  if (!news) errors.push("missing news");
+  if (!value?.shortVideo) errors.push("missing shortVideo");
+  if (!value?.reviewChecklist) errors.push("missing reviewChecklist");
+
+  if (knowledge) {
+    if (!slugPattern.test(knowledge.slug ?? "")) errors.push("invalid knowledge slug");
+    if (!knowledgeCategories.has(knowledge.category)) errors.push("invalid knowledge category");
+    if (!isText(knowledge.title, 8) || !isText(knowledge.summary, 40)) errors.push("knowledge title or summary is too short");
+    if (!Number.isInteger(knowledge.minutes) || knowledge.minutes < 5 || knowledge.minutes > 30) errors.push("invalid knowledge reading time");
+    if (!Array.isArray(knowledge?.seo?.keywords) || knowledge.seo.keywords.length < 3) errors.push("knowledge requires SEO keywords");
+    errors.push(...validateArticleBody(knowledge.body, "knowledge"));
+    errors.push(...validateSources(knowledge.sources, "knowledge"));
+    errors.push(...validateNoCollision(knowledge, knowledgeIndex, "knowledge"));
+  }
+
+  if (news) {
+    if (!slugPattern.test(news.slug ?? "")) errors.push("invalid news slug");
+    if (!newsCategories.has(news.category)) errors.push("invalid news category");
+    if (!isText(news.title, 8) || !isText(news.summary, 40)) errors.push("news title or summary is too short");
+    if (!Array.isArray(news.quickSummary) || news.quickSummary.length !== 3) errors.push("news requires exactly 3 quick summaries");
+    if (!isText(news.whatHappened, 100) || !isText(news.impact, 100) || !isText(news.action, 100)) {
+      errors.push("news explanation is incomplete");
+    }
+    if (!Number.isInteger(news.urgency) || news.urgency < 1 || news.urgency > 5) errors.push("invalid news urgency");
+    if (!Number.isInteger(news.audienceImpact) || news.audienceImpact < 1 || news.audienceImpact > 5) errors.push("invalid news audience impact");
+    errors.push(...validateSources(news.sources, "news", { requirePrimary: true }));
+    errors.push(...validateNoCollision(news, newsIndex, "news"));
+  }
+
+  if (knowledge?.slug === news?.slug) errors.push("knowledge and news slugs must differ");
+  const video = value?.shortVideo;
+  if (video && !["knowledge", "news"].includes(video.sourceKind)) errors.push("invalid short-video source kind");
+  if (video && (!isText(video.hook) || !isText(video.script, 80) || !Array.isArray(video.scenes) || video.scenes.length < 4)) {
+    errors.push("short-video script is incomplete");
   }
 
   if (folder === "automation/drafts") {
-    if (value.knowledge?.status !== "draft" || value.news?.status !== "draft") {
-      errors.push("generated content must remain draft");
+    if (knowledge?.status !== "draft" || news?.status !== "draft") errors.push("generated content must remain draft");
+    for (const key of ["factChecked", "primarySourcesChecked", "duplicateChecked", "seoChecked"]) {
+      if (value.reviewChecklist?.[key] !== false) errors.push(`draft reviewChecklist.${key} must be false`);
     }
+    if (value.reviewChecklist?.approvedBy !== null) errors.push("draft must not have an approver");
   } else {
-    const kinds = value.approval?.approvedKinds;
+    const kinds = value?.approval?.approvedKinds;
     if (!Array.isArray(kinds) || kinds.length === 0) errors.push("missing approved kinds");
-    if (!value.approval?.approvedAt || !value.approval?.approvedBy) errors.push("missing approval metadata");
+    if (!isText(value?.approval?.approvedAt) || !isText(value?.approval?.approvedBy)) errors.push("missing approval metadata");
     for (const kind of ["knowledge", "news"]) {
       const expected = kinds?.includes(kind) ? "approved" : "draft";
-      if (value[kind]?.status !== expected) errors.push(`${kind} status must be ${expected}`);
+      if (value?.[kind]?.status !== expected) errors.push(`${kind} status must be ${expected}`);
     }
   }
   return errors;
+}
+
+for (const error of [
+  ...validateIndex(knowledgeIndex, "content/knowledge/articles.json"),
+  ...validateIndex(newsIndex, "content/news/news.json"),
+]) {
+  failures += 1;
+  console.error(error);
 }
 
 for (const folder of folders) {
   const files = (await readdir(folder)).filter((file) => file.endsWith(".json"));
   for (const file of files) {
     const path = join(folder, file);
-    const value = JSON.parse(await readFile(path, "utf8"));
-    const errors = value.runDate || value.knowledge || value.news
-      ? validateDailyBundle(value, folder)
-      : validateLegacy(value);
-
-    if (errors.length) {
+    try {
+      const value = JSON.parse(await readFile(path, "utf8"));
+      if (!value.runDate || !value.knowledge || !value.news) {
+        console.log(`${path}: skipped legacy single-item draft`);
+        continue;
+      }
+      const errors = validateDailyBundle(value, folder, file);
+      if (errors.length) {
+        failures += 1;
+        console.error(`${path}: ${errors.join(", ")}`);
+      } else {
+        console.log(`${path}: valid`);
+      }
+    } catch (error) {
       failures += 1;
-      console.error(`${path}: ${errors.join(", ")}`);
-    } else {
-      console.log(`${path}: valid`);
+      console.error(`${path}: ${error.message}`);
     }
   }
 }

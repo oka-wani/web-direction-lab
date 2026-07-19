@@ -1,22 +1,168 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Web Direction Lab content draft",
+  "title": "Web Direction Lab daily content bundle",
   "type": "object",
-  "required": ["id", "kind", "status", "title", "slug", "category", "summary", "body", "seo", "video", "social", "review"],
+  "additionalProperties": true,
+  "required": ["runDate", "knowledge", "news", "shortVideo", "reviewChecklist"],
   "properties": {
-    "id": { "type": "string", "minLength": 1 },
-    "kind": { "enum": ["knowledge", "news"] },
-    "status": { "enum": ["draft", "approved", "published", "rejected"] },
-    "title": { "type": "string", "minLength": 10, "maxLength": 70 },
-    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-    "category": { "type": "string", "minLength": 1 },
-    "summary": { "type": "string", "minLength": 40, "maxLength": 180 },
-    "sources": { "type": "array", "items": { "type": "object", "required": ["name", "url", "isPrimary"], "properties": { "name": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "isPrimary": { "type": "boolean" } } } },
-    "body": { "type": "object", "required": ["conclusion", "definition", "importance", "practice", "mistakes", "example", "summary", "quiz", "nextTopic"] },
-    "seo": { "type": "object", "required": ["metaTitle", "metaDescription", "keywords"] },
-    "video": { "type": "object", "required": ["selected", "reason", "hook", "script", "cta"] },
-    "social": { "type": "object", "required": ["shortCaption", "hashtags"] },
-    "review": { "type": "object", "required": ["factChecked", "sourceChecked", "seoChecked", "approvedBy"] }
+    "runDate": { "type": "string", "format": "date" },
+    "knowledge": { "$ref": "#/$defs/knowledge" },
+    "news": { "$ref": "#/$defs/news" },
+    "shortVideo": { "$ref": "#/$defs/shortVideo" },
+    "reviewChecklist": { "$ref": "#/$defs/reviewChecklist" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "model": { "type": "string" },
+    "responseId": { "type": "string" }
   },
-  "allOf": [{ "if": { "properties": { "kind": { "const": "news" } } }, "then": { "required": ["sources"], "properties": { "sources": { "minItems": 1 } } } }]
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "url", "publishedAt", "isPrimary"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+        "publishedAt": { "type": "string", "minLength": 4 },
+        "isPrimary": { "type": "boolean" }
+      }
+    },
+    "quiz": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["question", "choices", "answer", "explanation"],
+      "properties": {
+        "question": { "type": "string", "minLength": 1 },
+        "choices": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "answer": { "type": "string", "minLength": 1 },
+        "explanation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "knowledge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "status", "title", "slug", "category", "summary", "level", "minutes", "hero", "body", "seo", "sources"],
+      "properties": {
+        "kind": { "const": "knowledge" },
+        "status": { "enum": ["draft", "approved", "published"] },
+        "title": { "type": "string", "minLength": 8 },
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "category": { "enum": ["SEO", "Web制作", "アクセス解析", "システム", "AI活用", "マーケティング", "UX", "Webディレクション"] },
+        "summary": { "type": "string", "minLength": 40 },
+        "level": { "enum": ["初級", "中級", "上級"] },
+        "minutes": { "type": "integer", "minimum": 5, "maximum": 30 },
+        "hero": {
+          "type": "object",
+          "required": ["label", "headline", "items"],
+          "properties": {
+            "label": { "type": "string" },
+            "headline": { "type": "string" },
+            "items": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "string" } }
+          }
+        },
+        "body": {
+          "type": "object",
+          "required": ["conclusion", "highlights", "glossary", "definition", "importance", "practice", "mistakes", "example", "quiz"],
+          "properties": {
+            "conclusion": { "type": "string" },
+            "highlights": { "type": "array", "minItems": 3, "maxItems": 5, "items": { "type": "string" } },
+            "glossary": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 10,
+              "items": {
+                "type": "object",
+                "required": ["term", "description"],
+                "properties": {
+                  "term": { "type": "string" },
+                  "description": { "type": "string" }
+                }
+              }
+            },
+            "definition": { "type": "string" },
+            "importance": { "type": "string" },
+            "practice": { "type": "string" },
+            "mistakes": { "type": "string" },
+            "example": { "type": "string" },
+            "quiz": { "$ref": "#/$defs/quiz" }
+          }
+        },
+        "seo": {
+          "type": "object",
+          "required": ["metaTitle", "metaDescription", "keywords"],
+          "properties": {
+            "metaTitle": { "type": "string" },
+            "metaDescription": { "type": "string" },
+            "keywords": { "type": "array", "minItems": 3, "maxItems": 8, "items": { "type": "string" } }
+          }
+        },
+        "sources": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "#/$defs/source" } }
+      }
+    },
+    "news": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["kind", "status", "title", "slug", "category", "serviceName", "summary", "quickSummary", "keywords", "whatHappened", "impact", "action", "urgency", "audienceImpact", "selectionReason", "sources"],
+      "properties": {
+        "kind": { "const": "news" },
+        "status": { "enum": ["draft", "approved", "published"] },
+        "title": { "type": "string", "minLength": 8 },
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "category": { "enum": ["AI", "検索・SEO", "アクセス解析・広告", "ブラウザ・Web標準", "Web制作・CMS", "クラウド・インフラ", "セキュリティ・プライバシー", "Webサービス"] },
+        "serviceName": { "type": "string" },
+        "summary": { "type": "string", "minLength": 40 },
+        "quickSummary": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } },
+        "keywords": { "type": "array", "minItems": 3, "maxItems": 8, "items": { "type": "string" } },
+        "whatHappened": { "type": "string" },
+        "impact": { "type": "string" },
+        "action": { "type": "string" },
+        "urgency": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "audienceImpact": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "selectionReason": { "type": "string" },
+        "sources": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "#/$defs/source" } }
+      }
+    },
+    "shortVideo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceKind", "reason", "hook", "script", "scenes", "cta"],
+      "properties": {
+        "sourceKind": { "enum": ["knowledge", "news"] },
+        "reason": { "type": "string" },
+        "hook": { "type": "string" },
+        "script": { "type": "string" },
+        "scenes": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 7,
+          "items": {
+            "type": "object",
+            "required": ["seconds", "narration", "visual"],
+            "properties": {
+              "seconds": { "type": "string" },
+              "narration": { "type": "string" },
+              "visual": { "type": "string" }
+            }
+          }
+        },
+        "cta": { "type": "string" }
+      }
+    },
+    "reviewChecklist": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["factChecked", "primarySourcesChecked", "duplicateChecked", "seoChecked", "approvedBy"],
+      "properties": {
+        "factChecked": { "type": "boolean" },
+        "primarySourcesChecked": { "type": "boolean" },
+        "duplicateChecked": { "type": "boolean" },
+        "seoChecked": { "type": "boolean" },
+        "approvedBy": { "type": ["string", "null"] }
+      }
+    }
+  }
 }

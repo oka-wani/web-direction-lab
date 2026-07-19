@@ -1,12 +1,14 @@
-name: Generate daily content drafts
+name: Generate daily content review
 
 on:
   schedule:
+    # 06:00 JST (GitHub Actions cron is UTC)
     - cron: "0 21 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: daily-content-draft
@@ -15,33 +17,92 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - name: Check out main
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
+          cache: npm
+
+      - name: Select today's review branch
+        id: daily
+        shell: bash
+        run: |
+          RUN_DATE="$(TZ=Asia/Tokyo date +%F)"
+          BRANCH="automation/daily-${RUN_DATE}"
+          echo "run_date=${RUN_DATE}" >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+
+          if [ -f "automation/drafts/daily-${RUN_DATE}.json" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Today's draft is already on main."
+            exit 0
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$BRANCH"
+            git switch -C "$BRANCH" FETCH_HEAD
+          else
+            git switch -c "$BRANCH"
+          fi
+
+          if [ -f "automation/drafts/daily-${RUN_DATE}.json" ]; then
+            echo "generate=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "generate=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.daily.outputs.skip != 'true'
+        run: npm ci
 
       - name: Generate knowledge, news, and short-video drafts
-        run: node scripts/generate-daily.mjs
+        if: steps.daily.outputs.skip != 'true' && steps.daily.outputs.generate == 'true'
+        run: npm run generate:draft
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          RUN_DATE: ${{ steps.daily.outputs.run_date }}
 
-      - name: Validate draft format
-        run: node scripts/validate-content.mjs
+      - name: Validate draft and site build
+        if: steps.daily.outputs.skip != 'true'
+        run: |
+          npm run content:validate
+          npm run build
 
-      - name: Save generated draft
+      - name: Save the review branch
+        if: steps.daily.outputs.skip != 'true'
+        env:
+          BRANCH: ${{ steps.daily.outputs.branch }}
+          RUN_DATE: ${{ steps.daily.outputs.run_date }}
         run: |
           git config user.name "web-direction-lab-bot"
           git config user.email "actions@users.noreply.github.com"
           git add automation/drafts
-          if git diff --cached --quiet; then
-            echo "No new draft to commit."
-          else
-            git commit -m "Add daily content draft"
-            git push
+          if ! git diff --cached --quiet; then
+            git commit -m "Add daily content draft for ${RUN_DATE}"
           fi
+          git push --set-upstream origin "HEAD:${BRANCH}"
+
+      - name: Open or update the review pull request
+        if: steps.daily.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.daily.outputs.branch }}
+          RUN_DATE: ${{ steps.daily.outputs.run_date }}
+        run: |
+          BODY=$'## 毎日のコンテンツ確認\n\nこのPRをマージすると、ナレッジ1本・Webニュース1本・ショート動画台本1本が承認されます。マージ後に公開用データへ変換され、Vercelへ自動反映されます。\n\n### プレビュー\n- `/preview/'"${RUN_DATE}"$'/knowledge`\n- `/preview/'"${RUN_DATE}"$'/news`\n\n### 確認項目\n- [ ] 事実関係と断定表現\n- [ ] 一次情報URLと公開日\n- [ ] 既存記事との重複\n- [ ] タイトル・説明文・SEO\n- [ ] ショート動画台本\n\n修正が必要な場合は、このブランチの `automation/drafts/daily-'"${RUN_DATE}"$'.json` を編集してください。'
+          PR_URL="$(gh pr list --head "$BRANCH" --base main --state open --json url --jq '.[0].url // ""')"
+          if [ -n "$PR_URL" ]; then
+            gh pr edit "$PR_URL" --title "毎日のコンテンツ確認: ${RUN_DATE}" --body "$BODY"
+          else
+            PR_URL="$(gh pr create --base main --head "$BRANCH" --title "毎日のコンテンツ確認: ${RUN_DATE}" --body "$BODY")"
+          fi
+          echo "Review PR: ${PR_URL}" >> "$GITHUB_STEP_SUMMARY"

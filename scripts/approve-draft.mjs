@@ -10,15 +10,53 @@ const runDate =
     day: "2-digit",
   }).format(new Date());
 
-const approveKnowledge = process.env.APPROVE_KNOWLEDGE === "true";
-const approveNews = process.env.APPROVE_NEWS === "true";
+const requestKnowledge = process.env.APPROVE_KNOWLEDGE === "true";
+const requestNews = process.env.APPROVE_NEWS === "true";
 const approvedBy = process.env.APPROVED_BY || "github-actions";
 
-if (!approveKnowledge && !approveNews) throw new Error("Select knowledge, news, or both for approval.");
+if (!requestKnowledge && !requestNews) throw new Error("Select knowledge, news, or both for approval.");
 
 const draftPath = join("automation/drafts", `daily-${runDate}.json`);
 const draft = JSON.parse(await readFile(draftPath, "utf8"));
-const approvedKinds = [];
+const approvedAt = new Date().toISOString();
+const approvalPath = join("automation/approved", `daily-${runDate}.json`);
+const publicationPath = join("automation/published", `daily-${runDate}.json`);
+
+async function readJsonIfPresent(path) {
+  try {
+    return JSON.parse(await readFile(path, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+const previousApproval = await readJsonIfPresent(approvalPath);
+const previousPublication = await readJsonIfPresent(publicationPath);
+const approvedKinds = [...new Set(previousApproval?.approval?.approvedKinds ?? [])];
+const approveKnowledge = requestKnowledge && !approvedKinds.includes("knowledge");
+const approveNews = requestNews && !approvedKinds.includes("news");
+
+if (!approveKnowledge && !approveNews) {
+  console.log(`Requested content for ${runDate} is already published.`);
+  process.exit(0);
+}
+
+if (draft.runDate !== runDate) {
+  throw new Error(`Draft runDate ${draft.runDate} does not match requested date ${runDate}.`);
+}
+
+function assertNoCollision(index, post, kind) {
+  const sameSlug = index.find((entry) => entry.slug === post.slug);
+  if (sameSlug && sameSlug.title !== post.title) {
+    throw new Error(`${kind} slug ${post.slug} is already used by a different title.`);
+  }
+
+  const sameTitle = index.find((entry) => entry.title === post.title);
+  if (sameTitle && sameTitle.slug !== post.slug) {
+    throw new Error(`${kind} title is already published with slug ${sameTitle.slug}.`);
+  }
+}
 
 function knowledgeType(category) {
   return {
@@ -34,12 +72,13 @@ function knowledgeType(category) {
 }
 
 if (approveKnowledge) {
-  const post = {...draft.knowledge, status: "published", date: runDate.replaceAll("-", "."), publishedAt: new Date().toISOString(), approvedBy};
+  const indexPath = "content/knowledge/articles.json";
+  const index = JSON.parse(await readFile(indexPath, "utf8"));
+  assertNoCollision(index, draft.knowledge, "Knowledge");
+  const post = {...draft.knowledge, status: "published", date: runDate.replaceAll("-", "."), publishedAt: approvedAt, approvedBy};
   await mkdir("content/knowledge/posts", { recursive: true });
   await writeFile(join("content/knowledge/posts", `${post.slug}.json`), `${JSON.stringify(post, null, 2)}\n`, "utf8");
 
-  const indexPath = "content/knowledge/articles.json";
-  const index = JSON.parse(await readFile(indexPath, "utf8"));
   const item = {
     slug: post.slug,
     category: post.category,
@@ -56,12 +95,13 @@ if (approveKnowledge) {
 }
 
 if (approveNews) {
-  const post = {...draft.news, status: "published", date: runDate.replaceAll("-", "."), publishedAt: new Date().toISOString(), approvedBy};
+  const indexPath = "content/news/news.json";
+  const index = JSON.parse(await readFile(indexPath, "utf8"));
+  assertNoCollision(index, draft.news, "News");
+  const post = {...draft.news, status: "published", date: runDate.replaceAll("-", "."), publishedAt: approvedAt, approvedBy};
   await mkdir("content/news/posts", { recursive: true });
   await writeFile(join("content/news/posts", `${post.slug}.json`), `${JSON.stringify(post, null, 2)}\n`, "utf8");
 
-  const indexPath = "content/news/news.json";
-  const index = JSON.parse(await readFile(indexPath, "utf8"));
   const primarySource = post.sources.find((source) => source.isPrimary) || post.sources[0];
   const item = {
     slug: post.slug, category: post.category, date: post.date, title: post.title,
@@ -77,10 +117,34 @@ if (approveNews) {
 }
 
 const approved = structuredClone(draft);
-approved.approval = {approvedKinds, approvedAt: new Date().toISOString(), approvedBy};
-if (approveKnowledge) approved.knowledge.status = "approved";
-if (approveNews) approved.news.status = "approved";
+approved.reviewChecklist = {
+  factChecked: true,
+  primarySourcesChecked: true,
+  duplicateChecked: true,
+  seoChecked: true,
+  approvedBy,
+};
+approved.approval = {approvedKinds, approvedAt, approvedBy};
+if (approvedKinds.includes("knowledge")) approved.knowledge.status = "approved";
+if (approvedKinds.includes("news")) approved.news.status = "approved";
 
 await mkdir("automation/approved", { recursive: true });
-await writeFile(join("automation/approved", `daily-${runDate}.json`), `${JSON.stringify(approved, null, 2)}\n`, "utf8");
+await writeFile(approvalPath, `${JSON.stringify(approved, null, 2)}\n`, "utf8");
+
+const published = {
+  runDate,
+  publishedAt: previousPublication?.publishedAt ?? approvedAt,
+  updatedAt: approvedAt,
+  publishedBy: approvedBy,
+  publishedKinds: approvedKinds,
+  urls: {
+    knowledge: approvedKinds.includes("knowledge") ? `/articles/${draft.knowledge.slug}` : null,
+    news: approvedKinds.includes("news") ? `/news/${draft.news.slug}` : null,
+  },
+  shortVideo: approvedKinds.includes(draft.shortVideo.sourceKind)
+    ? draft.shortVideo
+    : null,
+};
+await mkdir("automation/published", { recursive: true });
+await writeFile(publicationPath, `${JSON.stringify(published, null, 2)}\n`, "utf8");
 console.log(`Approved ${approvedKinds.join(" and ")} for ${runDate}.`);

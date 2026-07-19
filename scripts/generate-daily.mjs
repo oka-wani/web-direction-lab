@@ -5,7 +5,7 @@ const apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) throw new Error("OPENAI_API_KEY is not configured.");
 
 const now = new Date();
-const jstDate = new Intl.DateTimeFormat("sv-SE", {
+const jstDate = process.env.RUN_DATE || new Intl.DateTimeFormat("sv-SE", {
   timeZone: "Asia/Tokyo",
   year: "numeric",
   month: "2-digit",
@@ -17,7 +17,7 @@ const knowledgeIndex = JSON.parse(
 );
 const newsIndex = JSON.parse(await readFile("content/news/news.json", "utf8"));
 const existingTitles = [...knowledgeIndex, ...newsIndex]
-  .map((item) => item.title)
+  .map((item) => `${item.title}（slug: ${item.slug}）`)
   .join("\n- ");
 
 let recentNews = [];
@@ -329,7 +329,7 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 必須条件:
 - 日本語で書く
 - 実務で使える具体性を優先する
-- ナレッジの重要ポイントを2〜4件の短いhighlightsにまとめる
+- ナレッジの重要ポイントを3〜5件の短いhighlightsにまとめる
 - ナレッジに登場する重要用語を3〜8件抽出し、glossaryを「用語」と「簡潔な意味」に分けて書く
 - ナレッジのタイトルは煽らず、用語・仕組み・実務上の意味が分かる辞書・解説型にする
 - heroには記事テーマを一目で理解できる短い見出しと、図解用の3〜4項目を入れる
@@ -415,6 +415,9 @@ const outputText =
 if (!outputText) throw new Error("The API returned no structured output.");
 
 const draft = JSON.parse(outputText);
+if (draft.runDate !== jstDate) {
+  throw new Error(`The API returned runDate ${draft.runDate}; expected ${jstDate}.`);
+}
 draft.generatedAt = now.toISOString();
 draft.model = result.model ?? "gpt-5.6-sol";
 draft.responseId = result.id;

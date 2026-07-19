@@ -1,4 +1,4 @@
-name: Approve content for publishing
+name: Manually publish a merged draft
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: approve-content
+  group: publish-content
   cancel-in-progress: false
 
 jobs:
@@ -32,12 +32,13 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
+          cache: npm
 
       - name: Convert approved drafts to site content
         run: node scripts/approve-draft.mjs
@@ -47,14 +48,21 @@ jobs:
           APPROVE_NEWS: ${{ inputs.publish_news }}
           APPROVED_BY: ${{ github.actor }}
 
+      - name: Validate approved content and site build
+        run: |
+          npm ci
+          npm run content:validate
+          npm run build
+
       - name: Save approved content
         run: |
           git config user.name "web-direction-lab-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add automation/approved content
+          git add automation/approved automation/published content
           if git diff --cached --quiet; then
             echo "No content changes to commit."
           else
-            git commit -m "Approve content for publishing"
-            git push
+            git commit -m "Manually publish approved content for ${{ inputs.run_date }}"
+            git pull --rebase origin main
+            git push origin main
           fi

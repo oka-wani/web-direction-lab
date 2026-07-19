@@ -1,0 +1,72 @@
+name: Publish approved daily content
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-content
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'automation/daily-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out main after approval
+        uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Read the approved date
+        id: approved
+        env:
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          RUN_DATE="${HEAD_BRANCH#automation/daily-}"
+          if [[ ! "$RUN_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "Invalid daily branch date: $RUN_DATE" >&2
+            exit 1
+          fi
+          echo "run_date=${RUN_DATE}" >> "$GITHUB_OUTPUT"
+
+      - name: Convert the approved draft to site content
+        run: npm run approve:draft
+        env:
+          RUN_DATE: ${{ steps.approved.outputs.run_date }}
+          APPROVE_KNOWLEDGE: "true"
+          APPROVE_NEWS: "true"
+          APPROVED_BY: ${{ github.event.pull_request.merged_by.login }}
+
+      - name: Validate approved content and site build
+        run: |
+          npm ci
+          npm run content:validate
+          npm run build
+
+      - name: Publish to main
+        env:
+          RUN_DATE: ${{ steps.approved.outputs.run_date }}
+        run: |
+          git config user.name "web-direction-lab-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add automation/approved automation/published content
+          if git diff --cached --quiet; then
+            echo "No content changes to publish."
+            exit 0
+          fi
+          git commit -m "Publish approved daily content for ${RUN_DATE}"
+          git pull --rebase origin main
+          git push origin main

@@ -23,6 +23,7 @@ type KnowledgeDraft = {
   summary: string;
   minutes: number;
   level: string;
+  hero?: { label: string; headline: string; items: string[] };
   body: {
     conclusion: string;
     highlights?: string[];
@@ -39,7 +40,6 @@ type KnowledgeDraft = {
       answer: string;
       explanation: string;
     };
-    nextTopic: string;
   };
   sources: Source[];
 };
@@ -148,11 +148,12 @@ export default async function DraftPreviewPage({
         minutes={post.minutes}
         level={post.level}
         visual={visual}
+        hero={post.hero}
         conclusion={post.body.conclusion}
         highlights={post.body.highlights}
         terms={post.body.glossary}
         sections={[
-          { title: "そもそも何か", body: post.body.definition },
+          { title: "基本と仕組み", body: post.body.definition },
           { title: "なぜ重要か", body: post.body.importance },
           { title: "実務ではどう使うか", body: post.body.practice },
           { title: "よくある間違い", body: post.body.mistakes },
@@ -165,8 +166,6 @@ export default async function DraftPreviewPage({
         }}
         summary={post.body.todaySummary}
         sources={post.sources}
-        nextLabel={`次に学ぶ：${post.body.nextTopic}`}
-        nextHref="/roadmap"
       />
     </>
   );

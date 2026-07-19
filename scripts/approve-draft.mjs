@@ -68,6 +68,9 @@ if (approveNews) {
     summary: post.summary, whatHappened: post.whatHappened, impact: post.impact,
     action: post.action, audienceImpact: post.audienceImpact,
     selectionReason: post.selectionReason, sourceName: primarySource.name, sourceUrl: primarySource.url,
+    serviceName: post.serviceName, quickSummary: post.quickSummary, affected: post.affected,
+    beforeAfter: post.beforeAfter, actionLevel: post.actionLevel, actions: post.actions,
+    visual: post.visual, keywords: post.keywords,
   };
   await writeFile(indexPath, `${JSON.stringify([item, ...index.filter((entry) => entry.slug !== post.slug)], null, 2)}\n`, "utf8");
   approvedKinds.push("news");

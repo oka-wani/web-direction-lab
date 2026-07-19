@@ -1,48 +1,51 @@
 import type { Metadata } from "next";
+import LearningArticle from "../../components/LearningArticle";
 
 export const metadata: Metadata = {
   title: "titleタグとは？ SEOとクリック率を左右する基本｜Web Direction Lab",
-  description: "titleタグの役割、SEOで重要な理由、実務での書き方とよくある間違いを初心者向けに解説します。",
+  description: "titleタグの役割、Google検索でのタイトルリンクとの関係、実務での設計・確認方法を詳しく解説します。",
 };
 
 export default function TitleTagArticle() {
-  return (
-    <main className="article-page">
-      <header className="site-header">
-        <a className="logo" href="/">Web Direction <span>Lab</span></a>
-        <nav aria-label="メインナビゲーション"><a href="/knowledge">ナレッジ</a><a href="/news">Webニュース</a><a href="/roadmap">学習ロードマップ</a><a href="/#topics">カテゴリ</a><a href="/#about">このサイトについて</a></nav>
-      </header>
-      <div className="article-shell">
-        <article className="article-content">
-          <div className="breadcrumbs"><a href="/">トップ</a><span>›</span><a href="/knowledge?category=SEO">SEO</a><span>›</span><span>titleタグとは？</span></div>
-          <header className="article-header">
-            <span className="category-label">SEO</span>
-            <h1>titleタグとは？<br />SEOとクリック率を左右する基本</h1>
-            <p className="article-intro">検索結果でユーザーが最初に目にするタイトル。役割と書き方を、実務で判断できるように整理します。</p>
-            <div className="article-meta"><time>2026.07.18</time><span>読了目安 6分</span><span>初級</span></div>
-          </header>
-
-          <div className="article-hero-visual" aria-hidden="true"><div className="browser-card"><b>&lt;title&gt;</b><i /><i /><i /></div><div className="magnifier" /></div>
-
-          <aside className="conclusion"><b>まず結論</b><p>titleタグは、検索結果やブラウザのタブに表示される「ページの題名」です。検索意図に合う内容を簡潔に伝えることで、SEOとクリック率の両方に影響します。</p></aside>
-
-          <nav className="toc" aria-label="記事の目次"><b>この記事で学べること</b><ol><li><a href="#what">titleタグとは何か</a></li><li><a href="#why">なぜ重要なのか</a></li><li><a href="#practice">実務での書き方</a></li><li><a href="#mistakes">よくある間違い</a></li><li><a href="#quiz">理解度クイズ</a></li></ol></nav>
-
-          <section id="what"><p className="chapter">01</p><h2>そもそもtitleタグとは？</h2><p>titleタグは、HTMLの<code>&lt;head&gt;</code>内に記述する要素です。ページの主題を検索エンジンとユーザーに伝えます。</p><pre><code>{`<title>titleタグとは？SEOで重要な理由と書き方</title>`}</code></pre><p>ページ内に表示される見出しの<code>h1</code>とは役割が異なります。titleタグは検索結果やブラウザタブ、SNSで共有された際の情報源として使われます。</p></section>
-
-          <section id="why"><p className="chapter">02</p><h2>なぜ重要なのか</h2><div className="point-grid"><div><b>検索エンジンへの手掛かり</b><p>ページが何について書かれているかを理解する重要な情報になります。</p></div><div><b>クリックする判断材料</b><p>ユーザーはタイトルを見て、自分の疑問を解決できそうか判断します。</p></div></div><p>順位だけではなく、表示されたあとに選んでもらえるかまで考えることがポイントです。</p></section>
-
-          <section id="practice"><p className="chapter">03</p><h2>実務ではどう書く？</h2><ul className="check-list"><li>ページごとに固有のタイトルを付ける</li><li>検索する人が使う言葉を自然に含める</li><li>ページの内容と一致させる</li><li>重要な内容を前半に置く</li><li>サイト名を末尾に添える</li></ul><div className="example"><span>改善前</span><p>SEOについて｜Web Direction Lab</p><span>改善後</span><p><b>titleタグとは？SEOで重要な理由と書き方｜Web Direction Lab</b></p></div></section>
-
-          <section id="mistakes"><p className="chapter">04</p><h2>よくある間違い</h2><div className="mistake"><b>キーワードを詰め込みすぎる</b><p>読みにくく内容が伝わらないタイトルは逆効果です。検索キーワードより先に、ユーザーに意味が通じる文章になっているか確認します。</p></div><div className="mistake"><b>全ページで同じタイトルを使う</b><p>各ページの違いが検索エンジンにもユーザーにも伝わりません。テンプレート設計時点で固有部分を管理できるようにします。</p></div></section>
-
-          <section id="quiz" className="quiz"><p className="chapter">QUIZ</p><h2>今日の理解度チェック</h2><p>titleタグとh1の説明として適切なのはどれでしょう？</p><ol><li>必ず同じ文章にしなければならない</li><li>titleタグは検索結果、h1は主にページ内の見出しとして使われる</li><li>h1があればtitleタグは不要</li></ol><details><summary>答えを見る</summary><p><b>答えは 2。</b>役割は異なりますが、ページの主題に一貫性があることが大切です。</p></details></section>
-
-          <footer className="article-summary"><p className="section-kicker">TODAY&apos;S SUMMARY</p><h2>今日のまとめ</h2><ul><li>titleタグはページの題名を検索エンジンとユーザーに伝える</li><li>SEOだけでなく検索結果でのクリックにも影響する</li><li>検索意図と内容を一致させ、ページごとに固有の文言を付ける</li></ul><a className="button button--primary" href="/roadmap">次は「検索意図」を学ぶ <b>→</b></a></footer>
-        </article>
-
-        <aside className="article-sidebar"><div><b>学習状況</b><span>SEO 基礎</span><progress max="10" value="1">10%</progress><small>1 / 10 テーマ</small></div><div><b>この記事のポイント</b><ul><li>titleタグの役割</li><li>実務での書き方</li><li>よくある失敗</li></ul></div><a href="/roadmap">SEO学習ロードマップ →</a></aside>
-      </div>
-    </main>
-  );
+  return <LearningArticle
+    category="SEO"
+    title="titleタグとは？ SEOとクリック率を左右する基本"
+    intro="検索結果やブラウザのタブに表示されるページタイトルを、HTML・検索結果・実務運用の3つの視点から理解します。"
+    date="2026.07.18"
+    minutes={16}
+    visual="seo"
+    conclusion="titleタグはHTML文書の題名を定義する要素です。検索結果ではタイトルリンクを作るための重要な情報源になりますが、指定した文字列が必ずそのまま表示されるとは限りません。ページ内容と検索意図を正確に表し、サイト内で重複しないタイトルを継続的に管理することが重要です。"
+    highlights={[
+      "titleタグはページごとに固有の題名を設定するHTML要素",
+      "検索結果のタイトルはtitleタグだけでなく、ページ内の情報を使って調整される場合がある",
+      "キーワードの詰め込みより、ページ内容と検索意図を簡潔に伝えることが重要",
+      "公開後はSearch Consoleで表示回数・クリック率・検索語を確認する",
+    ]}
+    hero={{label:"TITLE DESIGN",headline:"題名・検索意図・クリック後の内容を一致させる",items:["ページの主題","検索意図","固有性","公開後の検証"]}}
+    terms={[
+      {term:"titleタグ",description:"HTML文書のタイトルを定義するhead内の要素。ブラウザのタブなどにも使われます。"},
+      {term:"タイトルリンク",description:"Google検索結果で、検索ユーザーがクリックする見出しとして表示される部分です。"},
+      {term:"検索意図",description:"ユーザーが検索によって知りたいこと、比較したいこと、行いたいことです。"},
+      {term:"クリック率（CTR）",description:"検索結果で表示された回数のうち、クリックされた割合です。"},
+      {term:"Search Console",description:"Google検索での表示回数、クリック、検索語、掲載順位などを確認できる公式ツールです。"},
+      {term:"h1",description:"ページ本文の最上位見出し。titleタグとは役割が異なりますが、ページの主題を伝える重要な要素です。"},
+    ]}
+    sections={[
+      {title:"titleタグの役割と表示される場所",body:"titleタグはHTMLのhead内に記述し、文書全体の題名を定義します。ブラウザのタブ、ブックマーク、履歴などで利用されるため、検索エンジンだけを対象にした要素ではありません。本文中に表示するh1とは別の要素であり、それぞれの役割を理解して設計します。\n\n検索結果では、titleタグがタイトルリンクを作るための重要な材料になります。ただしGoogleは、ページ内の見出し、目立つテキスト、リンクに使われる文言なども参照します。そのため、**titleタグへ記述した文字列が必ずそのまま表示されるわけではありません**。",points:["head内にtitle要素が一つあるか","ページ本文の内容を正確に表しているか","h1と大きく矛盾していないか"]},
+      {title:"SEOで重要になる理由",body:"検索結果を見たユーザーは、タイトルリンクから『自分の疑問を解決できるページか』を判断します。ページ内容に合った分かりやすい題名は、適切な検索ユーザーがページを選ぶ助けになります。\n\n一方、検索キーワードを不自然に並べたり、実際の内容より大きな成果を約束したりすると、クリック後の期待と内容がずれます。**検索意図とページの主題を一致させること**が、タイトル設計の中心です。"},
+      {title:"実務での作り方と判断基準",body:"最初に、そのページで一番伝えるべき主題を一文で書き出します。次に、想定する検索ユーザーが使う言葉へ置き換え、他ページとの違いが分かる情報を加えます。サービス名やサイト名は、必要に応じて後半へ配置します。\n\n文字数だけを機械的な正解にせず、検索結果で主要な意味が途中で切れても伝わる順番にします。CMSで入力する場合は、未入力、重複、長すぎるタイトルを検知できる運用ルールも用意します。**一ページにつき一つの明確な主題**を基本にすると判断しやすくなります。",points:["ページ固有の内容が前半で分かる","対象ユーザーが理解できる言葉を使う","同じテンプレート文だけの大量重複を避ける","公開前に検索結果を想定して読み直す"]},
+      {title:"よくある間違いと修正方法",body:"よくある失敗は、すべてのページで同じタイトルを使うこと、キーワードを読点で大量に並べること、会社名だけでページ内容が分からないことです。商品一覧や地域ページではテンプレートを使う場合がありますが、変数部分が空になると重複が発生するため注意します。\n\nまた、検索結果の表示が想定と違うからといって、短期間に何度も書き換えると検証が難しくなります。変更理由、変更日、対象ページ、確認する指標を記録し、**一定期間のデータを比較して判断すること**が大切です。"},
+      {title:"公開後の確認と改善例",body:"Search Consoleで対象ページを絞り、表示回数、クリック数、クリック率、検索語を確認します。掲載順位が大きく変わっている場合は、タイトルだけでなく検索需要や競合ページ、インデックス状況も確認します。\n\nたとえば『料金』を探すユーザーの表示回数が多いのにタイトルから料金情報があると分からない場合、ページ内容に十分な料金説明があることを確認したうえで、主題が伝わる表現へ変更します。変更後は同じ条件で比較し、クリック率だけでなく問い合わせなどの成果まで追います。"},
+    ]}
+    quiz={{question:"検索結果に指定したtitleタグと異なるタイトルが表示された場合、最初に確認することは？",choices:["同じキーワードを何度も追加する","titleタグ・h1・本文の主題が一致しているか確認する","ページをすぐ削除する"],answer:"答えは『titleタグ・h1・本文の主題が一致しているか確認する』です。検索結果のタイトルは複数のページ情報から作られる場合があります。"}}
+    sources={[
+      {name:"Google Search Central：検索結果のタイトルリンクに影響を与える",url:"https://developers.google.com/search/docs/appearance/title-link"},
+      {name:"MDN Web Docs：<title> HTML element",url:"https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/title"},
+    ]}
+    related={[
+      {title:"検索意図とは？ 読者が本当に知りたいことの見つけ方",category:"SEO",href:"/articles/search-intent"},
+      {title:"Webサイトが表示される仕組み",category:"基礎知識",href:"/knowledge/web-basics"},
+      {title:"成果につながるWebサイト改善の進め方",category:"デザイン・UX",href:"/articles/site-improvement"},
+    ]}
+  />;
 }

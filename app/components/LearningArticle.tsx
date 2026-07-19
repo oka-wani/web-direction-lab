@@ -1,6 +1,4 @@
 import { SiteFooter, SiteHeader } from "./SiteChrome";
-import { articleItems } from "../articles/article-data";
-import type { CSSProperties } from "react";
 
 type Source = { name: string; url: string };
 type Term = { term: string; description: string };
@@ -42,15 +40,13 @@ function HighlightedBody({ text }: { text: string }) {
 
 export default function LearningArticle(p: Props) {
   const keyPoints = p.highlights?.length ? p.highlights : p.summary ?? [];
-  const image = p.image ?? articleItems.find((article) => article.title === p.title)?.image;
-  const heroStyle = image ? { "--knowledge-mv-image":`url(${image})` } as CSSProperties : undefined;
   return <main className="article-page knowledge-article-page">
     <SiteHeader current="knowledge" />
     <div className="article-shell">
       <article className="article-content">
         <div className="breadcrumbs"><a href="/">トップ</a><span>›</span><a href={p.parentHref ?? `/knowledge?category=${p.category}`}>{p.parentLabel ?? p.category}</a><span>›</span><span>{p.title}</span></div>
 
-        <header className={`knowledge-article-mv knowledge-article-mv--${p.visual}`} style={heroStyle}>
+        <header className={`knowledge-article-mv knowledge-article-mv--${p.visual}`}>
           <div><span className="category-label">{p.category}</span><h1>{p.title}</h1><p>{p.intro}</p><div className="article-meta"><time>{p.date}</time></div></div>
         </header>
 
@@ -58,7 +54,7 @@ export default function LearningArticle(p: Props) {
 
         <nav className="toc knowledge-agenda" aria-label="記事の目次"><span className="section-kicker" aria-hidden="true">CONTENTS</span><ol><li><a href="#overview">概要</a></li>{p.sections.map((section, index) => <li key={section.title}><a href={`#section-${index + 1}`}>{section.title}</a></li>)}{p.sources && p.sources.length > 0 && <li><a href="#sources">参考サイト</a></li>}</ol></nav>
 
-        <section className="knowledge-overview" id="overview"><span className="section-kicker" aria-hidden="true">OVERVIEW</span><h2>概要と全体像</h2><p>{p.conclusion}</p>{p.hero && <div className="article-topic-map"><header><small>{p.hero.label}</small><strong>{p.hero.headline}</strong></header><ol>{p.hero.items.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><b>{item}</b></li>)}</ol></div>}</section>
+        <section className="knowledge-overview" id="overview"><span className="section-kicker" aria-hidden="true">OVERVIEW</span><h2>概要と全体像</h2><p>{p.conclusion}</p></section>
 
         {p.terms && p.terms.length > 0 && <section className="term-section" id="terms"><span className="section-kicker" aria-hidden="true">GLOSSARY</span><h2>用語集</h2><p className="section-introduction">本文を読む前に、記事内で使う重要な用語を確認します。</p><dl className="term-list">{p.terms.map((item) => <div key={item.term}><dt>{item.term}</dt><dd>{item.description}</dd></div>)}</dl></section>}
 

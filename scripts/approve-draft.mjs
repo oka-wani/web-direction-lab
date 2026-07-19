@@ -40,7 +40,17 @@ if (approveKnowledge) {
 
   const indexPath = "content/knowledge/articles.json";
   const index = JSON.parse(await readFile(indexPath, "utf8"));
-  const item = {slug: post.slug, category: post.category, date: post.date, title: post.title, description: post.summary, level: post.level, minutes: post.minutes, type: knowledgeType(post.category)};
+  const item = {
+    slug: post.slug,
+    category: post.category,
+    date: post.date,
+    title: post.title,
+    description: post.summary,
+    level: post.level,
+    minutes: post.minutes,
+    type: knowledgeType(post.category),
+    keywords: post.seo?.keywords ?? [],
+  };
   await writeFile(indexPath, `${JSON.stringify([item, ...index.filter((entry) => entry.slug !== post.slug)], null, 2)}\n`, "utf8");
   approvedKinds.push("knowledge");
 }

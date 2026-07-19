@@ -14,7 +14,7 @@ export type ArticleItem = {
 };
 
 export const articleItems = items as ArticleItem[];
-export const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "その他"];
+export const categories = ["すべて", "基礎知識", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "その他"];
 
 export function matchesCategory(article: ArticleItem, category: string) {
   if (category === "すべて") return true;

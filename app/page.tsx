@@ -67,10 +67,9 @@ export default function Home() {
       <header className="site-header">
         <a className="logo" href="#top" aria-label="Web Direction Lab トップ">Web Direction <span>Lab</span></a>
         <nav aria-label="メインナビゲーション">
+          <a href="/news">ニュース</a>
           <a href="/knowledge">ナレッジ</a>
-          <a href="/news">Webニュース</a>
-          <a href="/roadmap">学習ロードマップ</a>
-          <a href="#topics">カテゴリ</a>
+          <a href="/guide">Webガイド</a>
         </nav>
       </header>
 
@@ -81,7 +80,7 @@ export default function Home() {
           <p className="lead">Webディレクター・Webコンサルを目指す人のための、<br className="desktop" />Web制作・SEO・システム・マーケティング学習メディア。</p>
           <div className="hero-actions">
             <a className="button button--primary" href="#articles"><span className="book-icon">▤</span> 最新ナレッジを読む <b>→</b></a>
-            <a className="button button--secondary" href="/roadmap"><span>⌁</span> 学習ロードマップを見る <b>→</b></a>
+            <a className="button button--secondary" href="/guide"><span>⌁</span> Webガイドで学ぶ <b>→</b></a>
           </div>
           <p className="hero-note">毎日の学習と実務経験を、提案や改善に使える知識として整理します。</p>
         </div>
@@ -118,8 +117,8 @@ export default function Home() {
 
       <section className="section home-news">
         <div className="section-heading">
-          <div><p className="section-kicker">WEB NEWS</p><h2>押さえておきたい変化</h2></div>
-          <a href="/news">Webニュースをすべて見る <span>→</span></a>
+          <div><p className="section-kicker">NEWS</p><h2>押さえておきたい変化</h2></div>
+          <a href="/news">ニュースをすべて見る <span>→</span></a>
         </div>
         <div className="home-news-grid">
           {newsItems.map((item) => <article className="home-news-card" key={item.slug}>
@@ -147,18 +146,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section roadmap" id="roadmap">
+      <section className="section roadmap" id="guide">
         <div className="roadmap-copy">
-          <p className="section-kicker">LEARNING ROADMAP</p>
-          <h2>何から学べばいいか、<br />迷わないための道しるべ。</h2>
-          <p>Webの基礎からSEO、アクセス解析、改善提案まで。知識がつながる順番で学習テーマをまとめています。</p>
-          <a className="button button--primary" href="/roadmap">ロードマップをはじめる <b>→</b></a>
+          <p className="section-kicker">WEB GUIDE</p>
+          <h2>Webを基礎から、<br />順番に学ぶ。</h2>
+          <p>学習ロードマップ、用語集、ツール・サービス情報をまとめた、初心者向けの体系的な学習エリアです。</p>
+          <a className="button button--primary" href="/guide">Webガイドをはじめる <b>→</b></a>
         </div>
         <ol className="roadmap-steps">
-          <li><span>01</span><div><b>Webの仕組みを知る</b><small>HTML・CSS・サーバー・CMS</small></div></li>
-          <li><span>02</span><div><b>見つけてもらう</b><small>SEO・コンテンツ・検索意図</small></div></li>
-          <li><span>03</span><div><b>数字から改善する</b><small>GA4・Search Console・UX</small></div></li>
-          <li><span>04</span><div><b>成果につなげる</b><small>仮説・施策・検証・提案</small></div></li>
+          <li><span>01</span><div><b>基礎知識</b><small>ロードマップに沿って順番に学ぶ</small></div></li>
+          <li><span>02</span><div><b>用語集</b><small>分からない言葉を短時間で確認する</small></div></li>
+          <li><span>03</span><div><b>ツール・サービス</b><small>Webの現場で使うサービスを理解する</small></div></li>
         </ol>
       </section>
 

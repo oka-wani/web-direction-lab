@@ -15,6 +15,7 @@ const sections = [
   { id:"privacy", number:"09", title:"プライバシーポリシー", body:<><p>当サイトでは、アクセス状況の把握とサイト改善のためにアクセス解析ツールを利用する場合があります。取得する情報には、通常、個人を直接特定する情報は含まれません。</p><p>お問い合わせで取得した情報は、回答および必要な連絡のためにのみ利用し、法令に基づく場合を除いて第三者へ提供しません。</p></> },
 ];
 
+// Editorial policies are maintained on this page.
 export default function AboutPage() {
   return <main className="about-page"><SiteHeader current="about" /><section className="about-hero"><p className="section-kicker">ABOUT</p><h1>このサイトについて</h1><p>運営方針と、安心して情報を利用していただくための考え方をまとめています。</p></section><div className="about-layout"><aside><p>CONTENTS</p><nav>{sections.map((section)=><a href={`#${section.id}`} key={section.id}><span>{section.number}</span>{section.title}</a>)}</nav></aside><div className="about-content">{sections.map((section)=><section id={section.id} key={section.id}><header><span>{section.number}</span><h2>{section.title}</h2></header>{section.body}</section>)}</div></div><SiteFooter /></main>;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { articleItems, categories } from "./article-data";
+import { articleItems, categories, matchesCategory } from "./article-data";
 
 export default function ArticlesList() {
   const [category, setCategory] = useState("すべて");
@@ -14,7 +14,7 @@ export default function ArticlesList() {
     }
   }, []);
   const shown = useMemo(() => articleItems.filter((article) =>
-    (category === "すべて" || article.category === category) &&
+    matchesCategory(article, category) &&
     (article.title + article.description + article.category).toLowerCase().includes(query.toLowerCase())
   ), [category, query]);
   return <>

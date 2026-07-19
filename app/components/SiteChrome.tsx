@@ -1,14 +1,27 @@
+"use client";
+
+import { useState } from "react";
+
 type Current = "news" | "knowledge" | "column" | "about";
+
+const navigation = [
+  { href: "/knowledge", label: "Webナレッジ", current: "knowledge" },
+  { href: "/column", label: "コラム", current: "column" },
+  { href: "/news", label: "ニュース", current: "news" },
+  { href: "/about", label: "このサイトについて", current: "about" },
+] as const;
 
 // Shared navigation order is consistent across every public page.
 export function SiteHeader({ current }: { current?: Current }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return <header className="site-header">
-    <a className="logo" href="/" aria-label="Web Direction Lab トップ">Web Direction <span>Lab</span></a>
-    <nav aria-label="メインナビゲーション">
-      <a href="/knowledge" aria-current={current === "knowledge" ? "page" : undefined}>Webナレッジ</a>
-      <a href="/column" aria-current={current === "column" ? "page" : undefined}>コラム</a>
-      <a href="/news" aria-current={current === "news" ? "page" : undefined}>ニュース</a>
-      <a href="/about" aria-current={current === "about" ? "page" : undefined}>このサイトについて</a>
+    <a className="logo" href="/" aria-label="Web Direction Lab トップ" onClick={() => setMenuOpen(false)}>Web Direction <span>Lab</span></a>
+    <button className="nav-toggle" type="button" aria-controls="site-navigation" aria-expanded={menuOpen} aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"} onClick={() => setMenuOpen((open) => !open)}>
+      <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
+    </button>
+    <nav id="site-navigation" className={menuOpen ? "is-open" : undefined} aria-label="メインナビゲーション">
+      {navigation.map((item) => <a href={item.href} aria-current={current === item.current ? "page" : undefined} onClick={() => setMenuOpen(false)} key={item.href}>{item.label}</a>)}
     </nav>
   </header>;
 }

@@ -26,6 +26,7 @@ type KnowledgeDraft = {
   minutes: number;
   level: string;
   hero?: { label: string; headline: string; items: string[] };
+  seo: { keywords: string[] };
   body: {
     conclusion: string;
     highlights?: string[];
@@ -167,7 +168,7 @@ export default async function DraftPreviewPage({
           answer: `${post.body.quiz.answer} — ${post.body.quiz.explanation}`,
         }}
         sources={post.sources}
-        related={getRelatedKnowledge(post.slug, post.category)}
+        related={getRelatedKnowledge(post.slug, post.category, post.seo.keywords)}
       />
     </>
   );

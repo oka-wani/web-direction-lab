@@ -93,3 +93,16 @@ footer{background:#06172e;color:white;padding:50px clamp(24px,5vw,80px);display:
 .term-list dt{padding:20px;background:#f4f6f7;font-weight:800}
 .term-list dd{margin:0;padding:20px;line-height:1.85;color:#34465a}
 @media(max-width:720px){.term-list>div{grid-template-columns:1fr}.term-list dt,.term-list dd{padding:15px 17px}.key-highlights{padding:24px 20px!important}}
+
+/* Topic-specific article hero */
+.article-hero-knowledge{position:relative;min-height:350px;margin:45px 0;background:var(--navy);color:white;padding:44px;overflow:hidden}
+.article-hero-knowledge:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:28px 28px}
+.article-hero-knowledge:after{content:"";position:absolute;width:240px;height:240px;border:45px solid var(--yellow);border-radius:50%;right:-105px;top:-115px;opacity:.95}
+.hero-knowledge-heading,.hero-knowledge-flow{position:relative;z-index:2}
+.hero-knowledge-heading small{display:block;color:#ffd84d;font-size:11px;font-weight:800;letter-spacing:.17em;margin-bottom:12px}
+.hero-knowledge-heading strong{display:block;max-width:600px;font-size:clamp(28px,4vw,44px);line-height:1.35;letter-spacing:-.035em}
+.hero-knowledge-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:48px}
+.hero-knowledge-flow>div{position:relative;min-height:88px;padding:15px;background:white;color:var(--navy);border-bottom:5px solid var(--yellow)}
+.hero-knowledge-flow>div:not(:last-child):after{content:"→";position:absolute;right:-13px;top:31px;z-index:3;color:var(--yellow);font-size:20px;font-weight:900}
+.hero-knowledge-flow span,.hero-knowledge-flow b{display:block}.hero-knowledge-flow span{font-family:var(--font-geist-mono);font-size:10px;color:#7c8998;margin-bottom:9px}.hero-knowledge-flow b{font-size:14px;line-height:1.45}
+@media(max-width:720px){.article-hero-knowledge{min-height:390px;padding:30px 22px}.hero-knowledge-flow{grid-template-columns:1fr 1fr;margin-top:32px}.hero-knowledge-flow>div:not(:last-child):after{display:none}.article-hero-knowledge:after{width:150px;height:150px;border-width:30px}}

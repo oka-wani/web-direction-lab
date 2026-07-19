@@ -64,10 +64,12 @@
 }
 
 .knowledge-article-mv > div {
-  max-width: 710px;
+  width: 100%;
+  max-width: none;
 }
 
 .knowledge-article-mv h1 {
+  max-width: none !important;
   font-size: clamp(36px, 4.2vw, 56px) !important;
   line-height: 1.28;
 }

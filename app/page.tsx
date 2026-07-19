@@ -150,13 +150,14 @@ export default function Home() {
         <div className="roadmap-copy">
           <p className="section-kicker">WEB GUIDE</p>
           <h2>Webを基礎から、<br />順番に学ぶ。</h2>
-          <p>学習ロードマップ、用語集、ツール・サービス情報をまとめた、初心者向けの体系的な学習エリアです。</p>
+          <p>Webの仕組みから制作、サーバー、SEO、解析、マーケティングまで。基本用語と現場で使うツールを一緒に学べる初心者向けガイドです。</p>
           <a className="button button--primary" href="/guide">Webガイドをはじめる <b>→</b></a>
         </div>
         <ol className="roadmap-steps">
-          <li><span>01</span><div><b>基礎知識</b><small>ロードマップに沿って順番に学ぶ</small></div></li>
-          <li><span>02</span><div><b>用語集</b><small>分からない言葉を短時間で確認する</small></div></li>
-          <li><span>03</span><div><b>ツール・サービス</b><small>Webの現場で使うサービスを理解する</small></div></li>
+          <li><span>01</span><div><b>Webの仕組みと制作</b><small>HTML・CSS・JavaScript・API</small></div></li>
+          <li><span>02</span><div><b>公開と運用</b><small>サーバー・DNS・クラウド・CMS</small></div></li>
+          <li><span>03</span><div><b>集客と改善</b><small>SEO・アクセス解析・マーケティング</small></div></li>
+          <li><span>04</span><div><b>提案につなげる</b><small>AI活用・課題整理・改善提案</small></div></li>
         </ol>
       </section>
 

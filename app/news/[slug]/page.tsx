@@ -29,5 +29,5 @@ export default async function GeneratedNewsPage({ params }: { params: Promise<{ 
   }
 
   const primary = post.sources.find((source) => source.isPrimary) ?? post.sources[0];
-  return <NewsArticle item={{...post, sourceName: primary.name, sourceUrl: primary.url}} />;
+  return <NewsArticle item={{...post, sourceName: primary.name, sourceUrl: primary.url, sources: post.sources}} />;
 }

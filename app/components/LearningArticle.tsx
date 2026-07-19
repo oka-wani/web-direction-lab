@@ -1,3 +1,5 @@
+import { SiteFooter, SiteHeader } from "./SiteChrome";
+
 type Source = { name: string; url: string };
 type Term = { term: string; description: string };
 type Section = { title: string; body: string; points?: string[] };
@@ -28,15 +30,7 @@ type Props = {
 export default function LearningArticle(p: Props) {
   return (
     <main className="article-page">
-      <header className="site-header">
-        <a className="logo" href="/">Web Direction <span>Lab</span></a>
-        <nav aria-label="メインナビゲーション">
-          <a href="/news">ニュース</a>
-          <a href="/knowledge" aria-current="page">ナレッジ</a>
-          <a href="/guide">Webガイド</a>
-          <a href="/#about">このサイトについて</a>
-        </nav>
-      </header>
+      <SiteHeader current="knowledge" />
       <div className="article-shell">
         <article className="article-content">
           <div className="breadcrumbs">
@@ -124,6 +118,7 @@ export default function LearningArticle(p: Props) {
           </footer>
         </article>
       </div>
+      <SiteFooter />
     </main>
   );
 }

@@ -8,6 +8,8 @@ export type ArticleItem = {
   description: string;
   level: string;
   minutes: number;
+  image?: string;
+  tags?: string[];
   type: "seo" | "analytics" | "website" | "system" | "ai" | "marketing";
 };
 

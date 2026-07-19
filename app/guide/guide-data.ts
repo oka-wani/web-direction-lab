@@ -1,4 +1,5 @@
 export type GuideArticle = { title: string; summary: string; href?: string };
+export type KnowledgeCategory = "SEO" | "Web制作" | "デザイン・UX" | "マーケティング" | "アクセス解析" | "システム" | "AI活用" | "Webディレクション";
 export type GuideStep = {
   number: string;
   slug: string;
@@ -195,6 +196,26 @@ export const guideSteps: GuideStep[] = [
 ];
 
 export function getGuideStep(slug: string) { return guideSteps.find((step) => step.slug === slug); }
+
+const stepCategories: Record<string, KnowledgeCategory> = {
+  "web-basics": "システム",
+  "html-css": "Web制作",
+  "javascript-api": "システム",
+  "server-cloud": "システム",
+  "cms-operation": "Web制作",
+  "seo-search": "SEO",
+  "analytics-improvement": "アクセス解析",
+  "marketing-ux": "マーケティング",
+  "ai-consulting": "Webディレクション",
+};
+
+export function getGuideArticleCategory(step: GuideStep, article: GuideArticle): KnowledgeCategory {
+  const title = article.title;
+  if (step.slug === "html-css" && /アクセシビリティ|Figma|レスポンシブ|デザインシステム/.test(title)) return "デザイン・UX";
+  if (step.slug === "marketing-ux" && /ペルソナ|カスタマージャーニー|UX|UI|ランディングページ|ユーザー調査|情報設計|ユーザビリティ|視覚設計|デザインガイドライン|サービス設計|顧客体験/.test(title)) return "デザイン・UX";
+  if (step.slug === "ai-consulting" && /AI|ChatGPT|Claude|Gemini|プロンプト/.test(title)) return "AI活用";
+  return stepCategories[step.slug] ?? "Web制作";
+}
 
 function normalizeArticleSlug(value: string) {
   return value

@@ -37,6 +37,8 @@ const articleBodySchema = {
   additionalProperties: false,
   required: [
     "conclusion",
+    "highlights",
+    "glossary",
     "definition",
     "importance",
     "practice",
@@ -48,6 +50,26 @@ const articleBodySchema = {
   ],
   properties: {
     conclusion: { type: "string" },
+    highlights: {
+      type: "array",
+      minItems: 2,
+      maxItems: 4,
+      items: { type: "string" },
+    },
+    glossary: {
+      type: "array",
+      minItems: 3,
+      maxItems: 8,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["term", "description"],
+        properties: {
+          term: { type: "string" },
+          description: { type: "string" },
+        },
+      },
+    },
     definition: { type: "string" },
     importance: { type: "string" },
     practice: { type: "string" },
@@ -257,6 +279,8 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 必須条件:
 - 日本語で書く
 - 実務で使える具体性を優先する
+- ナレッジの重要ポイントを2〜4件の短いhighlightsにまとめる
+- ナレッジに登場する重要用語を3〜8件抽出し、glossaryを「用語」と「簡潔な意味」に分けて書く
 - ナレッジは既存記事と重複させない
 - ニュース候補を最低5件調査し、影響範囲・実務関連性・鮮度・行動可能性・一次情報の確かさで比較して最も有用な1件だけを出力する
 - Google検索・Search Console・GA4・主要ブラウザ・Web標準・アクセシビリティ・セキュリティ・プライバシー・主要CMS・主要AI/Web制作ツールの変更を優先する

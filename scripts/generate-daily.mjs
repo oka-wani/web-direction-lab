@@ -46,7 +46,6 @@ const articleBodySchema = {
     "example",
     "todaySummary",
     "quiz",
-    "nextTopic",
   ],
   properties: {
     conclusion: { type: "string" },
@@ -97,7 +96,6 @@ const articleBodySchema = {
         explanation: { type: "string" },
       },
     },
-    nextTopic: { type: "string" },
   },
 };
 
@@ -125,6 +123,7 @@ const responseSchema = {
         "summary",
         "level",
         "minutes",
+        "hero",
         "body",
         "seo",
         "sources",
@@ -150,6 +149,21 @@ const responseSchema = {
         summary: { type: "string" },
         level: { type: "string", enum: ["初級", "中級", "上級"] },
         minutes: { type: "integer", minimum: 5, maximum: 15 },
+        hero: {
+          type: "object",
+          additionalProperties: false,
+          required: ["label", "headline", "items"],
+          properties: {
+            label: { type: "string" },
+            headline: { type: "string" },
+            items: {
+              type: "array",
+              minItems: 3,
+              maxItems: 4,
+              items: { type: "string" },
+            },
+          },
+        },
         body: articleBodySchema,
         seo: {
           type: "object",
@@ -281,6 +295,8 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - 実務で使える具体性を優先する
 - ナレッジの重要ポイントを2〜4件の短いhighlightsにまとめる
 - ナレッジに登場する重要用語を3〜8件抽出し、glossaryを「用語」と「簡潔な意味」に分けて書く
+- ナレッジのタイトルは煽らず、用語・仕組み・実務上の意味が分かる辞書・解説型にする
+- heroには記事テーマを一目で理解できる短い見出しと、図解用の3〜4項目を入れる
 - ナレッジは既存記事と重複させない
 - ニュース候補を最低5件調査し、影響範囲・実務関連性・鮮度・行動可能性・一次情報の確かさで比較して最も有用な1件だけを出力する
 - Google検索・Search Console・GA4・主要ブラウザ・Web標準・アクセシビリティ・セキュリティ・プライバシー・主要CMS・主要AI/Web制作ツールの変更を優先する

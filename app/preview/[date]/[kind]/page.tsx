@@ -125,6 +125,7 @@ export default async function DraftPreviewPage({
             date: displayDate,
             sourceName: primary.name,
             sourceUrl: primary.url,
+            sources: draft.news.sources,
           }}
         />
       </>

@@ -1,0 +1,60 @@
+name: Approve content for publishing
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_date:
+        description: "Draft date in YYYY-MM-DD"
+        required: true
+        type: string
+      publish_knowledge:
+        description: "Approve the knowledge article"
+        required: true
+        default: true
+        type: boolean
+      publish_news:
+        description: "Approve the Web news article"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: approve-content
+  cancel-in-progress: false
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Convert approved drafts to site content
+        run: node scripts/approve-draft.mjs
+        env:
+          RUN_DATE: ${{ inputs.run_date }}
+          APPROVE_KNOWLEDGE: ${{ inputs.publish_knowledge }}
+          APPROVE_NEWS: ${{ inputs.publish_news }}
+          APPROVED_BY: ${{ github.actor }}
+
+      - name: Save approved content
+        run: |
+          git config user.name "web-direction-lab-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add automation/approved content
+          if git diff --cached --quiet; then
+            echo "No content changes to commit."
+          else
+            git commit -m "Approve content for publishing"
+            git push
+          fi

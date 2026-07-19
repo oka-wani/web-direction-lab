@@ -1,5 +1,6 @@
 type Current = "news" | "knowledge" | "column" | "about";
 
+// Shared navigation order is consistent across every public page.
 export function SiteHeader({ current }: { current?: Current }) {
   return <header className="site-header">
     <a className="logo" href="/" aria-label="Web Direction Lab トップ">Web Direction <span>Lab</span></a>

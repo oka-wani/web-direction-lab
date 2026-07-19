@@ -208,11 +208,6 @@ const responseSchema = {
         "serviceName",
         "summary",
         "quickSummary",
-        "affected",
-        "beforeAfter",
-        "actionLevel",
-        "actions",
-        "visual",
         "keywords",
         "whatHappened",
         "impact",
@@ -247,46 +242,6 @@ const responseSchema = {
           minItems: 3,
           maxItems: 3,
           items: { type: "string" },
-        },
-        affected: {
-          type: "array",
-          minItems: 1,
-          maxItems: 5,
-          items: { type: "string" },
-        },
-        beforeAfter: {
-          type: "object",
-          additionalProperties: false,
-          required: ["before", "after"],
-          properties: {
-            before: { type: "string" },
-            after: { type: "string" },
-          },
-        },
-        actionLevel: {
-          type: "string",
-          enum: ["今すぐ確認", "今週中に確認", "把握のみ"],
-        },
-        actions: {
-          type: "array",
-          minItems: 1,
-          maxItems: 3,
-          items: { type: "string" },
-        },
-        visual: {
-          type: "object",
-          additionalProperties: false,
-          required: ["label", "headline", "items"],
-          properties: {
-            label: { type: "string" },
-            headline: { type: "string" },
-            items: {
-              type: "array",
-              minItems: 2,
-              maxItems: 4,
-              items: { type: "string" },
-            },
-          },
         },
         keywords: {
           type: "array",
@@ -389,10 +344,11 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - ニュースは原則7日以内の公式な一次情報をWeb検索で確認する
 - 7日以内に影響度3以上のニュースがなければ30日以内まで広げる
 - audienceImpactには対象読者への影響度を1〜5で、selectionReasonには他候補より優先した理由を書く
-- quickSummaryは「何が変わったか」「誰に影響するか」「何をすべきか」を各1件、計3件にする
-- affectedは影響を受ける役割やサイト種別、actionLevelは対応時期、actionsは実行項目を最大3件に整理する
-- beforeAfterは変更前と変更後の差を、推測せず公式情報の範囲で短く示す
-- visualは外部画像を転載せずに表示する、記事固有の図解用テキストとして作る
+- quickSummaryは記事冒頭に表示する重要ポイントを、重複のない短文3件に整理する
+- whatHappenedは公式発表の内容、変更の背景、従来との違いが分かるよう600〜900文字程度で詳しく説明する
+- impactは誤解しやすい点や実務上とくに重要な点を、400〜700文字程度で具体的に説明する
+- actionはWeb担当者が確認・判断すべき内容を、400〜700文字程度で具体的に説明する
+- 結論、ポイント、詳しい説明、重要事項、実務で確認することの間で、同じ説明を繰り返さない
 - ニュースの全ソースに公開日とURLを入れる
 - ニュースは一次情報を最低1件含める
 - 検索結果だけで裏付けられない主張を作らない

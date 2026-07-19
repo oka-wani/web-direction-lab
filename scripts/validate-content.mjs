@@ -17,7 +17,7 @@ function validateLegacy(value) {
   ];
 }
 
-function validateDailyBundle(value) {
+function validateDailyBundle(value, folder) {
   const errors = [];
   if (!value.runDate) errors.push("missing runDate");
   if (!value.knowledge) errors.push("missing knowledge");
@@ -25,22 +25,24 @@ function validateDailyBundle(value) {
   if (!value.shortVideo) errors.push("missing shortVideo");
   if (!value.reviewChecklist) errors.push("missing reviewChecklist");
 
-  if (value.knowledge && !slugPattern.test(value.knowledge.slug ?? "")) {
-    errors.push("invalid knowledge slug");
-  }
-  if (value.news && !slugPattern.test(value.news.slug ?? "")) {
-    errors.push("invalid news slug");
-  }
-  if (
-    value.news &&
-    !value.news.sources?.some(
-      (source) => source.isPrimary && /^https:\/\//.test(source.url),
-    )
-  ) {
+  if (value.knowledge && !slugPattern.test(value.knowledge.slug ?? "")) errors.push("invalid knowledge slug");
+  if (value.news && !slugPattern.test(value.news.slug ?? "")) errors.push("invalid news slug");
+  if (value.news && !value.news.sources?.some((source) => source.isPrimary && /^https:\/\//.test(source.url))) {
     errors.push("news requires a primary HTTPS source");
   }
-  if (value.knowledge?.status !== "draft" || value.news?.status !== "draft") {
-    errors.push("generated content must remain draft");
+
+  if (folder === "automation/drafts") {
+    if (value.knowledge?.status !== "draft" || value.news?.status !== "draft") {
+      errors.push("generated content must remain draft");
+    }
+  } else {
+    const kinds = value.approval?.approvedKinds;
+    if (!Array.isArray(kinds) || kinds.length === 0) errors.push("missing approved kinds");
+    if (!value.approval?.approvedAt || !value.approval?.approvedBy) errors.push("missing approval metadata");
+    for (const kind of ["knowledge", "news"]) {
+      const expected = kinds?.includes(kind) ? "approved" : "draft";
+      if (value[kind]?.status !== expected) errors.push(`${kind} status must be ${expected}`);
+    }
   }
   return errors;
 }
@@ -50,10 +52,9 @@ for (const folder of folders) {
   for (const file of files) {
     const path = join(folder, file);
     const value = JSON.parse(await readFile(path, "utf8"));
-    const errors =
-      value.runDate || value.knowledge || value.news
-        ? validateDailyBundle(value)
-        : validateLegacy(value);
+    const errors = value.runDate || value.knowledge || value.news
+      ? validateDailyBundle(value, folder)
+      : validateLegacy(value);
 
     if (errors.length) {
       failures += 1;

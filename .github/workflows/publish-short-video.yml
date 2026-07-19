@@ -1,0 +1,122 @@
+name: Publish approved short video
+
+on:
+  push:
+    branches: [main]
+    paths: ["automation/published/daily-*.json"]
+  workflow_dispatch:
+    inputs:
+      run_date:
+        description: Publication date (YYYY-MM-DD)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-short-video-${{ inputs.run_date || github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install video tools and Japanese fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
+      - name: Select publication
+        id: publication
+        env:
+          MANUAL_DATE: ${{ inputs.run_date }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [[ -n "$MANUAL_DATE" ]]; then
+            RUN_DATE="$MANUAL_DATE"
+          else
+            FILE=$(git diff --name-only "$BEFORE_SHA" "$GITHUB_SHA" -- 'automation/published/daily-*.json' | tail -1)
+            RUN_DATE=$(basename "$FILE" .json | sed 's/^daily-//')
+          fi
+          if [[ ! "$RUN_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+            echo "Invalid publication date: $RUN_DATE" >&2
+            exit 1
+          fi
+          FILE="automation/published/daily-${RUN_DATE}.json"
+          test -f "$FILE"
+          node -e 'const d=require("./'"$FILE"'"); if (!d.shortVideo) process.exit(1)'
+          echo "run_date=$RUN_DATE" >> "$GITHUB_OUTPUT"
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+      - name: Check publishing credentials
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+        run: |
+          missing=()
+          for name in OPENAI_API_KEY YOUTUBE_CLIENT_ID YOUTUBE_CLIENT_SECRET YOUTUBE_REFRESH_TOKEN INSTAGRAM_USER_ID INSTAGRAM_ACCESS_TOKEN; do
+            [[ -n "${!name}" ]] || missing+=("$name")
+          done
+          if (( ${#missing[@]} )); then
+            echo "Missing GitHub Actions secrets: ${missing[*]}" >&2
+            exit 1
+          fi
+      - name: Render 9:16 video with AI narration
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_TTS_MODEL: gpt-4o-mini-tts
+          OPENAI_TTS_VOICE: onyx
+        run: node scripts/render-short-video.mjs --input "${{ steps.publication.outputs.file }}" --output "dist/short-${{ steps.publication.outputs.run_date }}.mp4"
+      - name: Publish the source video as a public release asset
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_DATE: ${{ steps.publication.outputs.run_date }}
+        run: |
+          TAG="short-video-${RUN_DATE}"
+          ASSET="dist/short-${RUN_DATE}.mp4"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" --title "Short video ${RUN_DATE}" --notes "Automated source asset for YouTube Shorts and Instagram Reels."
+          fi
+          URL=$(gh release view "$TAG" --json assets --jq '.assets[] | select(.name == "short-'"${RUN_DATE}"'.mp4") | .url')
+          echo "video_url=$URL" >> "$GITHUB_OUTPUT"
+      - name: Publish to YouTube Shorts
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_PRIVACY_STATUS: public
+        run: node scripts/publish-youtube.mjs --video "dist/short-${{ steps.publication.outputs.run_date }}.mp4" --metadata "${{ steps.publication.outputs.file }}" --output /tmp/youtube.json
+      - name: Publish to Instagram Reels
+        env:
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          META_GRAPH_API_VERSION: v25.0
+        run: node scripts/publish-instagram.mjs --video-url "${{ steps.release.outputs.video_url }}" --metadata "${{ steps.publication.outputs.file }}" --output /tmp/instagram.json
+      - name: Record publication IDs
+        env:
+          RUN_DATE: ${{ steps.publication.outputs.run_date }}
+          VIDEO_URL: ${{ steps.release.outputs.video_url }}
+        run: |
+          mkdir -p automation/video-publications
+          node -e 'const fs=require("fs"); const result={runDate:process.env.RUN_DATE,sourceVideoUrl:process.env.VIDEO_URL,youtube:JSON.parse(fs.readFileSync("/tmp/youtube.json")),instagram:JSON.parse(fs.readFileSync("/tmp/instagram.json"))}; fs.writeFileSync(`automation/video-publications/daily-${process.env.RUN_DATE}.json`,JSON.stringify(result,null,2)+"\n")'
+          git config user.name "web-direction-lab-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add automation/video-publications
+          git commit -m "Record short video publication for ${RUN_DATE}"
+          git pull --rebase origin main
+          git push origin main

@@ -11,6 +11,9 @@ const jstDate = process.env.RUN_DATE || new Intl.DateTimeFormat("sv-SE", {
   month: "2-digit",
   day: "2-digit",
 }).format(now);
+const videoSeries = Math.floor(Date.parse(`${jstDate}T00:00:00+09:00`) / 86_400_000) % 2 === 0
+  ? "効率化"
+  : "行動経済";
 
 const knowledgeIndex = JSON.parse(
   await readFile("content/knowledge/articles.json", "utf8"),
@@ -324,7 +327,7 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 成果物:
 - 長く役立つナレッジ記事の下書き1件
 - 最新のWebニュース記事の下書き1件
-- 上記のうち動画向きな1件の30〜60秒ショート動画台本
+- ${videoSeries}を題材にした30〜60秒ショート動画台本
 
 必須条件:
 - 日本語で書く
@@ -363,7 +366,12 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - 検索結果だけで裏付けられない主張を作らない
 - 確認できない内容は断定しない
 - SEOタイトルは誇張や煽りを避ける
-- 動画は通常ナレッジを選び、緊急度4以上の重要ニュースのみニュースを優先する
+- 今日の動画シリーズは「${videoSeries}」。万人が仕事や日常で試せる題材にし、専門的すぎる題材は避ける
+- 効率化の日は、段取り、集中、時間管理、タスク分解、意思決定など、すぐ試せる工夫を扱う
+- 行動経済の日は、先延ばし、選択疲れ、損失回避、現在バイアスなどを身近な例で扱う
+- shortVideo.sourceKindには、動画テーマにより近い方のknowledgeまたはnewsを指定する。ただし台本は記事の要約に限定せず、今日のシリーズを優先する
+- 冒頭3秒で意外性のある問いまたは結論を示し、1動画1メッセージに絞る
+- ナレーションはAI男性音声を少し速めに読む前提で、難読語や長すぎる一文を避ける
 - 出力は下書きであり、人間の承認前に公開しない`;
 
 const userPrompt = `実行日（日本時間）: ${jstDate}

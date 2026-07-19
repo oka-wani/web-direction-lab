@@ -65,14 +65,14 @@ const articleBodySchema = {
     conclusion: { type: "string" },
     highlights: {
       type: "array",
-      minItems: 2,
-      maxItems: 4,
+      minItems: 3,
+      maxItems: 5,
       items: { type: "string" },
     },
     glossary: {
       type: "array",
-      minItems: 3,
-      maxItems: 8,
+      minItems: 5,
+      maxItems: 10,
       items: {
         type: "object",
         additionalProperties: false,
@@ -156,7 +156,7 @@ const responseSchema = {
         },
         summary: { type: "string" },
         level: { type: "string", enum: ["初級", "中級", "上級"] },
-        minutes: { type: "integer", minimum: 5, maximum: 15 },
+        minutes: { type: "integer", minimum: 10, maximum: 25 },
         hero: {
           type: "object",
           additionalProperties: false,
@@ -333,6 +333,15 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - ナレッジに登場する重要用語を3〜8件抽出し、glossaryを「用語」と「簡潔な意味」に分けて書く
 - ナレッジのタイトルは煽らず、用語・仕組み・実務上の意味が分かる辞書・解説型にする
 - heroには記事テーマを一目で理解できる短い見出しと、図解用の3〜4項目を入れる
+- ナレッジ本文は合計3,500〜5,000文字程度を目安にし、初級でも説明を省略しすぎない
+- definitionは700〜1,000文字、importanceは500〜800文字、practiceは800〜1,200文字、mistakesは500〜800文字、exampleは600〜900文字を目安にする
+- 各本文項目は2〜4段落に分け、定義だけで終わらず、仕組み、判断基準、実務での確認方法まで説明する
+- 本文で特に重要な語句を各項目1〜2箇所だけ **重要語句** の形式で囲み、画面上のハイライト対象にする
+- highlightsは重複しない3〜5件、glossaryは本文理解に必要な5〜10件を作る
+- practiceには実務担当者が確認できる具体的な手順またはチェック項目を含める
+- mistakesにはよくある誤解、失敗した場合の影響、回避方法を含める
+- exampleにはWebサイト運用や制作現場を想定した具体的な状況を含める
+- ナレッジの参考情報は可能な限り公式仕様・公式ドキュメント・公的機関を優先し、最低2件確認する
 - SEO keywordsには関連ナレッジの判定にも使える、記事固有の用語・技術名・実務テーマを入れる
 - ナレッジは既存記事と重複させない
 - ニュース候補を最低5件調査し、影響範囲・実務関連性・鮮度・行動可能性・一次情報の確かさで比較して最も有用な1件だけを出力する

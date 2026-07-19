@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "content:validate": "node scripts/validate-content.mjs",
     "generate:draft": "node scripts/generate-daily.mjs",
-    "approve:draft": "node scripts/approve-draft.mjs"
+    "approve:draft": "node scripts/approve-draft.mjs",
+    "video:render": "node scripts/render-short-video.mjs"
   },
   "dependencies": {
     "next": "16.2.6",

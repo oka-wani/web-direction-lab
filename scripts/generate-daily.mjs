@@ -44,7 +44,6 @@ const articleBodySchema = {
     "practice",
     "mistakes",
     "example",
-    "todaySummary",
     "quiz",
   ],
   properties: {
@@ -74,12 +73,6 @@ const articleBodySchema = {
     practice: { type: "string" },
     mistakes: { type: "string" },
     example: { type: "string" },
-    todaySummary: {
-      type: "array",
-      minItems: 3,
-      maxItems: 5,
-      items: { type: "string" },
-    },
     quiz: {
       type: "object",
       additionalProperties: false,

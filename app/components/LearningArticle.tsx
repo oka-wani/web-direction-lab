@@ -31,10 +31,9 @@ export default function LearningArticle(p: Props) {
       <header className="site-header">
         <a className="logo" href="/">Web Direction <span>Lab</span></a>
         <nav aria-label="メインナビゲーション">
-          <a href="/knowledge">ナレッジ</a>
-          <a href="/news">Webニュース</a>
-          <a href="/roadmap">学習ロードマップ</a>
-          <a href="/#topics">カテゴリ</a>
+          <a href="/news">ニュース</a>
+          <a href="/knowledge" aria-current="page">ナレッジ</a>
+          <a href="/guide">Webガイド</a>
           <a href="/#about">このサイトについて</a>
         </nav>
       </header>

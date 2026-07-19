@@ -1,173 +1,69 @@
+import { SiteFooter, SiteHeader } from "./components/SiteChrome";
+import { guideSteps } from "./guide/guide-data";
+import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
 
 const articles = [
-  {
-    category: "SEO",
-    date: "2026.07.18",
-    title: "titleタグとは？ SEOとクリック率を左右する基本",
-    description: "検索結果で選ばれるタイトルの考え方を、実務で使える形に整理します。",
-    type: "search",
-    href: "/articles/title-tag",
-  },
-  {
-    category: "アクセス解析",
-    date: "2026.07.17",
-    title: "GA4で最初に見るべき5つの指標",
-    description: "数字を眺めるだけで終わらせず、改善につなげる確認順を解説します。",
-    type: "analytics",
-    href: "/articles/ga4-first-metrics",
-  },
-  {
-    category: "Web制作",
-    date: "2026.07.16",
-    title: "成果につながるWebサイト改善の進め方",
-    description: "課題発見から仮説、実装、検証までの流れを一つずつ確認します。",
-    type: "website",
-    href: "/articles/site-improvement",
-  },
+  { category:"SEO", date:"2026.07.18", title:"titleタグとは？ SEOとクリック率を左右する基本", description:"検索結果で選ばれるタイトルの考え方を、実務で使える形に整理します。", href:"/articles/title-tag" },
+  { category:"アクセス解析", date:"2026.07.17", title:"GA4で最初に見るべき5つの指標", description:"数字を眺めるだけで終わらせず、改善につなげる確認順を解説します。", href:"/articles/ga4-first-metrics" },
+  { category:"Web制作", date:"2026.07.16", title:"成果につながるWebサイト改善の進め方", description:"課題発見から仮説、実装、検証までの流れを一つずつ確認します。", href:"/articles/site-improvement" },
 ];
 
-const topics = [
-  { icon: "↗", name: "SEO", text: "検索で見つけてもらう仕組みを学ぶ", count: "2記事", href: "/knowledge?category=SEO" },
-  { icon: "◎", name: "アクセス解析", text: "データから改善点を見つける", count: "1記事", href: "/knowledge?category=アクセス解析" },
-  { icon: "◇", name: "Web制作", text: "設計・実装・CMSの基礎を固める", count: "1記事", href: "/knowledge?category=Web制作" },
-  { icon: "⌘", name: "システム", text: "サーバー・DNS・API・クラウドを理解する", count: "2記事", href: "/knowledge?category=システム" },
-  { icon: "✦", name: "AI活用", text: "制作と運用をAIで効率化する", count: "1記事", href: "/knowledge?category=AI活用" },
+const pillars = [
+  { number:"01", label:"NEWS", title:"ニュース", text:"Web・AI・SEOなど、いま起きている変化を短時間でつかむ。", href:"/news", link:"最新情報を見る" },
+  { number:"02", label:"KNOWLEDGE", title:"Webナレッジ", text:"基礎から実務まで、必要な知識を順番に学び、調べる。", href:"/knowledge", link:"体系的に学ぶ" },
+  { number:"03", label:"COLUMN", title:"コラム", text:"比較・検証・試行錯誤から、Webの仕事に役立つ視点を得る。", href:"/column", link:"考え方を読む" },
 ];
-
-function ArticleVisual({ type }: { type: string }) {
-  return (
-    <div className={`article-visual article-visual--${type}`} aria-hidden="true">
-      {type === "search" && (
-        <>
-          <div className="browser-card"><b>&lt;title&gt;</b><i /><i /><i /></div>
-          <div className="magnifier" />
-        </>
-      )}
-      {type === "analytics" && (
-        <>
-          <div className="mini-bars"><i /><i /><i /><i /><i /></div>
-          <div className="mini-line">●—●—●—●</div>
-          <div className="mini-ring" />
-        </>
-      )}
-      {type === "website" && (
-        <>
-          <div className="wireframe"><b /><span /><span /><i /><i /></div>
-          <div className="checks">✓<br />✓</div>
-        </>
-      )}
-    </div>
-  );
-}
 
 export default function Home() {
-  return (
-    <main>
-      <header className="site-header">
-        <a className="logo" href="#top" aria-label="Web Direction Lab トップ">Web Direction <span>Lab</span></a>
-        <nav aria-label="メインナビゲーション">
-          <a href="/news">ニュース</a>
-          <a href="/knowledge">ナレッジ</a>
-          <a href="/guide">Webガイド</a>
-        </nav>
-      </header>
+  return <main>
+    <SiteHeader />
+    <section className="hero home-hero" id="top">
+      <div className="hero-copy">
+        <p className="eyebrow">LEARN · THINK · APPLY</p>
+        <h1>Webを学び、考え、<br /><span>仕事で使える知識</span>に。</h1>
+        <p className="lead">Webディレクター・Webコンサルを目指す人へ。<br className="desktop" />最新情報、体系的な知識、実践から得た視点を一つにつなげます。</p>
+        <div className="hero-actions">
+          <a className="button button--primary" href="/knowledge">Webナレッジで学ぶ <b>→</b></a>
+          <a className="button button--secondary" href="/news">最新ニュースを見る <b>→</b></a>
+        </div>
+      </div>
+      <div className="hero-art" aria-label="知識を整理し改善につなげるイラスト" role="img">
+        <div className="art-grid" /><div className="donut" />
+        <div className="chart-bars"><i /><i /><i /><i /><i /></div>
+        <div className="growth-line"><i /><i /><i /><i /></div>
+        <div className="art-panel"><span>WEB KNOWLEDGE</span><b>知る・学ぶ・考える</b><i /></div>
+        <div className="dot-field">••••••<br />••••••<br />••••••</div>
+      </div>
+    </section>
 
-      <section className="hero" id="top">
-        <div className="hero-copy">
-          <p className="eyebrow">LEARN · CREATE · IMPROVE</p>
-          <h1>Webの知識を、<br /><span>実務で使える力</span>に。</h1>
-          <p className="lead">Webディレクター・Webコンサルを目指す人のための、<br className="desktop" />Web制作・SEO・システム・マーケティング学習メディア。</p>
-          <div className="hero-actions">
-            <a className="button button--primary" href="#articles"><span className="book-icon">▤</span> 最新ナレッジを読む <b>→</b></a>
-            <a className="button button--secondary" href="/guide"><span>⌁</span> Webガイドで学ぶ <b>→</b></a>
-          </div>
-          <p className="hero-note">毎日の学習と実務経験を、提案や改善に使える知識として整理します。</p>
-        </div>
+    <section className="section home-pillars">
+      <div className="section-heading"><div><p className="section-kicker">THREE CONTENTS</p><h2>3つの入口</h2></div><p>目的に合わせて、読み方を選べます。</p></div>
+      <div className="pillar-grid">{pillars.map((item) => <a className="content-pillar" href={item.href} key={item.number}><span>{item.number}</span><small>{item.label}</small><h2>{item.title}</h2><p>{item.text}</p><b>{item.link} →</b></a>)}</div>
+    </section>
 
-        <div className="hero-art" aria-label="学習と成長を表すグラフのイラスト" role="img">
-          <div className="art-grid" />
-          <div className="donut" />
-          <div className="chart-bars"><i /><i /><i /><i /><i /></div>
-          <div className="growth-line"><i /><i /><i /><i /></div>
-          <div className="art-panel"><span>LEARNING</span><b>知識を積み上げる</b><i /></div>
-          <div className="dot-field">••••••<br />••••••<br />••••••</div>
-        </div>
-      </section>
+    <section className="section knowledge-roadmap-home">
+      <div className="section-heading"><div><p className="section-kicker">LEARNING ROADMAP</p><h2>Webを順番に学ぶ</h2></div><a href="/knowledge">Webナレッジを見る <span>→</span></a></div>
+      <p className="section-lead">用語をばらばらに覚えるのではなく、Webの仕組みから制作・公開・集客・改善・提案までをつなげます。</p>
+      <div className="roadmap-link-grid">{guideSteps.map((step) => <a href={`/knowledge/${step.slug}`} key={step.slug}><span>{step.number}</span><div><b>{step.title}</b><small>{step.description}</small></div><i>→</i></a>)}</div>
+    </section>
 
-      <section className="section latest" id="articles">
-        <div className="section-heading">
-          <div><p className="section-kicker">NEW KNOWLEDGE</p><h2>最新ナレッジ</h2></div>
-          <a href="/knowledge">ナレッジをすべて見る <span>→</span></a>
-        </div>
-        <div className="article-grid">
-          {articles.map((article) => (
-            <article className="article-card" key={article.title}>
-              <div className="visual-wrap"><span className="category-badge">{article.category}</span><ArticleVisual type={article.type} /></div>
-              <div className="article-body">
-                <time>{article.date}</time>
-                <h3><a href={article.href}>{article.title}</a></h3>
-                <p>{article.description}</p>
-                <a className="text-link" href={article.href}>この記事を読む <span>→</span></a>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+    <section className="section latest">
+      <div className="section-heading"><div><p className="section-kicker">LATEST KNOWLEDGE</p><h2>最新のWebナレッジ</h2></div><a href="/knowledge#articles">すべて見る <span>→</span></a></div>
+      <div className="home-knowledge-list">{articles.map((article) => <article key={article.title}><div><span>{article.category}</span><time>{article.date}</time></div><h3><a href={article.href}>{article.title}</a></h3><p>{article.description}</p><a className="text-link" href={article.href}>この記事を読む <span>→</span></a></article>)}</div>
+    </section>
 
-      <section className="section home-news">
-        <div className="section-heading">
-          <div><p className="section-kicker">NEWS</p><h2>押さえておきたい変化</h2></div>
-          <a href="/news">ニュースをすべて見る <span>→</span></a>
-        </div>
-        <div className="home-news-grid">
-          {newsItems.map((item) => <article className="home-news-card" key={item.slug}>
-            <div><span>{item.category}</span><time>{item.date}</time></div>
-            <h3><a href={`/news/${item.slug}`}>{item.title}</a></h3>
-            <p>{item.summary}</p>
-            <a className="text-link" href={`/news/${item.slug}`}>3分で要点をつかむ <span>→</span></a>
-          </article>)}
-        </div>
-      </section>
+    <section className="section home-news">
+      <div className="section-heading"><div><p className="section-kicker">NEWS</p><h2>押さえておきたい変化</h2></div><a href="/news">ニュースをすべて見る <span>→</span></a></div>
+      <div className="home-news-grid">{newsItems.slice(0, 4).map((item) => <article className="home-news-card" key={item.slug}><div><span>{item.category}</span><time>{item.date}</time></div><h3><a href={`/news/${item.slug}`}>{item.title}</a></h3><p>{item.summary}</p><a className="text-link" href={`/news/${item.slug}`}>要点を読む <span>→</span></a></article>)}</div>
+    </section>
 
-      <section className="section topics" id="topics">
-        <div className="section-heading">
-          <div><p className="section-kicker">LEARNING TOPICS</p><h2>テーマから学ぶ</h2></div>
-          <p>気になる領域から、基礎と実務を順番に学べます。</p>
-        </div>
-        <div className="topic-grid">
-          {topics.map((topic) => (
-            <a className="topic-card" href={topic.href} key={topic.name}>
-              <span className="topic-icon">{topic.icon}</span>
-              <span><b>{topic.name}</b><small>{topic.text}</small></span>
-              <em>{topic.count}</em><i>→</i>
-            </a>
-          ))}
-        </div>
-      </section>
+    <section className="section home-column">
+      <div className="section-heading"><div><p className="section-kicker">COLUMN</p><h2>考え方と試行錯誤</h2></div><a href="/column">コラムをすべて見る <span>→</span></a></div>
+      <div className="home-column-list">{columnItems.map((item) => <a href={`/column/${item.slug}`} key={item.slug}><div><span>{item.category}</span><time>{item.date}</time></div><h3>{item.title}</h3><p>{item.summary}</p><b>続きを読む →</b></a>)}</div>
+    </section>
 
-      <section className="section roadmap" id="guide">
-        <div className="roadmap-copy">
-          <p className="section-kicker">WEB GUIDE</p>
-          <h2>Webを基礎から、<br />順番に学ぶ。</h2>
-          <p>Webの仕組みから制作、サーバー、SEO、解析、マーケティングまで。基本用語と現場で使うツールを一緒に学べる初心者向けガイドです。</p>
-          <a className="button button--primary" href="/guide">Webガイドをはじめる <b>→</b></a>
-        </div>
-        <ol className="roadmap-steps">
-          <li><span>01</span><div><b>Webの仕組みと制作</b><small>HTML・CSS・JavaScript・API</small></div></li>
-          <li><span>02</span><div><b>公開と運用</b><small>サーバー・DNS・クラウド・CMS</small></div></li>
-          <li><span>03</span><div><b>集客と改善</b><small>SEO・アクセス解析・マーケティング</small></div></li>
-          <li><span>04</span><div><b>提案につなげる</b><small>AI活用・課題整理・改善提案</small></div></li>
-        </ol>
-      </section>
-
-      <section className="about" id="about">
-        <p className="section-kicker">ABOUT THIS LAB</p>
-        <h2>Webの仕事に必要な知識を、一つずつ。</h2>
-        <p>このサイトは、Webディレクター・Webコンサルを目指す人に向けて、Web制作、SEO、アクセス解析、マーケティング、システムの知識を実務目線で整理する学習メディアです。</p>
-      </section>
-
-      <footer><a className="logo" href="#top">Web Direction <span>Lab</span></a><p>Webディレクター・Webコンサルを目指す人の実践学習メディア。</p><small>© 2026 Web Direction Lab</small></footer>
-    </main>
-  );
+    <section className="about"><p className="section-kicker">ABOUT THIS LAB</p><h2>知識を集めるだけでなく、使える形へ。</h2><p>ニュースで変化を知り、Webナレッジで仕組みを学び、コラムで判断や試行錯誤に触れる。Webの仕事に必要な知識を、一つの流れとして整理する学習メディアです。</p></section>
+    <SiteFooter />
+  </main>;
 }

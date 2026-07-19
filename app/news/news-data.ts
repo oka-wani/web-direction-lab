@@ -6,8 +6,11 @@ export type NewsItem = {
   date: string;
   title: string;
   summary: string;
+  whatHappened?: string;
   impact: string;
   action: string;
+  audienceImpact?: number;
+  selectionReason?: string;
   sourceName: string;
   sourceUrl: string;
 };

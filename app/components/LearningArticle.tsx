@@ -2,6 +2,7 @@ type Source = { name: string; url: string };
 type Term = { term: string; description: string };
 type Section = { title: string; body: string; points?: string[] };
 type Hero = { label: string; headline: string; items: string[] };
+type Related = { title: string; category: string; href: string };
 
 type Props = {
   category: string;
@@ -17,8 +18,9 @@ type Props = {
   terms?: Term[];
   sections: Section[];
   quiz: { question: string; choices: string[]; answer: string };
-  summary: string[];
+  summary?: string[];
   sources?: Source[];
+  related?: Related[];
   nextLabel?: string;
   nextHref?: string;
 };
@@ -110,10 +112,16 @@ export default function LearningArticle(p: Props) {
             <aside className="source-box"><b>参考情報</b><p>内容の確認や実務判断では、リンク先の原文も確認してください。</p>{p.sources.map((source) => <p key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.name} ↗</a></p>)}</aside>
           )}
 
-          <footer className="article-summary">
-            <p className="section-kicker">TODAY&apos;S SUMMARY</p><h2>今日のまとめ</h2>
-            <ul>{p.summary.map((item) => <li key={item}>{item}</li>)}</ul>
-            <a className="button button--primary" href="/knowledge">ナレッジ一覧に戻る <b>→</b></a>
+          {p.related && p.related.length > 0 && (
+            <section className="related-knowledge" aria-labelledby="related-knowledge-title">
+              <p className="section-kicker">RELATED KNOWLEDGE</p>
+              <h2 id="related-knowledge-title">関連ナレッジ</h2>
+              <div>{p.related.map((item) => <a href={item.href} key={item.href}><small>{item.category}</small><b>{item.title}</b><span>読む →</span></a>)}</div>
+            </section>
+          )}
+
+          <footer className="article-end-nav">
+            <a className="button button--primary" href="/knowledge">ナレッジ一覧に戻る</a>
           </footer>
         </article>
       </div>

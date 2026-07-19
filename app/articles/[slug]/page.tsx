@@ -2,6 +2,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { notFound } from "next/navigation";
 import LearningArticle from "../../components/LearningArticle";
+import { getRelatedKnowledge } from "../../knowledge/related";
 
 type GeneratedKnowledge = {
   slug: string;
@@ -21,7 +22,7 @@ type GeneratedKnowledge = {
     practice: string;
     mistakes: string;
     example: string;
-    todaySummary: string[];
+    todaySummary?: string[];
     quiz: {
       question: string;
       choices: string[];
@@ -93,8 +94,8 @@ export default async function GeneratedKnowledgePage({
         choices: post.body.quiz.choices,
         answer: `${post.body.quiz.answer} — ${post.body.quiz.explanation}`,
       }}
-      summary={post.body.todaySummary}
       sources={post.sources}
+      related={getRelatedKnowledge(post.slug, post.category)}
     />
   );
 }

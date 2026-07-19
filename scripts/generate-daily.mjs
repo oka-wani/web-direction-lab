@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const apiKey = process.env.OPENAI_API_KEY;
@@ -19,6 +19,21 @@ const newsIndex = JSON.parse(await readFile("content/news/news.json", "utf8"));
 const existingTitles = [...knowledgeIndex, ...newsIndex]
   .map((item) => item.title)
   .join("\n- ");
+
+let recentNews = [];
+try {
+  const files = (await readdir("automation/drafts"))
+    .filter((file) => /^daily-\d{4}-\d{2}-\d{2}\.json$/.test(file))
+    .sort()
+    .reverse()
+    .slice(0, 14);
+  recentNews = (await Promise.all(files.map(async (file) => {
+    const draft = JSON.parse(await readFile(join("automation/drafts", file), "utf8"));
+    return draft.news ? `${draft.runDate}: ${draft.news.category} / ${draft.news.serviceName ?? "サービス不明"} / ${draft.news.title}` : null;
+  }))).filter(Boolean);
+} catch {
+  recentNews = [];
+}
 
 const sourceSchema = {
   type: "object",
@@ -190,7 +205,15 @@ const responseSchema = {
         "title",
         "slug",
         "category",
+        "serviceName",
         "summary",
+        "quickSummary",
+        "affected",
+        "beforeAfter",
+        "actionLevel",
+        "actions",
+        "visual",
+        "keywords",
         "whatHappened",
         "impact",
         "action",
@@ -204,8 +227,73 @@ const responseSchema = {
         status: { type: "string", enum: ["draft"] },
         title: { type: "string" },
         slug: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        category: { type: "string" },
+        category: {
+          type: "string",
+          enum: [
+            "AI",
+            "検索・SEO",
+            "アクセス解析・広告",
+            "ブラウザ・Web標準",
+            "Web制作・CMS",
+            "クラウド・インフラ",
+            "セキュリティ・プライバシー",
+            "Webサービス",
+          ],
+        },
+        serviceName: { type: "string" },
         summary: { type: "string" },
+        quickSummary: {
+          type: "array",
+          minItems: 3,
+          maxItems: 3,
+          items: { type: "string" },
+        },
+        affected: {
+          type: "array",
+          minItems: 1,
+          maxItems: 5,
+          items: { type: "string" },
+        },
+        beforeAfter: {
+          type: "object",
+          additionalProperties: false,
+          required: ["before", "after"],
+          properties: {
+            before: { type: "string" },
+            after: { type: "string" },
+          },
+        },
+        actionLevel: {
+          type: "string",
+          enum: ["今すぐ確認", "今週中に確認", "把握のみ"],
+        },
+        actions: {
+          type: "array",
+          minItems: 1,
+          maxItems: 3,
+          items: { type: "string" },
+        },
+        visual: {
+          type: "object",
+          additionalProperties: false,
+          required: ["label", "headline", "items"],
+          properties: {
+            label: { type: "string" },
+            headline: { type: "string" },
+            items: {
+              type: "array",
+              minItems: 2,
+              maxItems: 4,
+              items: { type: "string" },
+            },
+          },
+        },
+        keywords: {
+          type: "array",
+          minItems: 3,
+          maxItems: 8,
+          items: { type: "string" },
+        },
         whatHappened: { type: "string" },
         impact: { type: "string" },
         action: { type: "string" },
@@ -293,12 +381,18 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - SEO keywordsには関連ナレッジの判定にも使える、記事固有の用語・技術名・実務テーマを入れる
 - ナレッジは既存記事と重複させない
 - ニュース候補を最低5件調査し、影響範囲・実務関連性・鮮度・行動可能性・一次情報の確かさで比較して最も有用な1件だけを出力する
-- Google検索・Search Console・GA4・主要ブラウザ・Web標準・アクセシビリティ・セキュリティ・プライバシー・主要CMS・主要AI/Web制作ツールの変更を優先する
+- ニュースの対象領域は、AI、検索・SEO、アクセス解析・広告、ブラウザ・Web標準、Web制作・CMS、クラウド・インフラ、セキュリティ・プライバシー、主要Webサービスまで広く扱う
+- OpenAI・Anthropic・Google AI・Microsoft・Adobe・Figma・GitHub・Cursor、Google Search・Bing・GA4、Chrome・Safari・Firefox・W3C、WordPress・Webflow・Shopify、Cloudflare・AWS・Vercelなどの一次情報を幅広く確認する
+- 直近の記事と同じ領域・同じサービスを続けず、14日単位でテーマを分散する。ただし緊急度4以上の重要変更は例外とする
 - ごく一部の事業者だけが対象の募集終了、限定テスト、地域限定機能、軽微な文言変更は原則選ばない
 - 対象読者の多くに影響するか、Webディレクターが顧客へ説明すべき変更を優先する
 - ニュースは原則7日以内の公式な一次情報をWeb検索で確認する
 - 7日以内に影響度3以上のニュースがなければ30日以内まで広げる
 - audienceImpactには対象読者への影響度を1〜5で、selectionReasonには他候補より優先した理由を書く
+- quickSummaryは「何が変わったか」「誰に影響するか」「何をすべきか」を各1件、計3件にする
+- affectedは影響を受ける役割やサイト種別、actionLevelは対応時期、actionsは実行項目を最大3件に整理する
+- beforeAfterは変更前と変更後の差を、推測せず公式情報の範囲で短く示す
+- visualは外部画像を転載せずに表示する、記事固有の図解用テキストとして作る
 - ニュースの全ソースに公開日とURLを入れる
 - ニュースは一次情報を最低1件含める
 - 検索結果だけで裏付けられない主張を作らない
@@ -311,6 +405,9 @@ const userPrompt = `実行日（日本時間）: ${jstDate}
 
 既存タイトル:
 - ${existingTitles}
+
+直近14日間のニュース（同じ領域・サービスの連続を避ける）:
+- ${recentNews.length ? recentNews.join("\n- ") : "なし"}
 
 SEO、Web制作、アクセス解析、システム、AI活用、マーケティング、UX、Webディレクションの範囲から、今日の下書きを作成してください。`;
 

@@ -13,6 +13,8 @@ type GeneratedKnowledge = {
   level: string;
   body: {
     conclusion: string;
+    highlights?: string[];
+    glossary?: { term: string; description: string }[];
     definition: string;
     importance: string;
     practice: string;
@@ -76,6 +78,8 @@ export default async function GeneratedKnowledgePage({
       level={post.level}
       visual={visual}
       conclusion={post.body.conclusion}
+      highlights={post.body.highlights}
+      terms={post.body.glossary}
       sections={[
         { title: "そもそも何か", body: post.body.definition },
         { title: "なぜ重要か", body: post.body.importance },

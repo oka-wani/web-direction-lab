@@ -1,0 +1,27 @@
+import { readFile, writeFile } from "node:fs/promises";
+
+const arg = (name) => process.argv[process.argv.indexOf(`--${name}`) + 1];
+const file = arg("video");
+const metadataPath = arg("metadata");
+const output = arg("output") || "youtube-result.json";
+if (!file || !metadataPath) throw new Error("--video and --metadata are required.");
+const required = ["YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN"];
+const missing = required.filter((name) => !process.env[name]);
+if (missing.length) throw new Error(`Missing GitHub Actions secrets: ${missing.join(", ")}`);
+const publication = JSON.parse(await readFile(metadataPath, "utf8"));
+const video = publication.shortVideo;
+const tokenResponse = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: process.env.YOUTUBE_CLIENT_ID, client_secret: process.env.YOUTUBE_CLIENT_SECRET, refresh_token: process.env.YOUTUBE_REFRESH_TOKEN, grant_type: "refresh_token" }) });
+const token = await tokenResponse.json();
+if (!tokenResponse.ok) throw new Error(`YouTube token error ${tokenResponse.status}: ${JSON.stringify(token)}`);
+const bytes = await readFile(file);
+const description = `${video.reason}\n\n${video.cta}\n\n※音声はAIで生成しています。\n#効率化 #行動経済 #仕事術 #Shorts`;
+const init = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", { method: "POST", headers: { Authorization: `Bearer ${token.access_token}`, "Content-Type": "application/json", "X-Upload-Content-Type": "video/mp4", "X-Upload-Content-Length": String(bytes.length) }, body: JSON.stringify({ snippet: { title: video.hook.slice(0, 100), description, categoryId: "27", tags: ["効率化", "行動経済", "仕事術"] }, status: { privacyStatus: process.env.YOUTUBE_PRIVACY_STATUS || "public", selfDeclaredMadeForKids: false } }) });
+if (!init.ok) throw new Error(`YouTube upload initialization error ${init.status}: ${await init.text()}`);
+const location = init.headers.get("location");
+if (!location) throw new Error("YouTube did not return a resumable upload URL.");
+const upload = await fetch(location, { method: "PUT", headers: { "Content-Type": "video/mp4", "Content-Length": String(bytes.length) }, body: bytes });
+const result = await upload.json();
+if (!upload.ok) throw new Error(`YouTube upload error ${upload.status}: ${JSON.stringify(result)}`);
+const saved = { id: result.id, url: `https://www.youtube.com/shorts/${result.id}`, publishedAt: new Date().toISOString() };
+await writeFile(output, `${JSON.stringify(saved, null, 2)}\n`);
+console.log(saved.url);

@@ -16,8 +16,6 @@ export default function GuidePage() {
 
     <ol className="guide-learning-list">{guideSteps.map((step) => <li key={step.number}><a href={`/guide/${step.slug}`}><span className="guide-step-number">{step.number}</span><div className="guide-step-main"><small>STEP {step.number}</small><h2>{step.title}</h2><p>{step.description}</p><dl><div><dt>学ぶ内容</dt><dd>{step.topics}</dd></div><div><dt>ツール・サービス</dt><dd>{step.tools}</dd></div></dl></div><span className="guide-step-arrow" aria-hidden="true">→</span></a></li>)}</ol>
 
-    <section className="guide-note"><b>用語説明について</b><p>DNS、API、CDN、JSONなどの用語は独立した用語集には分けず、関連する基礎知識の記事内で、仕組みや具体例と一緒に説明します。</p></section>
-
     <footer><a className="logo" href="/">Web Direction <span>Lab</span></a><p>Webディレクター・Webコンサルを目指す人の実践学習メディア。</p><small>© 2026 Web Direction Lab</small></footer>
   </main>;
 }

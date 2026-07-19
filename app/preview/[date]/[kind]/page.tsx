@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import LearningArticle from "../../../components/LearningArticle";
 import NewsArticle from "../../../components/NewsArticle";
 import type { NewsItem } from "../../../news/news-data";
+import { getRelatedKnowledge } from "../../../knowledge/related";
 
 export const metadata: Metadata = {
   title: "下書きプレビュー | Web Direction Lab",
@@ -18,6 +19,7 @@ type Source = {
 };
 
 type KnowledgeDraft = {
+  slug: string;
   category: string;
   title: string;
   summary: string;
@@ -33,7 +35,7 @@ type KnowledgeDraft = {
     practice: string;
     mistakes: string;
     example: string;
-    todaySummary: string[];
+    todaySummary?: string[];
     quiz: {
       question: string;
       choices: string[];
@@ -164,8 +166,8 @@ export default async function DraftPreviewPage({
           choices: post.body.quiz.choices,
           answer: `${post.body.quiz.answer} — ${post.body.quiz.explanation}`,
         }}
-        summary={post.body.todaySummary}
         sources={post.sources}
+        related={getRelatedKnowledge(post.slug, post.category)}
       />
     </>
   );

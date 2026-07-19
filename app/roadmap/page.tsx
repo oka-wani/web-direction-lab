@@ -1,1 +1,5 @@
-export default function RoadmapPage(){return <main className="roadmap-page"><header className="site-header"><a className="logo" href="/">Web Direction <span>Lab</span></a><nav aria-label="メインナビゲーション"><a href="/knowledge">ナレッジ</a><a href="/news">Webニュース</a><a href="/roadmap">学習ロードマップ</a><a href="/#topics">カテゴリ</a><a href="/#about">このサイトについて</a></nav></header><section className="roadmap-page-hero"><p className="section-kicker">LEARNING ROADMAP</p><h1>Webの仕事に必要な知識を、<br/>一本の線につなげる。</h1><p>Webディレクター・Webコンサルに必要な基礎から改善提案までを、順番に学べるロードマップです。</p></section><section className="roadmap-list">{[["01","Webの仕組み","HTML・CSS、ブラウザ、サーバー、DNS、CMS"],["02","SEOの基礎","検索の仕組み、クロール、インデックス、検索意図"],["03","アクセス解析","GA4、Search Console、KPI、課題発見"],["04","UXと改善","ユーザー行動、導線、CV、A/Bテスト"],["05","提案と実行","仮説設計、優先順位、施策、効果検証"]].map((item,i)=><article key={item[0]}><span>{item[0]}</span><div><small>STEP {item[0]}</small><h2>{item[1]}</h2><p>{item[2]}</p></div><em>{i===0?"学習中":"準備中"}</em></article>)}</section></main>}
+import { redirect } from "next/navigation";
+
+export default function RoadmapPage() {
+  redirect("/guide#basics");
+}

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "content:validate": "node scripts/validate-content.mjs",
-    "generate:draft": "node scripts/generate-daily.mjs"
+    "generate:draft": "node scripts/generate-daily.mjs",
+    "approve:draft": "node scripts/approve-draft.mjs"
   },
   "dependencies": {
     "next": "16.2.6",

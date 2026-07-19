@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default function KnowledgePage() {
   return <main className="knowledge-hub">
     <SiteHeader current="knowledge" />
-    <section className="knowledge-hub-hero"><div><p className="section-kicker">WEB KNOWLEDGE</p><h1>Webの知識を、<br />基礎から実務まで。</h1><p>初めて学ぶときはロードマップから。必要な情報を確認するときは記事検索から。基礎知識と実務ナレッジを一つの場所にまとめました。</p></div><dl><div><dt>01</dt><dd><b>順番に学ぶ</b><span>9ステップのロードマップ</span></dd></div><div><dt>02</dt><dd><b>テーマから探す</b><span>カテゴリとキーワード検索</span></dd></div><div><dt>03</dt><dd><b>実務で使う</b><span>判断・設計・改善まで解説</span></dd></div></dl></section>
+    <section className="knowledge-hub-hero"><div><p className="section-kicker">WEB KNOWLEDGE</p><h1>Webの知識を、<br />基礎から実務まで。</h1><p>基礎知識は学習順に、ナレッジはカテゴリやキーワードから。目的に合わせて二つの入口を使い分けられます。</p></div><dl><div><dt>01</dt><dd><b>基礎から学ぶ</b><span>9ステップの基礎知識</span></dd></div><div><dt>02</dt><dd><b>必要な記事を探す</b><span>カテゴリとキーワード検索</span></dd></div><div><dt>03</dt><dd><b>実務で使う</b><span>判断・設計・改善まで解説</span></dd></div></dl></section>
 
-    <section className="knowledge-paths"><header><p className="section-kicker">LEARNING ROADMAP</p><h2>初めて学ぶ人はこちら</h2><p>Webサイトが表示される仕組みから、制作・公開・集客・改善・提案までを順番につなげます。</p></header><ol className="knowledge-path-grid">{guideSteps.map((step) => <li key={step.slug}><a href={`/knowledge/${step.slug}`}><span>{step.number}</span><div><small>STEP {step.number}</small><h3>{step.title}</h3><p>{step.description}</p><em>{step.articles.length}テーマ</em></div><b>→</b></a></li>)}</ol></section>
+    <section className="knowledge-paths knowledge-paths--compact"><header><p className="section-kicker">BASIC KNOWLEDGE</p><h2>基礎知識</h2><p>Webサイトが表示される仕組みから、制作・公開・集客・改善・提案までを順番に学びます。</p></header><ol className="knowledge-path-grid">{guideSteps.map((step) => <li key={step.slug}><a href={`/knowledge/${step.slug}`}><span>{step.number}</span><div><small>STEP {step.number}</small><h3>{step.title}</h3><p>{step.description}</p><em>{step.articles.length}テーマ</em></div><b>→</b></a></li>)}</ol></section>
 
-    <section className="knowledge-library" id="articles"><header><p className="section-kicker">KNOWLEDGE LIBRARY</p><h2>記事から調べる</h2><p>知りたいテーマが決まっている場合は、カテゴリまたはキーワードから探せます。</p></header><ArticlesList /></section>
+    <section className="knowledge-library" id="articles"><header><p className="section-kicker">KNOWLEDGE</p><h2>ナレッジ</h2><p>実務で確認したいテーマを、カテゴリまたはキーワードから探せます。</p></header><ArticlesList /></section>
     <SiteFooter />
   </main>;
 }

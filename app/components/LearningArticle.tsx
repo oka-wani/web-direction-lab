@@ -1,6 +1,7 @@
 type Source = { name: string; url: string };
 type Term = { term: string; description: string };
 type Section = { title: string; body: string; points?: string[] };
+type Hero = { label: string; headline: string; items: string[] };
 
 type Props = {
   category: string;
@@ -10,6 +11,7 @@ type Props = {
   minutes: number;
   level?: string;
   visual: string;
+  hero?: Hero;
   conclusion: string;
   highlights?: string[];
   terms?: Term[];
@@ -17,8 +19,8 @@ type Props = {
   quiz: { question: string; choices: string[]; answer: string };
   summary: string[];
   sources?: Source[];
-  nextLabel: string;
-  nextHref: string;
+  nextLabel?: string;
+  nextHref?: string;
 };
 
 export default function LearningArticle(p: Props) {
@@ -47,10 +49,29 @@ export default function LearningArticle(p: Props) {
             <p className="article-intro">{p.intro}</p>
             <div className="article-meta"><time>{p.date}</time><span>読了目安 {p.minutes}分</span><span>{p.level || "初級"}</span></div>
           </header>
-          <div className={`article-hero-generic article-hero-generic--${p.visual}`} aria-hidden="true">
-            <div><small>WEB DIRECTION LAB</small><b>{p.visual === "system" ? "SYSTEM MAP" : p.visual === "analytics" ? "DATA ANALYSIS" : "WEB IMPROVEMENT"}</b><i/><i/><i/></div>
-          </div>
-          <aside className="conclusion"><b>まず結論</b><p>{p.conclusion}</p></aside>
+          {p.hero ? (
+            <div className={`article-hero-knowledge article-hero-knowledge--${p.visual}`} aria-label={`${p.title}の要点図`}>
+              <div className="hero-knowledge-heading"><small>{p.hero.label}</small><strong>{p.hero.headline}</strong></div>
+              <div className="hero-knowledge-flow">
+                {p.hero.items.map((item, index) => <div key={item}><span>{String(index + 1).padStart(2, "0")}</span><b>{item}</b></div>)}
+              </div>
+            </div>
+          ) : (
+            <div className={`article-hero-generic article-hero-generic--${p.visual}`} aria-hidden="true">
+              <div><small>WEB DIRECTION LAB</small><b>{p.visual === "system" ? "SYSTEM MAP" : p.visual === "analytics" ? "DATA ANALYSIS" : "WEB IMPROVEMENT"}</b><i/><i/><i/></div>
+            </div>
+          )}
+
+          <nav className="toc" aria-label="記事の目次">
+            <b>この記事で学べること</b>
+            <ol>
+              {p.terms && p.terms.length > 0 && <li><a href="#terms">重要用語</a></li>}
+              {p.sections.map((section, index) => <li key={section.title}><a href={`#section-${index + 1}`}>{section.title}</a></li>)}
+              <li><a href="#quiz">理解度クイズ</a></li>
+            </ol>
+          </nav>
+
+          <aside className="conclusion"><b>この記事の概要</b><p>{p.conclusion}</p></aside>
 
           {p.highlights && p.highlights.length > 0 && (
             <section className="key-highlights" aria-labelledby="key-highlights-title">
@@ -69,15 +90,6 @@ export default function LearningArticle(p: Props) {
               </dl>
             </section>
           )}
-
-          <nav className="toc" aria-label="記事の目次">
-            <b>この記事で学べること</b>
-            <ol>
-              {p.terms && p.terms.length > 0 && <li><a href="#terms">重要用語</a></li>}
-              {p.sections.map((section, index) => <li key={section.title}><a href={`#section-${index + 1}`}>{section.title}</a></li>)}
-              <li><a href="#quiz">理解度クイズ</a></li>
-            </ol>
-          </nav>
 
           {p.sections.map((section, index) => (
             <section id={`section-${index + 1}`} key={section.title}>
@@ -101,7 +113,7 @@ export default function LearningArticle(p: Props) {
           <footer className="article-summary">
             <p className="section-kicker">TODAY&apos;S SUMMARY</p><h2>今日のまとめ</h2>
             <ul>{p.summary.map((item) => <li key={item}>{item}</li>)}</ul>
-            <a className="button button--primary" href={p.nextHref}>{p.nextLabel} <b>→</b></a>
+            <a className="button button--primary" href="/knowledge">ナレッジ一覧に戻る <b>→</b></a>
           </footer>
         </article>
       </div>

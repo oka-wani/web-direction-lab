@@ -44,7 +44,7 @@ export default function TitleTagArticle() {
     ]}
     related={[
       {title:"検索意図とは？ 読者が本当に知りたいことの見つけ方",category:"SEO",href:"/articles/search-intent"},
-      {title:"Webサイトが表示される仕組み",category:"基礎知識",href:"/knowledge/web-basics"},
+      {title:"Webサイトが表示される仕組み",category:"システム",href:"/knowledge/web-basics/02-webサイトが表示される仕組み"},
       {title:"成果につながるWebサイト改善の進め方",category:"デザイン・UX",href:"/articles/site-improvement"},
     ]}
   />;

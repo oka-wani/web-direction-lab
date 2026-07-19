@@ -9,7 +9,7 @@ export default function NewsArticle({ item }: { item: NewsItem }) {
   const sources = item.sources?.length ? item.sources : [{ name: item.sourceName, url: item.sourceUrl }];
 
   return <main className="archive-page">
-    <header className="site-header"><a className="logo" href="/">Web Direction <span>Lab</span></a><nav aria-label="メインナビゲーション"><a href="/knowledge">ナレッジ</a><a href="/news" aria-current="page">Webニュース</a><a href="/roadmap">学習ロードマップ</a><a href="/#topics">カテゴリ</a></nav></header>
+    <header className="site-header"><a className="logo" href="/">Web Direction <span>Lab</span></a><nav aria-label="メインナビゲーション"><a href="/news" aria-current="page">ニュース</a><a href="/knowledge">ナレッジ</a><a href="/guide">Webガイド</a></nav></header>
     <article className="news-detail news-detail--simple">
       <p className="breadcrumb"><a href="/">トップ</a> / <a href="/news">Webニュース</a> / {item.category}</p>
       <div className="news-detail-meta"><span>{item.category}</span><time>{item.date}</time>{item.serviceName && <em>{item.serviceName}</em>}</div>

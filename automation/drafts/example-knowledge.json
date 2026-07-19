@@ -1,0 +1,25 @@
+{
+  "id": "2026-07-19-knowledge-example",
+  "kind": "knowledge",
+  "status": "draft",
+  "title": "構造化データとは？検索エンジンに内容を伝える基本",
+  "slug": "structured-data-basics",
+  "category": "SEO",
+  "summary": "構造化データの役割と、Web担当者が実装前後に確認すべきポイントを実務目線で整理します。",
+  "sources": [],
+  "body": {
+    "conclusion": "構造化データは、ページの意味を検索エンジンへ明確に伝えるための記述です。",
+    "definition": "決められた語彙と形式でページ内の情報を表現します。",
+    "importance": "検索エンジンが内容を理解しやすくなり、検索結果の表現にも関係します。",
+    "practice": "対象ページと対応するタイプを確認し、JSON-LDで実装してテストします。",
+    "mistakes": "画面に存在しない情報をマークアップしないことが重要です。",
+    "example": "記事ページならArticle、パンくずならBreadcrumbListを検討します。",
+    "summary": ["ページ内容と一致させる", "公式仕様を確認する", "公開前後にテストする"],
+    "quiz": { "question": "構造化データで最も重要な原則は？", "answer": "画面に表示される実際の内容と一致させること。" },
+    "nextTopic": "JSON-LDの書き方"
+  },
+  "seo": { "metaTitle": "構造化データとは？SEO実務での基本を解説", "metaDescription": "構造化データの役割、実装方法、よくある間違いをWeb担当者向けにわかりやすく解説します。", "keywords": ["構造化データ", "SEO", "JSON-LD"] },
+  "video": { "selected": true, "reason": "一つの図解で役割を説明しやすい", "hook": "構造化データ、検索順位を上げる魔法だと思っていませんか？", "script": "構造化データは、ページの意味を検索エンジンへ伝える記述です。大切なのは画面の内容と一致させること。", "cta": "続きはWeb Direction Labで。" },
+  "social": { "shortCaption": "構造化データの役割を1分で整理。", "hashtags": ["SEO", "Webディレクター", "構造化データ"] },
+  "review": { "factChecked": false, "sourceChecked": false, "seoChecked": false, "approvedBy": null }
+}

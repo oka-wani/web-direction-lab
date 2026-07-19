@@ -1,0 +1,24 @@
+[
+  {
+    "slug":"search-console-generative-ai-report",
+    "category":"SEO / AI",
+    "date":"2026.06.03",
+    "title":"Search Consoleに生成AI機能の専用レポートが登場",
+    "summary":"Googleが、AI OverviewsやAI Modeなどでのサイト表示状況を確認できる専用レポートを一部サイト向けに公開しました。",
+    "impact":"AI検索上で、どのページが・どの国や端末で表示されたかを把握しやすくなります。",
+    "action":"対象サイトでは新レポートの有無を確認し、従来の検索指標と分けて推移を記録しましょう。",
+    "sourceName":"Google Search Central",
+    "sourceUrl":"https://developers.google.com/search/blog/2026/06/gen-ai-performance-reports"
+  },
+  {
+    "slug":"baseline-alerts",
+    "category":"Web制作",
+    "date":"2026.06.25",
+    "title":"Web Platform Statusに「Baseline Alerts」が追加",
+    "summary":"関心のあるWeb機能のBaselineステータス変更を、メールやWebhookで受け取れる通知機能が公開されました。",
+    "impact":"新しいWeb標準が主要ブラウザで使えるタイミングを追いやすくなり、採用判断の手間を減らせます。",
+    "action":"実案件で採用を待っているCSS・Web APIを登録し、技術調査の定期確認に組み込みましょう。",
+    "sourceName":"web.dev",
+    "sourceUrl":"https://web.dev/blog/baseline-alerts"
+  }
+]

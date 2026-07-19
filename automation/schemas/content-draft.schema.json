@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Web Direction Lab content draft",
+  "type": "object",
+  "required": ["id", "kind", "status", "title", "slug", "category", "summary", "body", "seo", "video", "social", "review"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["knowledge", "news"] },
+    "status": { "enum": ["draft", "approved", "published", "rejected"] },
+    "title": { "type": "string", "minLength": 10, "maxLength": 70 },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "category": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 40, "maxLength": 180 },
+    "sources": { "type": "array", "items": { "type": "object", "required": ["name", "url", "isPrimary"], "properties": { "name": { "type": "string" }, "url": { "type": "string", "format": "uri" }, "isPrimary": { "type": "boolean" } } } },
+    "body": { "type": "object", "required": ["conclusion", "definition", "importance", "practice", "mistakes", "example", "summary", "quiz", "nextTopic"] },
+    "seo": { "type": "object", "required": ["metaTitle", "metaDescription", "keywords"] },
+    "video": { "type": "object", "required": ["selected", "reason", "hook", "script", "cta"] },
+    "social": { "type": "object", "required": ["shortCaption", "hashtags"] },
+    "review": { "type": "object", "required": ["factChecked", "sourceChecked", "seoChecked", "approvedBy"] }
+  },
+  "allOf": [{ "if": { "properties": { "kind": { "const": "news" } } }, "then": { "required": ["sources"], "properties": { "sources": { "minItems": 1 } } } }]
+}

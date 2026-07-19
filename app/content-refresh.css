@@ -514,3 +514,32 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Foundation library: all topics are published with sequential navigation */
+.guide-article-index li > a > b {
+  color: var(--navy);
+  background: var(--yellow);
+  padding: 7px 10px;
+}
+
+.article-end-nav {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.article-end-nav .button {
+  flex: 1 1 220px;
+  max-width: 340px;
+}
+
+@media (max-width: 767px) {
+  .article-end-nav {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .article-end-nav .button {
+    flex-basis: auto;
+    max-width: none;
+  }
+}

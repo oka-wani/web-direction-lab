@@ -195,3 +195,39 @@ export const guideSteps: GuideStep[] = [
 ];
 
 export function getGuideStep(slug: string) { return guideSteps.find((step) => step.slug === slug); }
+
+function normalizeArticleSlug(value: string) {
+  return value
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function getGuideArticleSlug(article: GuideArticle, index: number) {
+  return `${String(index + 1).padStart(2, "0")}-${normalizeArticleSlug(article.title)}`;
+}
+
+export function getGuideArticleHref(step: GuideStep, article: GuideArticle, index: number) {
+  return `/knowledge/${step.slug}/${getGuideArticleSlug(article, index)}`;
+}
+
+export function getAllGuideArticles() {
+  return guideSteps.flatMap((step) => step.articles.map((article, index) => ({
+    step,
+    article,
+    index,
+    slug: getGuideArticleSlug(article, index),
+    href: getGuideArticleHref(step, article, index),
+  })));
+}
+
+export function getGuideArticle(stepSlug: string, articleSlug: string) {
+  let normalizedSlug = articleSlug;
+  try {
+    normalizedSlug = decodeURIComponent(articleSlug);
+  } catch {
+    // Keep the original value when a malformed escape sequence is supplied.
+  }
+  return getAllGuideArticles().find((item) => item.step.slug === stepSlug && item.slug === normalizedSlug);
+}

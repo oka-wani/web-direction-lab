@@ -28,6 +28,12 @@ type Props = {
   related?: Related[];
   nextLabel?: string;
   nextHref?: string;
+  previousLabel?: string;
+  previousHref?: string;
+  parentLabel?: string;
+  parentHref?: string;
+  backLabel?: string;
+  backHref?: string;
 };
 
 function HighlightedBody({ text }: { text: string }) {
@@ -42,7 +48,7 @@ export default function LearningArticle(p: Props) {
     <SiteHeader current="knowledge" />
     <div className="article-shell">
       <article className="article-content">
-        <div className="breadcrumbs"><a href="/">トップ</a><span>›</span><a href={`/knowledge?category=${p.category}`}>{p.category}</a><span>›</span><span>{p.title}</span></div>
+        <div className="breadcrumbs"><a href="/">トップ</a><span>›</span><a href={p.parentHref ?? `/knowledge?category=${p.category}`}>{p.parentLabel ?? p.category}</a><span>›</span><span>{p.title}</span></div>
 
         <header className={`knowledge-article-mv knowledge-article-mv--${p.visual}`} style={heroStyle}>
           <div><span className="category-label">{p.category}</span><h1>{p.title}</h1><p>{p.intro}</p><div className="article-meta"><time>{p.date}</time></div></div>
@@ -64,7 +70,11 @@ export default function LearningArticle(p: Props) {
 
         {p.related && p.related.length > 0 && <section className="related-knowledge" aria-labelledby="related-knowledge-title"><span className="section-kicker" aria-hidden="true">RELATED KNOWLEDGE</span><h2 id="related-knowledge-title">関連ナレッジ</h2><div>{p.related.slice(0, 3).map((item) => <a href={item.href} key={item.href}><small>{item.category}</small><b>{item.title}</b><span>読む →</span></a>)}</div></section>}
 
-        <footer className="article-end-nav"><a className="button button--primary" href="/knowledge">Webナレッジへ戻る</a></footer>
+        <footer className="article-end-nav">
+          {p.previousHref && <a className="button button--secondary" href={p.previousHref}>← {p.previousLabel ?? "前の記事"}</a>}
+          <a className="button button--primary" href={p.backHref ?? "/knowledge"}>{p.backLabel ?? "Webナレッジへ戻る"}</a>
+          {p.nextHref && <a className="button button--secondary" href={p.nextHref}>{p.nextLabel ?? "次の記事"} →</a>}
+        </footer>
       </article>
     </div>
     <SiteFooter />

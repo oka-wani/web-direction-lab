@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { articleItems, categories, matchesCategory } from "./article-data";
-import { getAllGuideArticles } from "../guide/guide-data";
+import { getAllGuideArticles, getGuideArticleCategory } from "../guide/guide-data";
 
 const foundationItems = getAllGuideArticles().map(({ step, article, href, slug }) => ({
   slug: `${step.slug}-${slug}`,
-  category: "基礎知識",
+  category: getGuideArticleCategory(step, article),
   date: `STEP ${step.number}`,
   title: article.title,
   description: article.summary,
@@ -33,10 +33,13 @@ export default function ArticlesList() {
       return () => window.clearTimeout(timer);
     }
   }, []);
-  const shown = useMemo(() => knowledgeItems.filter((article) =>
-    (article.category === "基礎知識" ? category === "すべて" || category === "基礎知識" : matchesCategory(article, category)) &&
-    (article.title + article.description + article.category).toLowerCase().includes(query.toLowerCase())
-  ), [category, query]);
+  const shown = useMemo(() => {
+    const normalizedQuery = query.toLowerCase().replace(/[#＃]/g, "").trim();
+    return knowledgeItems.filter((article) => {
+      const searchableText = [article.title, article.description, article.category, ...(article.tags ?? [])].join(" ").toLowerCase();
+      return matchesCategory(article, category) && searchableText.includes(normalizedQuery);
+    });
+  }, [category, query]);
   return <>
     <div className="article-tools">
       <div className="category-filters" aria-label="カテゴリで絞り込む">{categories.map((item) => <button className={category === item ? "active" : ""} type="button" onClick={() => setCategory(item)} key={item}>{item}</button>)}</div>

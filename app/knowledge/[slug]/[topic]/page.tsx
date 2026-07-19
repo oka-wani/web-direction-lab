@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import LearningArticle from "../../../components/LearningArticle";
 import { getFoundationContent } from "../../../guide/foundation-content";
-import { getAllGuideArticles, getGuideArticle } from "../../../guide/guide-data";
+import { getAllGuideArticles, getGuideArticle, getGuideArticleCategory } from "../../../guide/guide-data";
 
 export const dynamicParams = false;
 
@@ -31,7 +31,7 @@ export default async function FoundationTopicPage({ params }: { params: Promise<
   const content = getFoundationContent(item.step, item.article);
 
   return <LearningArticle
-    category={`基礎知識 STEP ${item.step.number}`}
+    category={getGuideArticleCategory(item.step, item.article)}
     title={item.article.title}
     intro={item.article.summary}
     date="2026.07.20"

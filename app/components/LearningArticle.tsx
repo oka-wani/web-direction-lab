@@ -32,6 +32,7 @@ function HighlightedBody({ text }: { text: string }) {
 }
 
 export default function LearningArticle(p: Props) {
+  const keyPoints = p.highlights?.length ? p.highlights : p.summary ?? [];
   return <main className="article-page knowledge-article-page">
     <SiteHeader current="knowledge" />
     <div className="article-shell">
@@ -42,7 +43,7 @@ export default function LearningArticle(p: Props) {
           <div><span className="category-label">{p.category}</span><h1>{p.title}</h1><p>{p.intro}</p><div className="article-meta"><time>{p.date}</time><span>読了目安 {p.minutes}分</span><span>{p.level || "初級"}</span></div></div>
         </header>
 
-        {p.highlights && p.highlights.length > 0 && <section className="key-highlights knowledge-key-points" aria-labelledby="key-highlights-title"><p className="section-kicker">KEY POINTS</p><h2 id="key-highlights-title">最初に押さえるポイント</h2><ul>{p.highlights.map((item) => <li key={item}><mark>{item}</mark></li>)}</ul></section>}
+        {keyPoints.length > 0 && <section className="key-highlights knowledge-key-points" aria-labelledby="key-highlights-title"><p className="section-kicker">KEY POINTS</p><h2 id="key-highlights-title">最初に押さえるポイント</h2><ul>{keyPoints.map((item) => <li key={item}><mark>{item}</mark></li>)}</ul></section>}
 
         <nav className="toc knowledge-agenda" aria-label="記事のアジェンダ"><p className="section-kicker">AGENDA</p><b>この記事のアジェンダ</b><ol><li><a href="#overview">概要と全体像</a></li>{p.terms && p.terms.length > 0 && <li><a href="#terms">重要用語</a></li>}{p.sections.map((section, index) => <li key={section.title}><a href={`#section-${index + 1}`}>{section.title}</a></li>)}<li><a href="#quiz">理解度チェック</a></li>{p.sources && p.sources.length > 0 && <li><a href="#sources">参考サイト</a></li>}</ol></nav>
 

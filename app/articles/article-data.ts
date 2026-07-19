@@ -12,4 +12,11 @@ export type ArticleItem = {
 };
 
 export const articleItems = items as ArticleItem[];
-export const categories = ["すべて", "SEO", "Web制作", "アクセス解析", "システム", "AI活用", "マーケティング"];
+export const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用"];
+
+export function matchesCategory(article: ArticleItem, category: string) {
+  if (category === "すべて") return true;
+  if (category === "マーケティング・解析") return article.category === "マーケティング" || article.category === "アクセス解析";
+  if (category === "デザイン・UX") return article.slug === "site-improvement" || article.slug === "customer-journey";
+  return article.category === category;
+}

@@ -10,6 +10,8 @@ type ArticleIndexItem = {
   slug: string;
   category: string;
   title: string;
+  description?: string;
+  keywords?: string[];
 };
 
 const nearbyCategories: Record<string, string[]> = {
@@ -23,18 +25,44 @@ const nearbyCategories: Record<string, string[]> = {
   Webディレクション: ["Web制作", "システム", "マーケティング"],
 };
 
-export function getRelatedKnowledge(currentSlug: string, category: string): RelatedKnowledge[] {
+function normalize(value: string) {
+  return value.toLocaleLowerCase("ja").replace(/\s+/g, "").trim();
+}
+
+function keywordScore(currentKeywords: string[], article: ArticleIndexItem) {
+  const haystack = normalize([
+    article.title,
+    article.description ?? "",
+    ...(article.keywords ?? []),
+  ].join(" "));
+
+  return currentKeywords.reduce((score, keyword) => {
+    const normalized = normalize(keyword);
+    if (normalized.length < 2) return score;
+    if ((article.keywords ?? []).some((item) => normalize(item) === normalized)) return score + 600;
+    if (haystack.includes(normalized)) return score + 400;
+    return score;
+  }, 0);
+}
+
+export function getRelatedKnowledge(
+  currentSlug: string,
+  category: string,
+  currentKeywords: string[] = [],
+): RelatedKnowledge[] {
   const neighbors = nearbyCategories[category] ?? [];
 
   return (articles as ArticleIndexItem[])
     .filter((article) => article.slug !== currentSlug)
     .map((article, index) => {
       const neighborIndex = neighbors.indexOf(article.category);
-      const score = article.category === category
-        ? 1000 - index
+      const semanticScore = keywordScore(currentKeywords, article);
+      const categoryScore = article.category === category
+        ? 180
         : neighborIndex >= 0
-          ? 500 - neighborIndex * 50 - index
-          : 0 - index;
+          ? 70 - neighborIndex * 15
+          : 0;
+      const score = semanticScore + categoryScore - index;
       return { article, score };
     })
     .sort((a, b) => b.score - a.score)

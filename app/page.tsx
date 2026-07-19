@@ -4,6 +4,7 @@ import { guideSteps } from "./guide/guide-data";
 import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
 
+// Top page order: column, knowledge, basics, then current news.
 export default function Home() {
   return <main>
     <SiteHeader />

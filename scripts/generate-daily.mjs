@@ -166,6 +166,8 @@ const responseSchema = {
         "impact",
         "action",
         "urgency",
+        "audienceImpact",
+        "selectionReason",
         "sources",
       ],
       properties: {
@@ -179,6 +181,8 @@ const responseSchema = {
         impact: { type: "string" },
         action: { type: "string" },
         urgency: { type: "integer", minimum: 1, maximum: 5 },
+        audienceImpact: { type: "integer", minimum: 1, maximum: 5 },
+        selectionReason: { type: "string" },
         sources: {
           type: "array",
           minItems: 1,
@@ -254,8 +258,13 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - 日本語で書く
 - 実務で使える具体性を優先する
 - ナレッジは既存記事と重複させない
+- ニュース候補を最低5件調査し、影響範囲・実務関連性・鮮度・行動可能性・一次情報の確かさで比較して最も有用な1件だけを出力する
+- Google検索・Search Console・GA4・主要ブラウザ・Web標準・アクセシビリティ・セキュリティ・プライバシー・主要CMS・主要AI/Web制作ツールの変更を優先する
+- ごく一部の事業者だけが対象の募集終了、限定テスト、地域限定機能、軽微な文言変更は原則選ばない
+- 対象読者の多くに影響するか、Webディレクターが顧客へ説明すべき変更を優先する
 - ニュースは原則7日以内の公式な一次情報をWeb検索で確認する
-- 7日以内に重要ニュースがなければ30日以内まで広げる
+- 7日以内に影響度3以上のニュースがなければ30日以内まで広げる
+- audienceImpactには対象読者への影響度を1〜5で、selectionReasonには他候補より優先した理由を書く
 - ニュースの全ソースに公開日とURLを入れる
 - ニュースは一次情報を最低1件含める
 - 検索結果だけで裏付けられない主張を作らない

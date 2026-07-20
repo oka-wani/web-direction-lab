@@ -48,6 +48,7 @@ jobs:
           RUN_DATE: ${{ steps.approved.outputs.run_date }}
           APPROVE_KNOWLEDGE: "true"
           APPROVE_NEWS: "true"
+          APPROVE_COLUMN: "true"
           APPROVED_BY: ${{ github.event.pull_request.merged_by.login }}
 
       - name: Validate approved content and site build

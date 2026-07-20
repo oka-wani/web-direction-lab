@@ -12,10 +12,12 @@ const newsCategories = new Set([
   "AI", "検索・SEO", "アクセス解析・広告", "ブラウザ・Web標準",
   "Web制作・CMS", "クラウド・インフラ", "セキュリティ・プライバシー", "Webサービス",
 ]);
+const columnCategories = new Set(["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"]);
 
 let failures = 0;
 const knowledgeIndex = JSON.parse(await readFile("content/knowledge/articles.json", "utf8"));
 const newsIndex = JSON.parse(await readFile("content/news/news.json", "utf8"));
+const columnIndex = JSON.parse(await readFile("content/column/columns.json", "utf8"));
 
 function isText(value, min = 1) {
   return typeof value === "string" && value.trim().length >= min;
@@ -95,9 +97,9 @@ function validateDailyBundle(value, folder, file) {
 
   const knowledge = value?.knowledge;
   const news = value?.news;
+  const column = value?.column;
   if (!knowledge) errors.push("missing knowledge");
   if (!news) errors.push("missing news");
-  if (!value?.shortVideo) errors.push("missing shortVideo");
   if (!value?.reviewChecklist) errors.push("missing reviewChecklist");
 
   if (knowledge) {
@@ -125,15 +127,23 @@ function validateDailyBundle(value, folder, file) {
     errors.push(...validateNoCollision(news, newsIndex, "news"));
   }
 
-  if (knowledge?.slug === news?.slug) errors.push("knowledge and news slugs must differ");
-  const video = value?.shortVideo;
-  if (video && !["knowledge", "news"].includes(video.sourceKind)) errors.push("invalid short-video source kind");
-  if (video && (!isText(video.hook) || !isText(video.script, 80) || !Array.isArray(video.scenes) || video.scenes.length < 4)) {
-    errors.push("short-video script is incomplete");
+  if (column) {
+    if (!slugPattern.test(column.slug ?? "")) errors.push("invalid column slug");
+    if (!columnCategories.has(column.category)) errors.push("invalid column category");
+    if (!isText(column.title, 8) || !isText(column.summary, 40)) errors.push("column title or summary is too short");
+    if (!isText(column.videoHook, 8) || !isText(column.lead, 80)) errors.push("column hook or lead is too short");
+    if (!Array.isArray(column.sections) || column.sections.length < 3 || column.sections.some((section) => !isText(section?.title) || !isText(section?.body, 200))) {
+      errors.push("column requires at least 3 complete sections");
+    }
+    if (!Array.isArray(column?.seo?.keywords) || column.seo.keywords.length < 3) errors.push("column requires SEO keywords");
+    errors.push(...validateNoCollision(column, columnIndex, "column"));
   }
 
+  if (knowledge?.slug === news?.slug) errors.push("knowledge and news slugs must differ");
+  if (column && [knowledge?.slug, news?.slug].includes(column.slug)) errors.push("column slug must differ from other daily content");
+
   if (folder === "automation/drafts") {
-    if (knowledge?.status !== "draft" || news?.status !== "draft") errors.push("generated content must remain draft");
+    if (knowledge?.status !== "draft" || news?.status !== "draft" || (column && column.status !== "draft")) errors.push("generated content must remain draft");
     for (const key of ["factChecked", "primarySourcesChecked", "duplicateChecked", "seoChecked"]) {
       if (value.reviewChecklist?.[key] !== false) errors.push(`draft reviewChecklist.${key} must be false`);
     }
@@ -146,6 +156,10 @@ function validateDailyBundle(value, folder, file) {
       const expected = kinds?.includes(kind) ? "approved" : "draft";
       if (value?.[kind]?.status !== expected) errors.push(`${kind} status must be ${expected}`);
     }
+    if (value.column) {
+      const expected = kinds?.includes("column") ? "approved" : "draft";
+      if (value.column.status !== expected) errors.push(`column status must be ${expected}`);
+    }
   }
   return errors;
 }
@@ -153,6 +167,7 @@ function validateDailyBundle(value, folder, file) {
 for (const error of [
   ...validateIndex(knowledgeIndex, "content/knowledge/articles.json"),
   ...validateIndex(newsIndex, "content/news/news.json"),
+  ...validateIndex(columnIndex, "content/column/columns.json"),
 ]) {
   failures += 1;
   console.error(error);

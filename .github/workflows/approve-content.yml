@@ -17,6 +17,11 @@ on:
         required: true
         default: false
         type: boolean
+      publish_column:
+        description: "Approve the Web column"
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -46,6 +51,7 @@ jobs:
           RUN_DATE: ${{ inputs.run_date }}
           APPROVE_KNOWLEDGE: ${{ inputs.publish_knowledge }}
           APPROVE_NEWS: ${{ inputs.publish_news }}
+          APPROVE_COLUMN: ${{ inputs.publish_column }}
           APPROVED_BY: ${{ github.actor }}
 
       - name: Validate approved content and site build

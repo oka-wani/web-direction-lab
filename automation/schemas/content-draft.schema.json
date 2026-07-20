@@ -3,12 +3,12 @@
   "title": "Web Direction Lab daily content bundle",
   "type": "object",
   "additionalProperties": true,
-  "required": ["runDate", "knowledge", "news", "shortVideo", "reviewChecklist"],
+  "required": ["runDate", "knowledge", "news", "column", "reviewChecklist"],
   "properties": {
     "runDate": { "type": "string", "format": "date" },
     "knowledge": { "$ref": "#/$defs/knowledge" },
     "news": { "$ref": "#/$defs/news" },
-    "shortVideo": { "$ref": "#/$defs/shortVideo" },
+    "column": { "$ref": "#/$defs/column" },
     "reviewChecklist": { "$ref": "#/$defs/reviewChecklist" },
     "generatedAt": { "type": "string", "format": "date-time" },
     "model": { "type": "string" },
@@ -126,30 +126,42 @@
         "sources": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "$ref": "#/$defs/source" } }
       }
     },
-    "shortVideo": {
+    "column": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["sourceKind", "reason", "hook", "script", "scenes", "cta"],
+      "required": ["kind", "status", "title", "slug", "category", "summary", "videoHook", "lead", "sections", "seo"],
       "properties": {
-        "sourceKind": { "enum": ["knowledge", "news"] },
-        "reason": { "type": "string" },
-        "hook": { "type": "string" },
-        "script": { "type": "string" },
-        "scenes": {
+        "kind": { "const": "column" },
+        "status": { "enum": ["draft", "approved", "published"] },
+        "title": { "type": "string", "minLength": 8 },
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "category": { "enum": ["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"] },
+        "summary": { "type": "string", "minLength": 40 },
+        "videoHook": { "type": "string", "minLength": 8 },
+        "lead": { "type": "string", "minLength": 80 },
+        "sections": {
           "type": "array",
-          "minItems": 4,
-          "maxItems": 7,
+          "minItems": 3,
+          "maxItems": 5,
           "items": {
             "type": "object",
-            "required": ["seconds", "narration", "visual"],
+            "additionalProperties": false,
+            "required": ["title", "body"],
             "properties": {
-              "seconds": { "type": "string" },
-              "narration": { "type": "string" },
-              "visual": { "type": "string" }
+              "title": { "type": "string" },
+              "body": { "type": "string", "minLength": 200 }
             }
           }
         },
-        "cta": { "type": "string" }
+        "seo": {
+          "type": "object",
+          "required": ["metaTitle", "metaDescription", "keywords"],
+          "properties": {
+            "metaTitle": { "type": "string" },
+            "metaDescription": { "type": "string" },
+            "keywords": { "type": "array", "minItems": 3, "maxItems": 8, "items": { "type": "string" } }
+          }
+        }
       }
     },
     "reviewChecklist": {

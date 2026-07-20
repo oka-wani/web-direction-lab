@@ -12,9 +12,10 @@ const runDate =
 
 const requestKnowledge = process.env.APPROVE_KNOWLEDGE === "true";
 const requestNews = process.env.APPROVE_NEWS === "true";
+const requestColumn = process.env.APPROVE_COLUMN === "true";
 const approvedBy = process.env.APPROVED_BY || "github-actions";
 
-if (!requestKnowledge && !requestNews) throw new Error("Select knowledge, news, or both for approval.");
+if (!requestKnowledge && !requestNews && !requestColumn) throw new Error("Select knowledge, news, column, or a combination for approval.");
 
 const draftPath = join("automation/drafts", `daily-${runDate}.json`);
 const draft = JSON.parse(await readFile(draftPath, "utf8"));
@@ -36,8 +37,9 @@ const previousPublication = await readJsonIfPresent(publicationPath);
 const approvedKinds = [...new Set(previousApproval?.approval?.approvedKinds ?? [])];
 const approveKnowledge = requestKnowledge && !approvedKinds.includes("knowledge");
 const approveNews = requestNews && !approvedKinds.includes("news");
+const approveColumn = requestColumn && !approvedKinds.includes("column");
 
-if (!approveKnowledge && !approveNews) {
+if (!approveKnowledge && !approveNews && !approveColumn) {
   console.log(`Requested content for ${runDate} is already published.`);
   process.exit(0);
 }
@@ -116,6 +118,29 @@ if (approveNews) {
   approvedKinds.push("news");
 }
 
+if (approveColumn) {
+  if (!draft.column) throw new Error(`Draft for ${runDate} does not contain a column.`);
+  const indexPath = "content/column/columns.json";
+  const index = JSON.parse(await readFile(indexPath, "utf8"));
+  assertNoCollision(index, draft.column, "Column");
+  const image = {
+    "Webの仕事術": "/images/column/web-system-learning.webp",
+    "AI活用": "/images/column/ai-human-judgement.webp",
+    "サイト改善": "/images/column/news-to-action.webp",
+    "キャリア・学習": "/images/column/web-system-learning.webp",
+  }[draft.column.category] || "/images/column/web-system-learning.webp";
+  const post = {
+    ...draft.column,
+    status: "published",
+    date: runDate.replaceAll("-", "."),
+    image,
+    publishedAt: approvedAt,
+    approvedBy,
+  };
+  await writeFile(indexPath, `${JSON.stringify([post, ...index.filter((entry) => entry.slug !== post.slug)], null, 2)}\n`, "utf8");
+  approvedKinds.push("column");
+}
+
 const approved = structuredClone(draft);
 approved.reviewChecklist = {
   factChecked: true,
@@ -127,6 +152,7 @@ approved.reviewChecklist = {
 approved.approval = {approvedKinds, approvedAt, approvedBy};
 if (approvedKinds.includes("knowledge")) approved.knowledge.status = "approved";
 if (approvedKinds.includes("news")) approved.news.status = "approved";
+if (approvedKinds.includes("column") && approved.column) approved.column.status = "approved";
 
 await mkdir("automation/approved", { recursive: true });
 await writeFile(approvalPath, `${JSON.stringify(approved, null, 2)}\n`, "utf8");
@@ -140,10 +166,8 @@ const published = {
   urls: {
     knowledge: approvedKinds.includes("knowledge") ? `/articles/${draft.knowledge.slug}` : null,
     news: approvedKinds.includes("news") ? `/news/${draft.news.slug}` : null,
+    column: approvedKinds.includes("column") ? `/column/${draft.column.slug}` : null,
   },
-  shortVideo: approvedKinds.includes(draft.shortVideo.sourceKind)
-    ? draft.shortVideo
-    : null,
 };
 await mkdir("automation/published", { recursive: true });
 await writeFile(publicationPath, `${JSON.stringify(published, null, 2)}\n`, "utf8");

@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const apiKey = process.env.OPENAI_API_KEY;
@@ -11,32 +11,6 @@ const jstDate = process.env.RUN_DATE || new Intl.DateTimeFormat("sv-SE", {
   month: "2-digit",
   day: "2-digit",
 }).format(now);
-const videoSeries = Math.floor(Date.parse(`${jstDate}T00:00:00+09:00`) / 86_400_000) % 2 === 0
-  ? "効率化"
-  : "行動経済";
-
-const knowledgeIndex = JSON.parse(
-  await readFile("content/knowledge/articles.json", "utf8"),
-);
-const newsIndex = JSON.parse(await readFile("content/news/news.json", "utf8"));
-const existingTitles = [...knowledgeIndex, ...newsIndex]
-  .map((item) => `${item.title}（slug: ${item.slug}）`)
-  .join("\n- ");
-
-let recentNews = [];
-try {
-  const files = (await readdir("automation/drafts"))
-    .filter((file) => /^daily-\d{4}-\d{2}-\d{2}\.json$/.test(file))
-    .sort()
-    .reverse()
-    .slice(0, 14);
-  recentNews = (await Promise.all(files.map(async (file) => {
-    const draft = JSON.parse(await readFile(join("automation/drafts", file), "utf8"));
-    return draft.news ? `${draft.runDate}: ${draft.news.category} / ${draft.news.serviceName ?? "サービス不明"} / ${draft.news.title}` : null;
-  }))).filter(Boolean);
-} catch {
-  recentNews = [];
-}
 
 const sourceSchema = {
   type: "object",
@@ -117,7 +91,7 @@ const responseSchema = {
     "runDate",
     "knowledge",
     "news",
-    "shortVideo",
+    "column",
     "reviewChecklist",
   ],
   properties: {
@@ -266,38 +240,46 @@ const responseSchema = {
         },
       },
     },
-    shortVideo: {
+    column: {
       type: "object",
       additionalProperties: false,
       required: [
-        "sourceKind",
-        "reason",
-        "hook",
-        "script",
-        "scenes",
-        "cta",
+        "kind", "status", "title", "slug", "category", "summary",
+        "videoHook", "lead", "sections", "seo",
       ],
       properties: {
-        sourceKind: { type: "string", enum: ["knowledge", "news"] },
-        reason: { type: "string" },
-        hook: { type: "string" },
-        script: { type: "string" },
-        scenes: {
+        kind: { type: "string", enum: ["column"] },
+        status: { type: "string", enum: ["draft"] },
+        title: { type: "string" },
+        slug: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        category: { type: "string", enum: ["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"] },
+        summary: { type: "string" },
+        videoHook: { type: "string" },
+        lead: { type: "string" },
+        sections: {
           type: "array",
-          minItems: 4,
-          maxItems: 7,
+          minItems: 3,
+          maxItems: 5,
           items: {
             type: "object",
             additionalProperties: false,
-            required: ["seconds", "narration", "visual"],
+            required: ["title", "body"],
             properties: {
-              seconds: { type: "string" },
-              narration: { type: "string" },
-              visual: { type: "string" },
+              title: { type: "string" },
+              body: { type: "string" },
             },
           },
         },
-        cta: { type: "string" },
+        seo: {
+          type: "object",
+          additionalProperties: false,
+          required: ["metaTitle", "metaDescription", "keywords"],
+          properties: {
+            metaTitle: { type: "string" },
+            metaDescription: { type: "string" },
+            keywords: { type: "array", minItems: 3, maxItems: 8, items: { type: "string" } },
+          },
+        },
       },
     },
     reviewChecklist: {
@@ -327,7 +309,7 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 成果物:
 - 長く役立つナレッジ記事の下書き1件
 - 最新のWebニュース記事の下書き1件
-- ${videoSeries}を題材にした30〜60秒ショート動画台本
+- Webの仕事に関心を持つきっかけになるコラムの下書き1件
 
 必須条件:
 - 日本語で書く
@@ -366,21 +348,14 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - 検索結果だけで裏付けられない主張を作らない
 - 確認できない内容は断定しない
 - SEOタイトルは誇張や煽りを避ける
-- 今日の動画シリーズは「${videoSeries}」。万人が仕事や日常で試せる題材にし、専門的すぎる題材は避ける
-- 効率化の日は、段取り、集中、時間管理、タスク分解、意思決定など、すぐ試せる工夫を扱う
-- 行動経済の日は、先延ばし、選択疲れ、損失回避、現在バイアスなどを身近な例で扱う
-- shortVideo.sourceKindには、動画テーマにより近い方のknowledgeまたはnewsを指定する。ただし台本は記事の要約に限定せず、今日のシリーズを優先する
-- 冒頭3秒で意外性のある問いまたは結論を示し、1動画1メッセージに絞る
-- ナレーションはAI男性音声を少し速めに読む前提で、難読語や長すぎる一文を避ける
-- 出力は下書きであり、人間の承認前に公開しない`;
+- コラムは「Webの仕事術」「AI活用」「サイト改善」「キャリア・学習」のいずれかにする
+- コラムは専門用語の辞書解説ではなく、Webの現場で起きる悩み、判断、失敗、変化を入口にする
+- コラムのタイトルとvideoHookは興味を引くが、内容以上に煽らず、読後に実務上の気づきが残るものにする
+- コラム本文は3〜5セクション、合計1,800〜3,000文字程度とし、具体例と読者が取れる行動を含める
+- コラムは既存のナレッジ・ニュース・コラムと同じ結論や題材を繰り返さない
+- この出力は自動検証後に公開されるため、確認できない事実・数値・体験談を作らず、断定を避ける`;
 
 const userPrompt = `実行日（日本時間）: ${jstDate}
-
-既存タイトル:
-- ${existingTitles}
-
-直近14日間のニュース（同じ領域・サービスの連続を避ける）:
-- ${recentNews.length ? recentNews.join("\n- ") : "なし"}
 
 SEO、Web制作、アクセス解析、システム、AI活用、マーケティング、UX、Webディレクションの範囲から、今日の下書きを作成してください。`;
 

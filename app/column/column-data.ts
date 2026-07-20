@@ -1,3 +1,5 @@
+import columns from "../../content/column/columns.json";
+
 export type ColumnItem = {
   slug: string;
   category: string;
@@ -10,6 +12,6 @@ export type ColumnItem = {
   sections: { title: string; body: string }[];
 };
 
-export const columnItems: ColumnItem[] = [];
+export const columnItems = columns as ColumnItem[];
 
 export function getColumn(slug: string) { return columnItems.find((item) => item.slug === slug); }

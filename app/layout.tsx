@@ -14,14 +14,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://web-direction-lab.vercel.app"),
   title: "Web Direction Lab｜Webディレクター・Webコンサルを目指す人の学習メディア",
   description: "Webディレクター・Webコンサルを目指す人が、Web制作・SEO・システム・アクセス解析・AI活用を実務目線で学べるメディアです。",
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    url: "/",
+    siteName: "Web Direction Lab",
+    title: "Web Direction Lab｜Webディレクター・Webコンサルを目指す人の学習メディア",
+    description: "Web制作・SEO・システム・アクセス解析・AI活用を実務目線で学べるメディアです。",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Web Direction Lab" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Web Direction Lab",
+    description: "Web制作・SEO・システム・アクセス解析・AI活用を実務目線で学べるメディアです。",
+    images: ["/twitter-image.png"],
+  },
   other: {
     "codex-preview": "development",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
   },
 };
 

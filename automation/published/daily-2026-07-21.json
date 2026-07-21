@@ -1,0 +1,16 @@
+{
+  "runDate": "2026-07-21",
+  "publishedAt": "2026-07-21T00:18:03.575Z",
+  "updatedAt": "2026-07-21T00:18:03.575Z",
+  "publishedBy": "web-direction-lab-bot",
+  "publishedKinds": [
+    "knowledge",
+    "news",
+    "column"
+  ],
+  "urls": {
+    "knowledge": "/articles/http-cache-control-practical-guide",
+    "news": "/news/wordpress-7-0-2-security-release",
+    "column": "/column/web-director-say-i-dont-know"
+  }
+}

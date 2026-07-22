@@ -10,8 +10,7 @@ export default function HomeKnowledgeTabs() {
   return <>
     <div className="category-filters home-knowledge-tabs" aria-label="ナレッジカテゴリを切り替える">{categories.map((item) => <button type="button" className={category === item ? "active" : ""} onClick={() => setCategory(item)} key={item}>{item}</button>)}</div>
     <div className="archive-grid home-archive-grid">{shown.map((article) => <article className="archive-card" key={article.slug}>
-      <a className="archive-visual archive-visual--image" href={`/articles/${article.slug}`} aria-label={`${article.title}を読む`} style={{ backgroundImage:`url(${article.image ?? "/images/web-knowledge-hero-v2.webp"})` }}><span>{article.category}</span></a>
-      <div className="archive-body"><div className="archive-meta"><time>{article.date}</time></div><h3><a href={`/articles/${article.slug}`}>{article.title}</a></h3><p>{article.description}</p><ul className="archive-tags" aria-label="記事内の主な用語">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link" href={`/articles/${article.slug}`}>この記事を読む <span>→</span></a></div>
+      <div className="archive-body"><h3><a href={`/articles/${article.slug}`}>{article.title}</a></h3><p>{article.description}</p><ul className="archive-tags" aria-label="記事内の用語集">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link" href={`/articles/${article.slug}`}>この記事を読む <span>→</span></a></div>
     </article>)}</div>
     {shown.length === 0 && <p className="home-empty">このカテゴリの記事は準備中です。</p>}
   </>;

@@ -3,7 +3,7 @@
   "status": "published",
   "title": "WordPress 7.0.2が公開、重大な脆弱性2件を修正し強制自動更新を実施",
   "slug": "wordpress-7-0-2-security-release",
-  "category": "セキュリティ・プライバシー",
+  "category": "システム",
   "serviceName": "WordPress",
   "summary": "WordPress.orgは2026年7月17日、重大度の高い脆弱性2件を修正したWordPress 7.0.2を公開しました。影響を受ける一部バージョンにはバックポート版も提供され、公式チームは直ちに更新するよう推奨しています。",
   "quickSummary": [

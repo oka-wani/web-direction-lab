@@ -3,17 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { articleItems, categories, matchesCategory } from "./article-data";
 import { getAllGuideArticles, getGuideArticleCategory } from "../guide/guide-data";
+import { getFoundationGlossaryTerms } from "../guide/foundation-content";
 
 const foundationItems = getAllGuideArticles().map(({ step, article, href, slug }) => ({
   slug: `${step.slug}-${slug}`,
   category: getGuideArticleCategory(step, article),
-  date: `STEP ${step.number}`,
+  date: "",
   title: article.title,
   description: article.summary,
   level: "基礎",
   minutes: 6,
   image: "/images/web-guide-hero.webp",
-  tags: [step.title],
+  tags: getFoundationGlossaryTerms(step.slug).map(({ term }) => term),
   type: "website" as const,
   href,
 }));
@@ -49,8 +50,7 @@ export default function ArticlesList() {
     </div>
     <p className="result-count"><b>{shown.length}</b> 件のナレッジ</p>
     <div className="archive-grid">{visibleItems.map((article) => <article className="archive-card" key={article.slug}>
-      <a className="archive-visual archive-visual--image" href={article.href} aria-label={`${article.title}を読む`} style={{ backgroundImage:`url(${article.image ?? "/images/web-knowledge-hero-v2.webp"})` }}><span>{article.category}</span></a>
-      <div className="archive-body"><div className="archive-meta"><span>{article.date}</span></div><h2><a href={article.href}>{article.title}</a></h2><p>{article.description}</p><ul className="archive-tags" aria-label="記事内の主な用語">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link" href={article.href}>この記事を読む <span>→</span></a></div>
+      <div className="archive-body"><h2><a href={article.href}>{article.title}</a></h2><p>{article.description}</p><ul className="archive-tags" aria-label="記事内の用語集">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link" href={article.href}>この記事を読む <span>→</span></a></div>
     </article>)}</div>
     {visibleCount < shown.length && <button className="load-more-button" type="button" onClick={() => setVisibleCount((count) => count + 9)}>もっと見る <span>＋9件</span></button>}
     {shown.length === 0 && <div className="empty-state"><b>該当する記事がありません</b><p>別のキーワードまたはカテゴリでお試しください。</p></div>}

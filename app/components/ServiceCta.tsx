@@ -7,22 +7,22 @@ type Props = {
 function selectCta(category = "", title = "") {
   const text = `${category} ${title}`.toLowerCase();
   if (/seo|検索|title|core web vitals|lcp|インデックス|クロール/.test(text)) return {
-    label: "SEO・検索流入について相談",
-    title: "検索流入が伸びない理由を、一緒に整理しませんか？",
-    body: "技術設定だけでなく、検索意図・サイト構造・コンテンツまで確認します。",
-    href: "/services/seo-improvement",
+    label: "サイト診断について見る",
+    title: "検索やサイト構造の課題を、診断から整理します。",
+    body: "検索設定だけに限定せず、導線・コンテンツ・技術品質を含めて改善点を確認します。",
+    href: "/services/website-diagnosis",
   };
   if (/cms|movable|wordpress|webrelease|microcms|運用/.test(text)) return {
-    label: "CMS・運用について相談",
-    title: "更新しやすいCMSと運用フローを整理します。",
-    body: "CMS選定、コンテンツ構造、権限、承認・公開フローまで実務に合わせて設計します。",
-    href: "/services/cms-support",
+    label: "進行支援について見る",
+    title: "CMSを含む制作・リニューアルの進行を支援します。",
+    body: "要件整理、制作会社への指示、検品、公開までの確認事項を整理します。",
+    href: "/services/project-support",
   };
   if (/ai|chatgpt|自動|効率|仕事術/.test(text)) return {
-    label: "AI活用について相談",
-    title: "AIを、実際の業務で使える仕組みに。",
-    body: "業務を分解し、AIへ任せる範囲と人が確認する範囲を整理します。",
-    href: "/services/ai-support",
+    label: "サイト診断について見る",
+    title: "Webの課題を、まずは診断から整理します。",
+    body: "現在のサイトとお悩みを確認し、優先して着手する改善点をまとめます。",
+    href: "/services/website-diagnosis",
   };
   if (/アクセシビリティ|ui|ux|導線|デザイン|フォーム|改善/.test(text)) return {
     label: "Webサイト改善について相談",
@@ -31,7 +31,7 @@ function selectCta(category = "", title = "") {
     href: "/services/website-improvement",
   };
   return {
-    label: "Webサイト簡易診断",
+    label: "Webサイト診断・改善提案",
     title: "何から改善すべきか分からない方へ。",
     body: "サイトURLとお悩みをもとに、優先して確認したいポイントを整理します。",
     href: "/services/website-diagnosis",

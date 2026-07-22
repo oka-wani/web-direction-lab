@@ -78,7 +78,7 @@
                 "type": "object",
                 "required": ["term", "description"],
                 "properties": {
-                  "term": { "type": "string" },
+                  "term": { "type": "string", "minLength": 1, "maxLength": 30 },
                   "description": { "type": "string" }
                 }
               }
@@ -112,7 +112,7 @@
         "status": { "enum": ["draft", "approved", "published"] },
         "title": { "type": "string", "minLength": 8 },
         "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        "category": { "enum": ["AI", "検索・SEO", "アクセス解析・広告", "ブラウザ・Web標準", "Web制作・CMS", "クラウド・インフラ", "セキュリティ・プライバシー", "Webサービス"] },
+        "category": { "enum": ["SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他"] },
         "serviceName": { "type": "string" },
         "summary": { "type": "string", "minLength": 40 },
         "quickSummary": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "type": "string" } },
@@ -135,7 +135,7 @@
         "status": { "enum": ["draft", "approved", "published"] },
         "title": { "type": "string", "minLength": 8 },
         "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        "category": { "enum": ["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"] },
+        "category": { "enum": ["仕事術", "Web改善"] },
         "summary": { "type": "string", "minLength": 40 },
         "videoHook": { "type": "string", "minLength": 8 },
         "lead": { "type": "string", "minLength": 80 },

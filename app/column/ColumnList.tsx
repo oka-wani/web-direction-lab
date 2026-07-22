@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { columnItems } from "./column-data";
 
-const columnCategories = ["すべて", "Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"];
+const columnCategories = ["すべて", "仕事術", "Web改善"];
 
 export default function ColumnList() {
   const [category, setCategory] = useState("すべて");

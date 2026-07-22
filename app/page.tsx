@@ -26,11 +26,11 @@ export default function Home() {
 
     <section className="simple-home-section simple-home-knowledge">
       <header><div><span>KNOWLEDGE</span><h2>ナレッジ</h2><p>Web制作や運用で必要になる知識を、実務で使える形で解説します。</p></div><a href="/knowledge">すべて見る →</a></header>
-      <div className="simple-knowledge-grid">{articleItems.slice(0, 3).map((item) => <a href={`/articles/${item.slug}`} key={item.slug}><div><span>{item.category}</span><time>{item.date}</time></div><h3>{item.title}</h3><p>{item.description}</p><ul aria-label="主な用語">{(item.tags ?? []).slice(0, 3).map((tag) => <li key={tag}>#{tag}</li>)}</ul><b>この記事を読む →</b></a>)}</div>
+      <div className="simple-knowledge-grid">{articleItems.slice(0, 3).map((item) => <a href={`/articles/${item.slug}`} key={item.slug}><h3>{item.title}</h3><p>{item.description}</p><ul aria-label="記事内の用語集">{(item.tags ?? []).slice(0, 3).map((tag) => <li key={tag}>#{tag}</li>)}</ul><b>この記事を読む →</b></a>)}</div>
     </section>
 
     <section className="simple-home-section">
-      <header><div><span>COLUMN</span><h2>コラム</h2><p>Web担当者の仕事、AI活用、業務改善について、実践の視点で考えます。</p></div><a href="/column">すべて見る →</a></header>
+      <header><div><span>COLUMN</span><h2>コラム</h2><p>仕事術とWeb改善の気になる疑問を、動画でも伝わる切り口で掘り下げます。</p></div><a href="/column">すべて見る →</a></header>
       <div className="simple-column-grid">{columnItems.slice(0, 3).map((item) => <a href={`/column/${item.slug}`} key={item.slug}><div style={{ backgroundImage: `url(${item.image})` }} /><small>{item.category}　{item.date}</small><h3>{item.title}</h3><p>{item.summary}</p><b>読む →</b></a>)}</div>
     </section>
 

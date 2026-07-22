@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-export const metadata: Metadata = { title: "制作・改善事例｜Web Direction Lab", description: "Web Direction Labの制作・改善事例を、課題、対応、結果が分かる形で掲載します。" };
+export const metadata: Metadata = { title: "制作・改善事例｜Web Growth Lab", description: "Web Growth Labの制作・改善事例を、課題、対応、結果が分かる形で掲載します。" };
 
 export default function CasesPage() {
   return <main className="platform-page"><SiteHeader current="cases" />
@@ -10,4 +10,3 @@ export default function CasesPage() {
     <SiteFooter />
   </main>;
 }
-

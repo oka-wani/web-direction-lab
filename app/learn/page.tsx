@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 export const metadata: Metadata = {
-  title: "学ぶ｜Web Direction Lab",
+  title: "学ぶ｜Web Growth Lab",
   description: "Webガイド、ナレッジ、コラム、ニュースから、Web制作・SEO・AI・業務改善を目的に合わせて学べます。",
 };
 
@@ -21,4 +21,3 @@ export default function LearnPage() {
     <SiteFooter />
   </main>;
 }
-

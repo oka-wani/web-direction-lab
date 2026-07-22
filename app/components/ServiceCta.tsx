@@ -41,7 +41,7 @@ function selectCta(category = "", title = "") {
 export default function ServiceCta({ category, title, compact = false }: Props) {
   const cta = selectCta(category, title);
   return <aside className={`service-cta${compact ? " service-cta--compact" : ""}`} aria-label="関連サービス">
-    <div><span>WDL SERVICE</span><h2>{cta.title}</h2><p>{cta.body}</p></div>
+    <div><span>WGL SERVICE</span><h2>{cta.title}</h2><p>{cta.body}</p></div>
     <div className="service-cta-actions"><a className="button button--primary" href={cta.href}>{cta.label} <b>→</b></a><a className="service-cta-link" href="/contact">まずは相談する</a></div>
   </aside>;
 }

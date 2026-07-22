@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import { faqs } from "../platform-data";
 
-export const metadata: Metadata = { title: "よくある質問｜Web Direction Lab", description: "Webサイト診断・改善・制作・運用のご相談に関するよくある質問をまとめています。" };
+export const metadata: Metadata = { title: "よくある質問｜Web Growth Lab", description: "Webサイト診断・改善・制作・運用のご相談に関するよくある質問をまとめています。" };
 
 export default function FaqPage() {
   return <main className="platform-page"><SiteHeader />
@@ -12,4 +12,3 @@ export default function FaqPage() {
     <SiteFooter />
   </main>;
 }
-

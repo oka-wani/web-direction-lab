@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import InquiryForm from "./InquiryForm";
 
-export const metadata: Metadata = { title: "お問い合わせ｜Web Direction Lab", description: "Webサイト診断、改善、SEO、CMS、AI導入、制作・運用についてご相談ください。" };
+export const metadata: Metadata = { title: "お問い合わせ｜Web Growth Lab", description: "Webサイト診断、改善、SEO、CMS、AI導入、制作・運用についてご相談ください。" };
 
 export default function ContactPage() {
   return <main className="platform-page"><SiteHeader current="contact" />

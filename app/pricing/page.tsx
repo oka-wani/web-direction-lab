@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import { services } from "../platform-data";
 
-export const metadata: Metadata = { title: "料金｜Web Direction Lab", description: "Web Direction Labの簡易診断、改善提案、制作・運用支援の料金目安をご案内します。" };
+export const metadata: Metadata = { title: "料金｜Web Growth Lab", description: "Web Growth Labの簡易診断、改善提案、制作・運用支援の料金目安をご案内します。" };
 
 export default function PricingPage() {
   return <main className="platform-page"><SiteHeader current="pricing" />
@@ -12,4 +12,3 @@ export default function PricingPage() {
     <SiteFooter />
   </main>;
 }
-

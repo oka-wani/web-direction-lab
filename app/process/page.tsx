@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-export const metadata: Metadata = { title: "制作・改善の進め方｜Web Direction Lab", description: "お問い合わせからヒアリング、診断、提案、制作、公開、運用までの進め方をご案内します。" };
+export const metadata: Metadata = { title: "制作・改善の進め方｜Web Growth Lab", description: "お問い合わせからヒアリング、診断、提案、制作、公開、運用までの進め方をご案内します。" };
 
 const steps = [
   { number: "01", title: "お問い合わせ", text: "対象サイト、現在のお悩み、希望する支援内容をお送りください。" },
@@ -21,4 +21,3 @@ export default function ProcessPage() {
     <SiteFooter />
   </main>;
 }
-

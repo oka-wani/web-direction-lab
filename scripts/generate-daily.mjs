@@ -303,7 +303,7 @@ const responseSchema = {
   },
 };
 
-const developerPrompt = `あなたはWeb Direction Labの編集者です。
+const developerPrompt = `あなたはWeb Growth Labの編集者です。
 対象読者は、Webディレクター・Webコンサルを目指す20〜40代です。
 
 成果物:

@@ -3,7 +3,7 @@ import ArticlesList from "../articles/ArticlesList";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import { guideSteps } from "../guide/guide-data";
 
-export const metadata: Metadata = { title:"Webナレッジ｜Web Direction Lab", description:"Webの仕組み、制作、サーバー、SEO、解析、マーケティング、AI活用を、基礎から実務まで体系的に学べます。" };
+export const metadata: Metadata = { title:"Webナレッジ｜Web Growth Lab", description:"Webの仕組み、制作、サーバー、SEO、解析、マーケティング、AI活用を、基礎から実務まで体系的に学べます。" };
 
 export default function KnowledgePage() {
   return <main className="knowledge-hub"><SiteHeader current="knowledge" />

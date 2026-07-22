@@ -3,7 +3,7 @@ import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import { tools } from "../platform-data";
 
 export const metadata: Metadata = {
-  title: "ツール・テンプレート｜Web Direction Lab",
+  title: "ツール・テンプレート｜Web Growth Lab",
   description: "Web担当者の確認・制作・改善を支える無料ツール、テンプレート、AIプロンプトを提供します。",
 };
 
@@ -15,4 +15,3 @@ export default function ToolsPage() {
     <SiteFooter />
   </main>;
 }
-

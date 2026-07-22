@@ -17,7 +17,7 @@ export function SiteHeader({ current }: { current?: Current }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return <header className="site-header">
-    <a className="logo" href="/" aria-label="Web Direction Lab トップ" onClick={() => setMenuOpen(false)}>Web Direction <span>Lab</span></a>
+    <a className="logo" href="/" aria-label="Web Growth Lab トップ" onClick={() => setMenuOpen(false)}>Web Growth <span>Lab</span></a>
     <button className="nav-toggle" type="button" aria-controls="site-navigation" aria-expanded={menuOpen} aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"} onClick={() => setMenuOpen((open) => !open)}>
       <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
     </button>
@@ -33,13 +33,13 @@ export function SiteHeader({ current }: { current?: Current }) {
 
 export function SiteFooter() {
   return <footer className="site-footer">
-    <div className="footer-brand"><a className="logo" href="/">Web Direction <span>Lab</span></a><p>Webで成果を出すための知識・ツール・サービスを提供するプラットフォーム。</p></div>
+    <div className="footer-brand"><a className="logo" href="/">Web Growth <span>Lab</span></a><p>Webの知識と仕組みで、成果を育てる。実務に役立つ情報と改善支援を届けます。</p></div>
     <div className="footer-nav-groups">
       <nav aria-label="コンテンツ"><b>コンテンツ</b><a href="/knowledge">ナレッジ</a><a href="/column">コラム</a><a href="/news">ニュース</a></nav>
       <nav aria-label="サービス"><b>サービス</b><a href="/services">サービス・料金・ツール</a><a href="/cases">改善事例</a><a href="/contact">お問い合わせ</a></nav>
-      <nav aria-label="WDL"><b>WDL</b><a href="/about">このサイトについて</a><a href="/faq">よくある質問</a><a href="/process">進め方</a></nav>
+      <nav aria-label="WGL"><b>WGL</b><a href="/about">このサイトについて</a><a href="/faq">よくある質問</a><a href="/process">進め方</a></nav>
     </div>
     <div className="footer-policy"><a href="/about#editorial">記事作成・編集方針</a><a href="/about#privacy">プライバシーポリシー</a></div>
-    <small>© 2026 Web Direction Lab</small>
+    <small>© 2026 Web Growth Lab</small>
   </footer>;
 }

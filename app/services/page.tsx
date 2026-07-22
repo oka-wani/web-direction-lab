@@ -3,7 +3,7 @@ import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import { services, tools } from "../platform-data";
 
 export const metadata: Metadata = {
-  title: "サービス｜Web Direction Lab",
+  title: "サービス｜Web Growth Lab",
   description: "Webサイト改善・制作・運用支援のサービス、料金目安、実務ツールをまとめてご案内します。",
 };
 

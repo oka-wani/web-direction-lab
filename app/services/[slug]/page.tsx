@@ -11,7 +11,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const service = getService((await params).slug);
-  return service ? { title: `${service.title}｜Web Direction Lab`, description: service.summary } : {};
+  return service ? { title: `${service.title}｜Web Growth Lab`, description: service.summary } : {};
 }
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -27,4 +27,3 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     <SiteFooter />
   </main>;
 }
-

@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug, topic } = await params;
   const item = getGuideArticle(slug, topic);
   return item ? {
-    title:`${item.article.title}｜${item.step.title}｜Web Direction Lab`,
+    title:`${item.article.title}｜${item.step.title}｜Web Growth Lab`,
     description:item.article.summary,
   } : {};
 }

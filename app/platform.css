@@ -190,3 +190,10 @@ footer.site-footer .footer-nav-groups nav{grid-area:auto;min-width:0}
   .mv-concept-label{align-items:flex-start;flex-direction:column;gap:3px}.mv-concept-label small{text-align:left;font-size:10px}
   .mv-concept--white-editorial,.mv-concept--white-split,.mv-concept--white-orbit{grid-template-columns:1fr}.mv-concept--white-split:before{inset:58% 0 0 8%}.mv-concept--white-editorial .mv-concept-art{border-left:0;border-top:1px solid var(--navy)}
 }
+
+/* 2026-07-23: adopted TOP MV white B-01 */
+.button--navy{min-width:250px;color:#fff;background:var(--navy);border:1.5px solid var(--navy)}
+.button--navy:hover{color:#fff;background:#173958;border-color:#173958}
+.simple-home-hero--white-grid:before{display:none}
+.simple-home-brand-visual{z-index:1;width:100%;max-width:none!important}
+@media(max-width:720px){.simple-home-brand-visual{min-height:360px}}

@@ -4,6 +4,21 @@ import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
 import { services } from "./platform-data";
 
+function HeroPageLayer({ className = "" }: { className?: string }) {
+  return <div className={`brand-page ${className}`}><span className="brand-page-bar"><i /><i /><i /></span><b /><em /><em /><div><i /><i /></div></div>;
+}
+
+function HeroBrandVisual() {
+  return <div className="brand-visual brand-visual--layers simple-home-brand-visual" aria-hidden="true">
+    <HeroPageLayer className="brand-page--back" />
+    <HeroPageLayer className="brand-page--middle" />
+    <HeroPageLayer className="brand-page--front" />
+    <span className="brand-route brand-route--one" /><span className="brand-route brand-route--two" />
+    <i className="brand-route-dot brand-route-dot--one" /><i className="brand-route-dot brand-route-dot--two" />
+    <strong>WGL</strong><small>STRUCTURE / CONNECT / GROW</small>
+  </div>;
+}
+
 export default function Home() {
   return <main>
     <SiteHeader />
@@ -12,9 +27,9 @@ export default function Home() {
         <p className="eyebrow">WEB GROWTH LAB</p>
         <h1>Webの課題を、<br /><span>知識と実行</span>で解決する。</h1>
         <p>Web制作・SEO・AI・業務改善の情報を分かりやすく届け、必要に応じてサイトの診断・改善・制作まで支援します。</p>
-        <div className="hero-actions"><a className="button button--primary" href="/knowledge">ナレッジを見る <b>→</b></a><a className="button button--secondary" href="/services">サービスを見る <b>→</b></a></div>
+        <div className="hero-actions"><a className="button button--primary" href="/knowledge">ナレッジを見る <b>→</b></a><a className="button button--navy" href="/services">サービスを見る <b>→</b></a></div>
       </div>
-      <div className="simple-home-hero-mark" aria-hidden="true"><strong>WGL</strong><div className="hero-metric"><span>01</span><b>知識を得る</b><i /></div><div className="hero-metric"><span>02</span><b>課題を見つける</b><i /></div><div className="hero-metric"><span>03</span><b>改善を進める</b><i /></div></div>
+      <HeroBrandVisual />
     </section>
 
     <section className="simple-home-section simple-home-offer">
@@ -39,7 +54,7 @@ export default function Home() {
       <div className="simple-news-list">{newsItems.slice(0, 3).map((item) => <a href={`/news/${item.slug}`} key={item.slug}><time>{item.date}</time><span>{item.category}</span><h3>{item.title}</h3><b>→</b></a>)}</div>
     </section>
 
-    <section className="home-final-cta"><span>CONTACT</span><h2>Webサイトの悩みを、<br />一緒に整理しませんか。</h2><p>依頼内容がまだ決まっていなくても大丈夫です。現在の課題から必要な対応を考えます。</p><div className="hero-actions"><a className="button button--primary" href="/contact">お問い合わせ <b>→</b></a><a className="button button--secondary" href="/services">サービスを見る <b>→</b></a></div></section>
+    <section className="home-final-cta"><span>CONTACT</span><h2>Webサイトの悩みを、<br />一緒に整理しませんか。</h2><p>依頼内容がまだ決まっていなくても大丈夫です。現在の課題から必要な対応を考えます。</p><div className="hero-actions"><a className="button button--primary" href="/contact">お問い合わせ <b>→</b></a><a className="button button--navy" href="/services">サービスを見る <b>→</b></a></div></section>
     <SiteFooter />
   </main>;
 }

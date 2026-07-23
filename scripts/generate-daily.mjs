@@ -243,7 +243,7 @@ const responseSchema = {
         status: { type: "string", enum: ["draft"] },
         title: { type: "string" },
         slug: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        category: { type: "string", enum: ["仕事術", "Web改善"] },
+        category: { type: "string", enum: ["仕事術", "AI・効率化"] },
         summary: { type: "string" },
         videoHook: { type: "string" },
         lead: { type: "string" },
@@ -342,7 +342,8 @@ const developerPrompt = `あなたはWeb Growth Labの編集者です。
 - 検索結果だけで裏付けられない主張を作らない
 - 確認できない内容は断定しない
 - SEOタイトルは誇張や煽りを避ける
-- コラムは「仕事術」「Web改善」のいずれかにする
+- コラムは「仕事術」「AI・効率化」のいずれかにする
+- AI・効率化では、生成AIの新機能紹介だけでなく、時間短縮、自動化、ツール活用、続けやすい仕組みづくりを扱う
 - コラムは検索流入と30〜60秒のショート動画化を前提に、読者が思わず理由を知りたくなる疑問・意外な結論・現場の失敗を入口にする
 - タイトルは具体的な悩みまたは意外性を含め、videoHookは冒頭3秒で続きを見たくなる一文にする。ただし内容以上に煽らない
 - コラムは専門用語の辞書解説ではなく、Webの現場で起きる悩み、判断、失敗、変化を入口にする

@@ -14,9 +14,9 @@ function selectCta(category = "", title = "") {
   };
   if (/cms|movable|wordpress|webrelease|microcms|運用/.test(text)) return {
     label: "運用支援について見る",
-    title: "CMSを含む日々の更新・改善を支援します。",
-    body: "更新相談、制作会社への指示、既存ページのSEO改善、公開確認を必要な範囲で支援します。",
-    href: "/services/operation-support",
+    title: "CMSや更新を含む、サイト運用を支援します。",
+    body: "更新依頼、制作会社との進行、品質確認、公開対応を必要な範囲から整理します。",
+    href: "/services/website-operation-support",
   };
   if (/ai|chatgpt|自動|効率|仕事術/.test(text)) return {
     label: "サイト診断について見る",

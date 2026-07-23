@@ -50,7 +50,7 @@ export default function ArticlesList() {
     </div>
     <p className="result-count"><b>{shown.length}</b> 件のナレッジ</p>
     <div className="archive-grid">{visibleItems.map((article) => <article className="archive-card" key={article.slug}>
-      <div className="archive-body"><span className="knowledge-category-badge">{article.category}</span><h2><a href={article.href}>{article.title}</a></h2><p>{article.description}</p><ul className="archive-tags knowledge-term-tags" aria-label="記事内の用語集">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link" href={article.href}>この記事を読む <span>→</span></a></div>
+      <div className="archive-body"><span className="knowledge-category-badge">{article.category}</span><h2><a href={article.href}>{article.title}</a></h2><p>{article.description}</p><ul className="archive-tags knowledge-term-tags" aria-label="記事内の用語集">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link card-read-link" href={article.href}><span>この記事を読む</span><i>→</i></a></div>
     </article>)}</div>
     {visibleCount < shown.length && <button className="load-more-button" type="button" onClick={() => setVisibleCount((count) => count + 9)}>もっと見る <span>＋9件</span></button>}
     {shown.length === 0 && <div className="empty-state"><b>該当する記事がありません</b><p>別のキーワードまたはカテゴリでお試しください。</p></div>}

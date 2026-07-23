@@ -140,7 +140,7 @@ if (approveColumn) {
   assertNoCollision(index, draft.column, "Column");
   const image = {
     "仕事術": "/images/column/web-system-learning.webp",
-    "Web改善": "/images/column/news-to-action.webp",
+    "AI・効率化": "/images/column/ai-human-judgement.webp",
   }[draft.column.category] || "/images/column/web-system-learning.webp";
   const post = {
     ...draft.column,

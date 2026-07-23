@@ -13,10 +13,10 @@ function selectCta(category = "", title = "") {
     href: "/services/website-diagnosis",
   };
   if (/cms|movable|wordpress|webrelease|microcms|運用/.test(text)) return {
-    label: "進行支援について見る",
-    title: "CMSを含む制作・リニューアルの進行を支援します。",
-    body: "要件整理、制作会社への指示、検品、公開までの確認事項を整理します。",
-    href: "/services/project-support",
+    label: "運用支援について見る",
+    title: "CMSを含む日々の更新・改善を支援します。",
+    body: "更新相談、制作会社への指示、既存ページのSEO改善、公開確認を必要な範囲で支援します。",
+    href: "/services/operation-support",
   };
   if (/ai|chatgpt|自動|効率|仕事術/.test(text)) return {
     label: "サイト診断について見る",
@@ -25,10 +25,10 @@ function selectCta(category = "", title = "") {
     href: "/services/website-diagnosis",
   };
   if (/アクセシビリティ|ui|ux|導線|デザイン|フォーム|改善/.test(text)) return {
-    label: "Webサイト改善について相談",
+    label: "サイト診断について見る",
     title: "既存サイトの改善点を、優先順位から整理します。",
     body: "導線・コンテンツ・アクセシビリティ・技術品質を横断して確認します。",
-    href: "/services/website-improvement",
+    href: "/services/website-diagnosis",
   };
   return {
     label: "Webサイト診断・改善提案",

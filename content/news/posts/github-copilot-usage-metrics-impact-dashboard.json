@@ -1,0 +1,45 @@
+{
+  "kind": "news",
+  "status": "published",
+  "title": "GitHub、Copilotの活用段階と開発指標を確認できるImpact Dashboardを公開",
+  "slug": "github-copilot-usage-metrics-impact-dashboard",
+  "category": "AI",
+  "serviceName": "GitHub Copilot",
+  "summary": "GitHubは2026年7月22日、企業管理者とOrganizationオーナー向けに、Copilotの利用者を活用段階別に可視化するImpact Dashboardを公開しました。アクティブ率だけでなく、利用機能の深さやプルリクエスト関連指標を確認でき、AI導入後の支援対象を判断しやすくなります。",
+  "quickSummary": [
+    "利用者を4つの活用段階に分けて可視化",
+    "プルリクエスト数やマージ速度の傾向を確認可能",
+    "ライセンス配布後の定着支援に活用できる"
+  ],
+  "keywords": [
+    "GitHub Copilot",
+    "Copilot usage metrics",
+    "Impact Dashboard",
+    "AI導入効果",
+    "開発生産性",
+    "AI adoption phase"
+  ],
+  "whatHappened": "GitHubは2026年7月22日、GitHub Copilotの利用状況を活用段階別に確認できる「Copilot usage metrics impact dashboard」を公開しました。対象は、Copilot usage metricsへのアクセス権を持つEnterprise管理者とOrganizationオーナーです。従来の単純なアクティブユーザー数だけでは、利用者が補完機能を使っているのか、エージェント型の機能まで業務へ組み込んでいるのかを判別しにくい課題がありました。\n\n新しいダッシュボードは、直近28日間のCopilot製品利用を基に、利用者をPassive、Phase 1のCode-first、Phase 2のAgent-first、Phase 3のMulti-agentまたはCopilot appに分類します。各コホートでは、利用者数と構成比に加え、1人当たり月間平均マージ済みプルリクエスト数、プルリクエストのマージ速度中央値、1人1日当たり平均コード行数などを表示します。また、Passive層と利用中の層を比較するAdoption multiplier、6カ月間のコホート成長とプルリクエスト処理量の推移、より深い活用段階へ移行するための推奨アクションも提供されます。\n\nGitHubは7月17日にリポジトリ単位のCopilot利用指標を一般提供し、7月20日にはAIクレジットの利用確認機能も更新していました。今回のダッシュボードは、利用量の集計だけでなく、活用段階と開発活動の関係を管理画面で説明しやすくする更新と位置付けられます。",
+  "impact": "企業がAIツールを導入した後は、ライセンス数やログイン回数だけで成果を判断しないことが重要です。今回のダッシュボードにより、利用者がどの機能まで使っているか、利用が浅い層がどこにいるかを確認しやすくなります。Web制作会社や事業会社の開発部門では、研修対象のチーム、エージェント機能を試す対象業務、未使用ライセンスの扱いを検討する材料になります。\n\n一方、表示されるプルリクエスト数、マージ速度、コード行数は、品質や事業成果そのものを示す指標ではありません。案件の難易度、チーム構成、レビュー方針、リポジトリの用途が異なる状態で、個人やチームを単純比較すると誤った評価につながります。また、コホート分類は直近28日間の製品利用に基づくため、長期的な能力や生産性を直接判定するものではありません。人事評価ではなく、導入支援と運用改善のための観察指標として扱う必要があります。",
+  "action": "GitHub Copilotを組織導入している担当者は、まず自社の契約と権限でCopilot usage metricsおよびImpact Dashboardを利用できるか確認します。表示できる場合は、Passive層の割合、各活用段階の人数、6カ月の推移を記録し、ライセンスを配布しただけで利用支援が止まっている部署がないか確認してください。\n\n次に、ダッシュボードの数値を単独で評価せず、レビュー差し戻し、障害件数、リードタイム、開発者への聞き取りなど、自社で既に使っている品質・進行指標と組み合わせます。たとえばPassive層が多い場合は、利用を義務化する前に、対象業務がCopilotに適しているか、IDE設定や社内ルールが障壁になっていないかを確認します。Agent-first層を増やす場合も、小規模な保守作業やテスト作成など、成果とリスクを確認しやすい業務から試す方法が安全です。\n\nWebディレクターは、顧客や管理職へ「AIで何％生産性が上がった」と即断せず、利用段階を把握して次の支援策を決める機能だと説明してください。個人監視への懸念を避けるため、閲覧権限、利用目的、報告単位も事前に合意しておく必要があります。",
+  "urgency": 3,
+  "audienceImpact": 4,
+  "selectionReason": "直近7日間の候補として、GitHub Code Qualityの一般提供、GitHub CopilotへのGemini 3.6 Flash追加、Copilotのリポジトリ別利用指標、Figmaのコード画面取り込み改善、Google Searchのソーシャル・動画パフォーマンス情報などを比較しました。今回の更新は、特定モデルの追加よりも導入後の効果測定と社内説明に直接使え、開発を伴う幅広いWeb組織に関係します。前日に公開された一次情報で鮮度が高く、管理者がすぐ確認できる行動可能性もあるため優先しました。",
+  "sources": [
+    {
+      "name": "GitHub Changelog：New Copilot usage metrics impact dashboard",
+      "url": "https://github.blog/changelog/2026-07-22-new-copilot-usage-metrics-impact-dashboard/",
+      "publishedAt": "2026-07-22",
+      "isPrimary": true
+    },
+    {
+      "name": "GitHub Docs：About GitHub Copilot usage metrics",
+      "url": "https://docs.github.com/en/copilot/concepts/copilot-metrics",
+      "publishedAt": "2026-07-22",
+      "isPrimary": true
+    }
+  ],
+  "date": "2026.07.23",
+  "publishedAt": "2026-07-23T06:40:34.082Z",
+  "approvedBy": "web-direction-lab-bot"
+}

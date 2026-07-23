@@ -1,5 +1,25 @@
 [
   {
+    "slug": "http-cache-cache-control-guide",
+    "category": "システム",
+    "date": "2026.07.23",
+    "title": "HTTPキャッシュとは何か：Cache-Controlの仕組みとWebサイト運用での設定・確認方法",
+    "description": "HTTPキャッシュがレスポンスを再利用する仕組みを、ブラウザキャッシュとCDNの違い、Cache-Control、ETag、更新反映の考え方から解説します。表示速度を改善しながら、古いHTMLや画像を配信し続ける事故を防ぐための実務手順も紹介します。",
+    "level": "中級",
+    "minutes": 14,
+    "type": "system",
+    "keywords": [
+      "HTTPキャッシュ",
+      "Cache-Control",
+      "no-cache",
+      "no-store",
+      "max-age",
+      "ETag",
+      "304 Not Modified",
+      "CDNキャッシュ設定"
+    ]
+  },
+  {
     "slug": "http-cache-control-practical-guide",
     "category": "システム",
     "date": "2026.07.21",

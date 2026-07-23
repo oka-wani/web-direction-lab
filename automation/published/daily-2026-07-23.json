@@ -1,0 +1,16 @@
+{
+  "runDate": "2026-07-23",
+  "publishedAt": "2026-07-23T06:40:34.082Z",
+  "updatedAt": "2026-07-23T06:40:34.082Z",
+  "publishedBy": "web-direction-lab-bot",
+  "publishedKinds": [
+    "knowledge",
+    "news",
+    "column"
+  ],
+  "urls": {
+    "knowledge": "/articles/http-cache-cache-control-guide",
+    "news": "/news/github-copilot-usage-metrics-impact-dashboard",
+    "column": "/column/web-director-confirmation-next-decision"
+  }
+}

@@ -4,7 +4,8 @@ import ServiceCta from "./ServiceCta";
 
 type Source = { name: string; url: string };
 type Term = { term: string; description: string };
-type Section = { title: string; body: string; points?: string[] };
+type Subsection = { title: string; body: string; points?: string[] };
+type Section = { title: string; body: string; points?: string[]; subsections?: Subsection[] };
 type Hero = { label: string; headline: string; items: string[] };
 type Related = { title: string; category: string; href: string };
 
@@ -62,7 +63,7 @@ export default function LearningArticle(p: Props) {
 
         {p.terms && p.terms.length > 0 && <section className="term-section" id="terms"><span className="section-kicker" aria-hidden="true">GLOSSARY</span><h2>用語集</h2><p className="section-introduction">本文を読む前に、記事内で使う重要な用語を確認します。</p><dl className="term-list">{p.terms.map((item) => <div key={item.term}><dt>{item.term}</dt><dd>{item.description}</dd></div>)}</dl></section>}
 
-        <div className="knowledge-detail-sections">{p.sections.map((section, index) => <section id={`section-${index + 1}`} key={section.title}><p className="chapter">{String(index + 1).padStart(2, "0")}</p><h2>{section.title}</h2><div className="section-body"><HighlightedBody text={section.body} /></div>{section.points && <aside className="practice-points"><b>実務で確認するポイント</b><ul>{section.points.map((point) => <li key={point}>{point}</li>)}</ul></aside>}</section>)}</div>
+        <div className="knowledge-detail-sections">{p.sections.map((section, index) => <section id={`section-${index + 1}`} key={section.title}><p className="chapter">{String(index + 1).padStart(2, "0")}</p><h2>{section.title}</h2><div className="section-body"><HighlightedBody text={section.body} /></div>{section.subsections && <div className="knowledge-subsections">{section.subsections.map((subsection) => <section key={subsection.title}><h3>{subsection.title}</h3><div className="section-body"><HighlightedBody text={subsection.body} /></div>{subsection.points && <ul>{subsection.points.map((point) => <li key={point}>{point}</li>)}</ul>}</section>)}</div>}{section.points && <aside className="practice-points"><b>実務で確認するポイント</b><ul>{section.points.map((point) => <li key={point}>{point}</li>)}</ul></aside>}</section>)}</div>
 
         <section id="quiz" className="quiz"><p className="chapter">CHECK</p><h2>理解度チェック</h2><p>{p.quiz.question}</p><ol>{p.quiz.choices.map((choice) => <li key={choice}>{choice}</li>)}</ol><details><summary>答えと解説を見る</summary><p>{p.quiz.answer}</p></details></section>
 

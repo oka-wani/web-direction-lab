@@ -26,7 +26,12 @@ type GeneratedKnowledge = {
     practice: string;
     mistakes: string;
     example: string;
-    sections?: { title: string; body: string; points?: string[] }[];
+    sections?: {
+      title: string;
+      body: string;
+      points?: string[];
+      subsections?: { title: string; body: string; points?: string[] }[];
+    }[];
     todaySummary?: string[];
     quiz: {
       question: string;

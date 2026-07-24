@@ -54,6 +54,10 @@
   margin-top: auto;
 }
 
+.knowledge-library .archive-card {
+  min-height: 330px;
+}
+
 .knowledge-article-mv {
   min-height: 0 !important;
   margin-bottom: 42px !important;
@@ -93,6 +97,70 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
+}
+
+.knowledge-detail-sections > section {
+  padding-top: 38px;
+  border-top: 1px solid #ccd6da;
+}
+
+.knowledge-detail-sections > section > .chapter {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 28px;
+  margin: 0 0 13px;
+  padding: 5px 10px;
+  align-items: center;
+  justify-content: center;
+  color: var(--yellow);
+  font-family: var(--font-geist-mono);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .12em;
+  background: var(--navy);
+}
+
+.knowledge-detail-sections > section > h2 {
+  margin: 0 0 28px;
+  padding-left: 18px;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.4;
+  letter-spacing: -.035em;
+  border-left: 7px solid var(--yellow);
+}
+
+.knowledge-subsections {
+  display: grid;
+  gap: 18px;
+  margin-top: 34px;
+}
+
+.knowledge-subsections > section {
+  padding: 26px 28px;
+  background: #f8faf7;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--navy);
+}
+
+.knowledge-subsections h3 {
+  margin: 0 0 16px;
+  color: var(--navy);
+  font-size: clamp(21px, 2vw, 26px);
+  line-height: 1.5;
+}
+
+.knowledge-subsections .section-body > p {
+  margin-bottom: 1.2em;
+}
+
+.knowledge-subsections .section-body > p:last-child {
+  margin-bottom: 0;
+}
+
+.knowledge-subsections ul {
+  margin: 18px 0 0;
+  padding-left: 20px;
+  line-height: 1.8;
 }
 
 .knowledge-agenda {
@@ -308,6 +376,20 @@
     padding: 5px 8px !important;
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+
+  .knowledge-detail-sections > section {
+    padding-top: 28px;
+  }
+
+  .knowledge-detail-sections > section > h2 {
+    padding-left: 13px;
+    font-size: 27px;
+    border-left-width: 5px;
+  }
+
+  .knowledge-subsections > section {
+    padding: 22px 20px;
   }
 
   .news-article-page .news-detail {

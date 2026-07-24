@@ -13,7 +13,6 @@ const foundationItems = getAllGuideArticles().map(({ step, article, href, slug }
   description: article.summary,
   level: "基礎",
   minutes: 6,
-  image: "/images/web-guide-hero.webp",
   tags: getFoundationGlossaryTerms(step.slug).map(({ term }) => term),
   type: "website" as const,
   href,
@@ -22,7 +21,11 @@ const foundationItems = getAllGuideArticles().map(({ step, article, href, slug }
 const knowledgeItems = [
   ...foundationItems,
   ...articleItems.map((article) => ({ ...article, href: `/articles/${article.slug}` })),
-];
+].sort((a, b) => {
+  const aDate = Date.parse(a.date.replaceAll(".", "-")) || 0;
+  const bDate = Date.parse(b.date.replaceAll(".", "-")) || 0;
+  return bDate - aDate;
+});
 
 export default function ArticlesList() {
   const [category, setCategory] = useState("すべて");
@@ -50,7 +53,6 @@ export default function ArticlesList() {
     </div>
     <p className="result-count"><b>{shown.length}</b> 件のナレッジ</p>
     <div className="archive-grid">{visibleItems.map((article) => <article className="archive-card" key={article.slug}>
-      {article.image && <a className="archive-visual archive-visual--image" href={article.href} aria-label={`${article.title}を読む`} style={{ backgroundImage: `url(${article.image})` }} />}
       <div className="archive-body"><span className="knowledge-category-badge">{article.category}</span><h2><a href={article.href}>{article.title}</a></h2><p>{article.description}</p><ul className="archive-tags knowledge-term-tags" aria-label="記事内の用語集">{(article.tags ?? []).slice(0, 4).map((tag) => <li key={tag}>#{tag}</li>)}</ul><a className="text-link card-read-link" href={article.href}><span>この記事を読む</span><i>→</i></a></div>
     </article>)}</div>
     {visibleCount < shown.length && <button className="load-more-button" type="button" onClick={() => setVisibleCount((count) => count + 9)}>もっと見る <span>＋9件</span></button>}

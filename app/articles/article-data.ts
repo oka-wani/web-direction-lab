@@ -13,7 +13,13 @@ export type ArticleItem = {
   type: "seo" | "analytics" | "website" | "system" | "ai" | "marketing";
 };
 
-export const articleItems = items as ArticleItem[];
+function dateValue(date: string) {
+  return Date.parse(date.replaceAll(".", "-")) || 0;
+}
+
+export const articleItems = [...(items as ArticleItem[])].sort(
+  (a, b) => dateValue(b.date) - dateValue(a.date),
+);
 export const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他"];
 
 export function matchesCategory(article: ArticleItem, category: string) {

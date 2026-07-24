@@ -80,6 +80,21 @@
   padding-top: 17px;
 }
 
+.knowledge-article-image {
+  max-width: 1200px;
+  margin: 0 auto 46px;
+  overflow: hidden;
+  background: #f4f7f1;
+  border: 1px solid var(--line);
+}
+
+.knowledge-article-image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
 .knowledge-agenda {
   display: block !important;
   margin-bottom: 46px !important;

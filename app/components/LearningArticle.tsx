@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { SiteFooter, SiteHeader } from "./SiteChrome";
 import ServiceCta from "./ServiceCta";
 
@@ -50,6 +51,8 @@ export default function LearningArticle(p: Props) {
         <header className={`knowledge-article-mv knowledge-article-mv--${p.visual}`}>
           <div><span className="category-label">{p.category}</span><h1>{p.title}</h1><p>{p.intro}</p><div className="article-meta"><time>{p.date}</time></div></div>
         </header>
+
+        {p.image && <figure className="knowledge-article-image"><Image src={p.image} alt="" width={1200} height={675} priority /></figure>}
 
         {keyPoints.length > 0 && <section className="key-highlights knowledge-key-points" aria-labelledby="key-highlights-title"><span className="section-kicker" aria-hidden="true">KEY POINTS</span><h2 id="key-highlights-title">最初に押さえるポイント</h2><ul>{keyPoints.map((item) => <li key={item}><mark>{item}</mark></li>)}</ul></section>}
 

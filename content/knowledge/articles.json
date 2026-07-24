@@ -1,5 +1,35 @@
 [
   {
+    "slug": "web-hosting-service-selection-guide",
+    "category": "システム",
+    "date": "2026.07.24",
+    "title": "Webホスティングサービスの選び方とは？6種類の特徴と案件別の比較ポイント",
+    "description": "GitHub Pages、Vercel、Cloudflare Pages、Netlify、AWS Amplify、レンタルサーバーの違いを、機能比較だけでなく案件要件と運用条件から選定する方法まで解説します。",
+    "level": "中級",
+    "minutes": 16,
+    "type": "system",
+    "image": "/images/knowledge/web-hosting-service-selection-guide.webp",
+    "tags": [
+      "Webホスティング",
+      "Vercel",
+      "Cloudflare Pages",
+      "GitHub Pages",
+      "Netlify",
+      "AWS Amplify",
+      "レンタルサーバー",
+      "CDN",
+      "自動デプロイ"
+    ],
+    "keywords": [
+      "Webホスティングサービス 比較",
+      "ホスティング 選び方",
+      "Vercel Cloudflare Pages 比較",
+      "GitHub Pages Vercel 違い",
+      "Astro ホスティング",
+      "Webサイト 公開基盤"
+    ]
+  },
+  {
     "slug": "http-cache-cache-control-guide",
     "category": "システム",
     "date": "2026.07.23",

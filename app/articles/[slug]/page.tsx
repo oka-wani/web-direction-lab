@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import LearningArticle from "../../components/LearningArticle";
 import { getRelatedKnowledge } from "../../knowledge/related";
@@ -12,8 +13,10 @@ type GeneratedKnowledge = {
   date: string;
   minutes: number;
   level: string;
+  image?: string;
+  tags?: string[];
   hero?: { label: string; headline: string; items: string[] };
-  seo: { keywords: string[] };
+  seo: { metaTitle?: string; metaDescription?: string; keywords: string[] };
   body: {
     conclusion: string;
     highlights?: string[];
@@ -23,6 +26,7 @@ type GeneratedKnowledge = {
     practice: string;
     mistakes: string;
     example: string;
+    sections?: { title: string; body: string; points?: string[] }[];
     todaySummary?: string[];
     quiz: {
       question: string;
@@ -36,6 +40,14 @@ type GeneratedKnowledge = {
 
 const postsDirectory = join(process.cwd(), "content/knowledge/posts");
 
+async function readPost(slug: string): Promise<GeneratedKnowledge | null> {
+  try {
+    return JSON.parse(await readFile(join(postsDirectory, `${slug}.json`), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 export async function generateStaticParams() {
   try {
     const files = await readdir(postsDirectory);
@@ -47,21 +59,28 @@ export async function generateStaticParams() {
   }
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const post = await readPost((await params).slug);
+  if (!post) return {};
+  return {
+    title: post.seo.metaTitle ?? post.title,
+    description: post.seo.metaDescription ?? post.summary,
+    openGraph: post.image ? { images: [post.image] } : undefined,
+  };
+}
+
 export default async function GeneratedKnowledgePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let post: GeneratedKnowledge;
-
-  try {
-    post = JSON.parse(
-      await readFile(join(postsDirectory, `${slug}.json`), "utf8"),
-    );
-  } catch {
-    notFound();
-  }
+  const post = await readPost(slug);
+  if (!post) notFound();
 
   const visual = {
     SEO: "seo",
@@ -78,12 +97,13 @@ export default async function GeneratedKnowledgePage({
       date={post.date}
       minutes={post.minutes}
       level={post.level}
+      image={post.image}
       visual={visual}
       hero={post.hero}
       conclusion={post.body.conclusion}
       highlights={post.body.highlights}
       terms={post.body.glossary}
-      sections={[
+      sections={post.body.sections ?? [
         { title: "基本と仕組み", body: post.body.definition },
         { title: "なぜ重要か", body: post.body.importance },
         { title: "実務ではどう使うか", body: post.body.practice },
@@ -96,7 +116,7 @@ export default async function GeneratedKnowledgePage({
         answer: `${post.body.quiz.answer} — ${post.body.quiz.explanation}`,
       }}
       sources={post.sources}
-      related={getRelatedKnowledge(post.slug, post.category, post.seo.keywords)}
+      related={getRelatedKnowledge(post.slug, post.category, post.tags ?? post.seo.keywords)}
     />
   );
 }

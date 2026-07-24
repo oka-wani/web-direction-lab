@@ -195,5 +195,7 @@ footer.site-footer .footer-nav-groups nav{grid-area:auto;min-width:0}
 .button--navy{min-width:250px;color:#fff;background:var(--navy);border:1.5px solid var(--navy)}
 .button--navy:hover{color:#fff;background:#173958;border-color:#173958}
 .simple-home-hero--white-grid:before{display:none}
+.simple-home-hero--white-grid h1 span{color:var(--navy)}
 .simple-home-brand-visual{z-index:1;width:100%;max-width:none!important}
+.simple-column-grid .card-read-link{width:calc(100% - 44px)}
 @media(max-width:720px){.simple-home-brand-visual{min-height:360px}}

@@ -1,4 +1,5 @@
 import { SiteFooter, SiteHeader } from "./SiteChrome";
+import ServiceCta from "./ServiceCta";
 
 type Source = { name: string; url: string };
 type Term = { term: string; description: string };
@@ -65,6 +66,8 @@ export default function LearningArticle(p: Props) {
         {p.sources && p.sources.length > 0 && <aside className="source-box" id="sources"><span className="section-kicker" aria-hidden="true">REFERENCES</span><b>参考サイト</b><p>仕様や実務判断では、公式情報と最新の原文も確認してください。</p>{p.sources.map((source) => <p key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.name} ↗</a></p>)}</aside>}
 
         {p.related && p.related.length > 0 && <section className="related-knowledge" aria-labelledby="related-knowledge-title"><span className="section-kicker" aria-hidden="true">RELATED KNOWLEDGE</span><h2 id="related-knowledge-title">関連ナレッジ</h2><div>{p.related.slice(0, 3).map((item) => <a href={item.href} key={item.href}><small>{item.category}</small><b>{item.title}</b><span>読む →</span></a>)}</div></section>}
+
+        <ServiceCta category={p.category} title={p.title} />
 
         <footer className="article-end-nav">
           {p.previousHref && <a className="button button--secondary" href={p.previousHref}>← {p.previousLabel ?? "前の記事"}</a>}

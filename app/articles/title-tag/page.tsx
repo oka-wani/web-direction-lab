@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import LearningArticle from "../../components/LearningArticle";
 
 export const metadata: Metadata = {
-  title: "titleタグとは？ SEOとクリック率を左右する基本｜Web Direction Lab",
+  title: "titleタグとは？ SEOとクリック率を左右する基本｜Web Growth Lab",
   description: "titleタグの役割、Google検索でのタイトルリンクとの関係、実務での設計・確認方法を詳しく解説します。",
 };
 

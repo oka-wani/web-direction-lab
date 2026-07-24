@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./content-refresh.css";
+import "./platform.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,21 +16,21 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://web-direction-lab.vercel.app"),
-  title: "Web Direction Lab｜Webディレクター・Webコンサルを目指す人の学習メディア",
-  description: "Webディレクター・Webコンサルを目指す人が、Web制作・SEO・システム・アクセス解析・AI活用を実務目線で学べるメディアです。",
+  title: "Web Growth Lab｜Webの知識と仕組みで、成果を育てる",
+  description: "Web制作・SEO・AI・業務改善の知識を発信し、ツール、テンプレート、Webサイト診断・改善・制作・運用支援を提供します。",
   openGraph: {
     type: "website",
     locale: "ja_JP",
     url: "/",
-    siteName: "Web Direction Lab",
-    title: "Web Direction Lab｜Webディレクター・Webコンサルを目指す人の学習メディア",
-    description: "Web制作・SEO・システム・アクセス解析・AI活用を実務目線で学べるメディアです。",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Web Direction Lab" }],
+    siteName: "Web Growth Lab",
+    title: "Web Growth Lab｜Webの知識と仕組みで、成果を育てる",
+    description: "Web制作・SEO・AI・業務改善を、学ぶ・使う・相談するまで一つにつなげます。",
+    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Web Growth Lab" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Web Direction Lab",
-    description: "Web制作・SEO・システム・アクセス解析・AI活用を実務目線で学べるメディアです。",
+    title: "Web Growth Lab",
+    description: "Web制作・SEO・AI・業務改善を、学ぶ・使う・相談するまで一つにつなげます。",
     images: ["/twitter-image.png"],
   },
   other: {

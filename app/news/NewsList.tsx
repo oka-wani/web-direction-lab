@@ -1,19 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { categories } from "../articles/article-data";
 import { newsItems, type NewsItem } from "./news-data";
 
+const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他"];
+
 function matchesNewsCategory(item: NewsItem, category: string) {
-  if (category === "すべて") return true;
-  const text = `${item.category} ${item.title} ${item.summary}`;
-  if (category === "SEO") return text.includes("SEO") || text.includes("検索");
-  if (category === "Web制作") return text.includes("Web制作") || text.includes("Web Platform") || text.includes("ブラウザ");
-  if (category === "デザイン・UX") return text.includes("デザイン") || text.includes("UX") || text.includes("UI") || text.includes("アクセシビリティ");
-  if (category === "マーケティング・解析") return text.includes("マーケティング") || text.includes("解析") || text.includes("GA4") || text.includes("広告");
-  if (category === "システム") return ["システム", "セキュリティ", "クラウド", "CMS", "サーバー", "API"].some((word) => text.includes(word));
-  if (category === "AI活用") return text.includes("AI") || text.includes("生成");
-  return !["SEO", "検索", "Web制作", "Web Platform", "ブラウザ", "デザイン", "UX", "UI", "アクセシビティ", "マーケティング", "解析", "GA4", "広告", "システム", "セキュリティ", "クラウド", "CMS", "サーバー", "API", "AI", "生成"].some((word) => text.includes(word));
+  return category === "すべて" || item.category === category;
 }
 
 export default function NewsList() {

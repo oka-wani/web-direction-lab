@@ -60,6 +60,13 @@ function assertNoCollision(index, post, kind) {
   }
 }
 
+function assertGlossaryTerms(glossary) {
+  const invalid = glossary?.find(({ term }) =>
+    typeof term !== "string" || term.length > 30 || /[。！？!?]|(?:の基本|入門|方法|使い方|仕組み)$/.test(term)
+  );
+  if (invalid) throw new Error(`Glossary term must be a short technical noun: ${invalid.term}`);
+}
+
 function knowledgeType(category) {
   return {
     SEO: "seo",
@@ -77,6 +84,7 @@ if (approveKnowledge) {
   const indexPath = "content/knowledge/articles.json";
   const index = JSON.parse(await readFile(indexPath, "utf8"));
   assertNoCollision(index, draft.knowledge, "Knowledge");
+  assertGlossaryTerms(draft.knowledge.body?.glossary);
   const post = {...draft.knowledge, status: "published", date: runDate.replaceAll("-", "."), publishedAt: approvedAt, approvedBy};
   await mkdir("content/knowledge/posts", { recursive: true });
   await writeFile(join("content/knowledge/posts", `${post.slug}.json`), `${JSON.stringify(post, null, 2)}\n`, "utf8");
@@ -90,6 +98,7 @@ if (approveKnowledge) {
     level: post.level,
     minutes: post.minutes,
     type: knowledgeType(post.category),
+    tags: post.body?.glossary?.map((entry) => entry.term).slice(0, 8) ?? [],
     keywords: post.seo?.keywords ?? [],
   };
   await writeFile(indexPath, `${JSON.stringify([item, ...index.filter((entry) => entry.slug !== post.slug)], null, 2)}\n`, "utf8");
@@ -100,7 +109,13 @@ if (approveNews) {
   const indexPath = "content/news/news.json";
   const index = JSON.parse(await readFile(indexPath, "utf8"));
   assertNoCollision(index, draft.news, "News");
-  const post = {...draft.news, status: "published", date: runDate.replaceAll("-", "."), publishedAt: approvedAt, approvedBy};
+  const category = {
+    AI: "AI活用", "検索・SEO": "SEO", "アクセス解析・広告": "マーケティング・解析",
+    "ブラウザ・Web標準": "Web制作", "Web制作・CMS": "Web制作",
+    "クラウド・インフラ": "システム", "セキュリティ・プライバシー": "システム",
+    Webサービス: "その他",
+  }[draft.news.category] ?? draft.news.category;
+  const post = {...draft.news, category, status: "published", date: runDate.replaceAll("-", "."), publishedAt: approvedAt, approvedBy};
   await mkdir("content/news/posts", { recursive: true });
   await writeFile(join("content/news/posts", `${post.slug}.json`), `${JSON.stringify(post, null, 2)}\n`, "utf8");
 
@@ -124,10 +139,8 @@ if (approveColumn) {
   const index = JSON.parse(await readFile(indexPath, "utf8"));
   assertNoCollision(index, draft.column, "Column");
   const image = {
-    "Webの仕事術": "/images/column/web-system-learning.webp",
-    "AI活用": "/images/column/ai-human-judgement.webp",
-    "サイト改善": "/images/column/news-to-action.webp",
-    "キャリア・学習": "/images/column/web-system-learning.webp",
+    "仕事術": "/images/column/web-system-learning.webp",
+    "AI・効率化": "/images/column/ai-human-judgement.webp",
   }[draft.column.category] || "/images/column/web-system-learning.webp";
   const post = {
     ...draft.column,

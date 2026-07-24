@@ -55,7 +55,7 @@ const articleBodySchema = {
         additionalProperties: false,
         required: ["term", "description"],
         properties: {
-          term: { type: "string" },
+          term: { type: "string", minLength: 1, maxLength: 30 },
           description: { type: "string" },
         },
       },
@@ -201,16 +201,7 @@ const responseSchema = {
         slug: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
         category: {
           type: "string",
-          enum: [
-            "AI",
-            "検索・SEO",
-            "アクセス解析・広告",
-            "ブラウザ・Web標準",
-            "Web制作・CMS",
-            "クラウド・インフラ",
-            "セキュリティ・プライバシー",
-            "Webサービス",
-          ],
+          enum: ["SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他"],
         },
         serviceName: { type: "string" },
         summary: { type: "string" },
@@ -252,7 +243,7 @@ const responseSchema = {
         status: { type: "string", enum: ["draft"] },
         title: { type: "string" },
         slug: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        category: { type: "string", enum: ["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"] },
+        category: { type: "string", enum: ["仕事術", "AI・効率化"] },
         summary: { type: "string" },
         videoHook: { type: "string" },
         lead: { type: "string" },
@@ -303,7 +294,7 @@ const responseSchema = {
   },
 };
 
-const developerPrompt = `あなたはWeb Direction Labの編集者です。
+const developerPrompt = `あなたはWeb Growth Labの編集者です。
 対象読者は、Webディレクター・Webコンサルを目指す20〜40代です。
 
 成果物:
@@ -315,7 +306,9 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - 日本語で書く
 - 実務で使える具体性を優先する
 - ナレッジの重要ポイントを3〜5件の短いhighlightsにまとめる
-- ナレッジに登場する重要用語を3〜8件抽出し、glossaryを「用語」と「簡潔な意味」に分けて書く
+- ナレッジに登場する重要用語を5〜10件抽出し、glossaryを「用語」と「簡潔な意味」に分けて書く
+- glossaryのtermは記事タイトルや「〜の基本」「〜の使い方」のような見出しではなく、本文中に登場する単独の専門用語・技術名にする（例: Chrome DevTools、DOM、HTTP、キャッシュ）
+- glossaryのtermは30文字以内の名詞または固有名詞とし、助詞を含む説明文や末尾が「基本」「入門」「方法」「使い方」「仕組み」の語句は使わない
 - ナレッジのタイトルは煽らず、用語・仕組み・実務上の意味が分かる辞書・解説型にする
 - heroには記事テーマを一目で理解できる短い見出しと、図解用の3〜4項目を入れる
 - ナレッジ本文は合計3,500〜5,000文字程度を目安にし、初級でも説明を省略しすぎない
@@ -331,6 +324,7 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - ナレッジは既存記事と重複させない
 - ニュース候補を最低5件調査し、影響範囲・実務関連性・鮮度・行動可能性・一次情報の確かさで比較して最も有用な1件だけを出力する
 - ニュースの対象領域は、AI、検索・SEO、アクセス解析・広告、ブラウザ・Web標準、Web制作・CMS、クラウド・インフラ、セキュリティ・プライバシー、主要Webサービスまで広く扱う
+- ニュースの表示カテゴリはサイトのタブと同じ「SEO」「Web制作」「デザイン・UX」「マーケティング・解析」「システム」「AI活用」「Webディレクション」「その他」から一つだけ選ぶ。セキュリティ・プライバシー、クラウド、インフラは「システム」、検索関連は「SEO」、AI関連は「AI活用」に分類する
 - OpenAI・Anthropic・Google AI・Microsoft・Adobe・Figma・GitHub・Cursor、Google Search・Bing・GA4、Chrome・Safari・Firefox・W3C、WordPress・Webflow・Shopify、Cloudflare・AWS・Vercelなどの一次情報を幅広く確認する
 - 直近の記事と同じ領域・同じサービスを続けず、14日単位でテーマを分散する。ただし緊急度4以上の重要変更は例外とする
 - ごく一部の事業者だけが対象の募集終了、限定テスト、地域限定機能、軽微な文言変更は原則選ばない
@@ -348,7 +342,10 @@ const developerPrompt = `あなたはWeb Direction Labの編集者です。
 - 検索結果だけで裏付けられない主張を作らない
 - 確認できない内容は断定しない
 - SEOタイトルは誇張や煽りを避ける
-- コラムは「Webの仕事術」「AI活用」「サイト改善」「キャリア・学習」のいずれかにする
+- コラムは「仕事術」「AI・効率化」のいずれかにする
+- AI・効率化では、生成AIの新機能紹介だけでなく、時間短縮、自動化、ツール活用、続けやすい仕組みづくりを扱う
+- コラムは検索流入と30〜60秒のショート動画化を前提に、読者が思わず理由を知りたくなる疑問・意外な結論・現場の失敗を入口にする
+- タイトルは具体的な悩みまたは意外性を含め、videoHookは冒頭3秒で続きを見たくなる一文にする。ただし内容以上に煽らない
 - コラムは専門用語の辞書解説ではなく、Webの現場で起きる悩み、判断、失敗、変化を入口にする
 - コラムのタイトルとvideoHookは興味を引くが、内容以上に煽らず、読後に実務上の気づきが残るものにする
 - コラム本文は3〜5セクション、合計1,800〜3,000文字程度とし、具体例と読者が取れる行動を含める
@@ -398,6 +395,12 @@ const outputText =
 if (!outputText) throw new Error("The API returned no structured output.");
 
 const draft = JSON.parse(outputText);
+const invalidGlossaryTerm = draft.knowledge.body.glossary.find(({ term }) =>
+  term.length > 30 || /[。！？!?]|(?:の基本|入門|方法|使い方|仕組み)$/.test(term)
+);
+if (invalidGlossaryTerm) {
+  throw new Error(`Glossary term must be a short technical noun: ${invalidGlossaryTerm.term}`);
+}
 if (draft.runDate !== jstDate) {
   throw new Error(`The API returned runDate ${draft.runDate}; expected ${jstDate}.`);
 }

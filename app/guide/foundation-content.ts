@@ -127,7 +127,7 @@ export function getFoundationContent(step: GuideStep, article: GuideArticle) {
     highlights: [article.summary, `「${article.title}」を${step.title}全体の中で捉える`, "目的・前提・確認方法をセットで実務へつなげる"],
     hero: { label:`STEP ${step.number}`, headline:`${article.title}の学習ポイント`, items:["役割と基本用語を理解する", "周辺の仕組みとの関係を整理する", "実務での確認方法を身に付ける"] },
     conclusion: `${article.summary} このページでは、用語の暗記で終わらず、${step.title}の中での位置付けと、実務で確認・判断するときの流れまで整理します。`,
-    terms: [{ term:article.title, description:article.summary }, ...profile.terms].slice(0, 4),
+    terms: profile.terms,
     sections: [
       { title:"まず理解したいこと", body:`${article.summary}\n\n**最初に確認するのは、この仕組みや考え方が何のためにあるかです。** 名称だけを覚えるのではなく、入力されるもの、行われる処理、得られる結果、関係する担当者やサービスを整理します。` },
       { title:"全体の中での位置付け", body:`${profile.importance}\n\n「${article.title}」だけを切り離して考えず、前後の工程や他の技術との関係を図にすると、判断が必要な箇所と確認先が分かりやすくなります。` },
@@ -143,4 +143,8 @@ export function getFoundationContent(step: GuideStep, article: GuideArticle) {
     sources: profile.sources,
     related: related.slice(0, 3),
   };
+}
+
+export function getFoundationGlossaryTerms(stepSlug: string) {
+  return profiles[stepSlug]?.terms ?? [];
 }

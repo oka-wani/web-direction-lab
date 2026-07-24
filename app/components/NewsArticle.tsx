@@ -1,6 +1,7 @@
 import type { NewsItem } from "../news/news-data";
 import { articleItems } from "../articles/article-data";
 import { SiteFooter, SiteHeader } from "./SiteChrome";
+import ServiceCta from "./ServiceCta";
 
 function Paragraphs({ text }: { text: string }) {
   return <>{text.split(/\n\s*\n/).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</>;
@@ -60,6 +61,7 @@ export default function NewsArticle({ item }: { item: NewsItem }) {
 
       <aside className="source-box"><b>参考リンク</b><p>判断・実装の前に、リンク先の原文と最新情報も確認してください。</p>{sources.map((source) => <p key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.name} ↗</a></p>)}</aside>
       <section className="related-knowledge news-related-knowledge" aria-labelledby="news-related-title"><span className="section-kicker" aria-hidden="true">RELATED KNOWLEDGE</span><h2 id="news-related-title">関連ナレッジ</h2><div>{related.map((article) => <a href={`/articles/${article.slug}`} key={article.slug}><small>{article.category}</small><b>{article.title}</b><span>読む →</span></a>)}</div></section>
+      <ServiceCta category={item.category} title={item.title} />
       <div className="news-back"><a className="button button--secondary" href="/news">← Webニュース一覧へ</a></div>
     </article>
     <SiteFooter />

@@ -11,8 +11,9 @@ const knowledgeCategories = new Set([
 const newsCategories = new Set([
   "AI", "検索・SEO", "アクセス解析・広告", "ブラウザ・Web標準",
   "Web制作・CMS", "クラウド・インフラ", "セキュリティ・プライバシー", "Webサービス",
+  "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他",
 ]);
-const columnCategories = new Set(["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習"]);
+const columnCategories = new Set(["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習", "仕事術", "AI・効率化"]);
 
 let failures = 0;
 const knowledgeIndex = JSON.parse(await readFile("content/knowledge/articles.json", "utf8"));

@@ -8,7 +8,7 @@ import type { NewsItem } from "../../../news/news-data";
 import { getRelatedKnowledge } from "../../../knowledge/related";
 
 export const metadata: Metadata = {
-  title: "下書きプレビュー | Web Direction Lab",
+  title: "下書きプレビュー | Web Growth Lab",
   robots: { index: false, follow: false, nocache: true },
 };
 

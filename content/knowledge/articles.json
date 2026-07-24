@@ -28,6 +28,15 @@
     "level": "中級",
     "minutes": 14,
     "type": "system",
+    "tags": [
+      "HTTPキャッシュ",
+      "Cache-Control",
+      "ブラウザキャッシュ",
+      "共有キャッシュ",
+      "ETag",
+      "304 Not Modified",
+      "キャッシュバスティング"
+    ],
     "keywords": [
       "HTTPキャッシュ",
       "Cache-Control",

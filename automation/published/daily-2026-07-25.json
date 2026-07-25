@@ -1,0 +1,16 @@
+{
+  "runDate": "2026-07-25",
+  "publishedAt": "2026-07-25T06:08:25.271Z",
+  "updatedAt": "2026-07-25T06:08:25.271Z",
+  "publishedBy": "web-direction-lab-bot",
+  "publishedKinds": [
+    "knowledge",
+    "news",
+    "column"
+  ],
+  "urls": {
+    "knowledge": "/articles/http-cache-mechanism-and-operation",
+    "news": "/news/figma-auto-layout-css-flexbox-update-2026",
+    "column": "/column/web-production-checklist-review-timing"
+  }
+}

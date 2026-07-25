@@ -1,5 +1,35 @@
 [
   {
+    "slug": "http-cache-mechanism-and-operation",
+    "category": "システム",
+    "date": "2026.07.25",
+    "title": "HTTPキャッシュとは何か：ブラウザとCDNで再利用される仕組みと実務上の確認方法",
+    "description": "HTTPキャッシュがレスポンスを保存・再利用する仕組みを、鮮度、有効期限、再検証、ブラウザキャッシュと共有キャッシュの違いから解説します。表示速度の改善と更新反映の両立に必要な設計・確認手順を、Web制作と運用の実務に沿って整理します。",
+    "level": "中級",
+    "minutes": 14,
+    "type": "system",
+    "tags": [
+      "HTTPキャッシュ",
+      "Cache-Control",
+      "max-age",
+      "ETag",
+      "Last-Modified",
+      "条件付きリクエスト",
+      "304 Not Modified",
+      "共有キャッシュ"
+    ],
+    "keywords": [
+      "HTTPキャッシュ",
+      "Cache-Control",
+      "ETag",
+      "304 Not Modified",
+      "ブラウザキャッシュ",
+      "CDNキャッシュ",
+      "キャッシュバスティング",
+      "Chrome DevTools Network"
+    ]
+  },
+  {
     "slug": "web-hosting-service-selection-guide",
     "category": "システム",
     "date": "2026.07.24",

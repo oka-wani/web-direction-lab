@@ -1,0 +1,47 @@
+{
+  "kind": "news",
+  "status": "published",
+  "title": "FigmaがAuto LayoutをCSS Flexboxに近づける更新、新規フレームでは新方式が標準に",
+  "slug": "figma-auto-layout-css-flexbox-update-2026",
+  "category": "デザイン・UX",
+  "serviceName": "Figma",
+  "summary": "Figmaは2026年7月24日、Auto Layoutの計算方法をCSS Flexboxへ近づける更新を発表しました。新規フレームには更新版が標準で適用され、既存フレームは従来方式のまま維持されます。デザインと実装の差を減らせる一方、コンポーネント更新時には余白、ストローク、Fill container、Auto gapの表示確認が必要です。",
+  "quickSummary": [
+    "新しいAuto Layoutでは余白やストロークの計算がCSSに近づく",
+    "既存フレームは自動変換されず、新規フレームから更新版が標準になる",
+    "旧方式への切り替えは2027年1月まで提供される予定"
+  ],
+  "keywords": [
+    "Figma",
+    "Auto Layout",
+    "CSS Flexbox",
+    "border-box",
+    "Fill container",
+    "Auto gap",
+    "デザインシステム",
+    "デザインハンドオフ"
+  ],
+  "whatHappened": "Figmaは2026年7月24日、Auto LayoutをCSS Flexboxの挙動へ近づける更新をリリースノートで案内しました。従来のAuto LayoutはWebのレイアウトを意識した機能でしたが、一部の計算がCSSと一致せず、デザインから実装へ移す際に調整が必要になる場合がありました。今回の更新では、フレームの幅より左右のpadding合計が大きい場合にpaddingを維持すること、内側のstrokeをレイアウト計算へ含めること、Fill containerの子要素をborder-boxに近い考え方で配分することなどが変更点です。\n\nまた、Auto gapで子要素が収まらない場合、従来は間隔が負になって要素同士が重なることがありましたが、更新版では間隔が0未満にならず、CSSの `space-between` に近い挙動になります。子要素が一つだけの場合も、中央ではなく横方向なら左、縦方向なら上へ配置されます。これにより、デザイン上の見た目と実装後のレイアウト差を減らしやすくなります。\n\n新しく作成するAuto Layoutフレームには更新版が標準で使われます。既存フレームは従来方式のままで、自動的には更新されません。選択範囲またはページ単位で更新でき、変更によって見た目が変わる箇所は適用前に確認できます。Figmaは2027年1月まで両方式の切り替えを提供する予定です。",
+  "impact": "今回の変更は単なる操作画面の更新ではなく、デザインデータとCSS実装の対応関係に影響します。特に、固定幅よりpadding合計が大きいフレーム、親子で異なるstroke設定を持つコンポーネント、stroke幅が異なるFill containerの子要素、Auto gapを使ったナビゲーションなどは、更新後にサイズや位置が変わる可能性があります。\n\n誤解しやすい点は、既存ファイルが一斉に変更されるわけではないことです。一方で、新規フレームは更新版で作られるため、同じファイル内に新旧方式が混在する可能性があります。デザインシステムの管理者が方針を決めないまま各担当者が個別に更新すると、コンポーネントと画面側で挙動が揃わない恐れがあります。Dev Modeから得られるコードはCSS Flexboxへより直接的に対応するため、デザイナーと実装者が余白や枠線の扱いを共有しやすくなる点は実務上の利点です。",
+  "action": "まず、進行中の案件で既存フレームを急いで一括更新する必要はありません。代表的なコンポーネントを複製し、更新版へ切り替えて差分を確認してください。確認対象は、ボタンや入力欄のpadding、カードの内側stroke、均等幅カラム、Auto gapを使うヘッダー、子要素が一つになる可変コンポーネントです。デスクトップ幅だけでなく、狭い画面や長いテキストでも確認します。\n\nデザインシステムを運用している場合は、更新対象、検証担当、ライブラリの再公開日を決めます。コンポーネントを更新すると、そのインスタンスでは方式を個別に上書きできないため、公開前に主要画面で影響を確認する必要があります。また、同一案件内で新旧Auto Layoutが混在する期間は、ファイル説明や変更履歴へ使用方式を記録すると安全です。\n\nWebディレクターはデザイナーとフロントエンド担当者を交え、Figma上のstrokeがCSSのborderとoutlineのどちらに相当するか、均等幅をFlexboxとGridのどちらで実装するかを確認してください。2027年1月を移行期限として捉え、既存資産を重要度順に検証する計画を作るのが現実的です。",
+  "urgency": 3,
+  "audienceImpact": 4,
+  "selectionReason": "直近7日では、GitHub Copilotのモデル追加やエージェント機能、WordPress 7.1 Beta 3、ChatGPTの米国向けHealth機能、AIモデル評価中のセキュリティ事案なども確認しました。その中で本件は、地域限定やベータ版に限られず、新規Auto Layoutフレームの標準挙動を変更する正式更新です。Web制作に携わるデザイナー、実装者、ディレクターの引き継ぎと品質確認へ直接影響し、既存資産についても2027年1月までに移行判断が必要になるため優先しました。",
+  "sources": [
+    {
+      "name": "Figma Release Notes: Design closer to CSS with the updated auto layout option",
+      "url": "https://www.figma.com/release-notes/",
+      "publishedAt": "2026-07-24",
+      "isPrimary": true
+    },
+    {
+      "name": "Figma Help Center: Use auto layout with CSS Flexbox in mind",
+      "url": "https://help.figma.com/hc/en-us/articles/42031586813719-Use-auto-layout-with-CSS-Flexbox-in-mind",
+      "publishedAt": "2026-07-24",
+      "isPrimary": true
+    }
+  ],
+  "date": "2026.07.25",
+  "publishedAt": "2026-07-25T06:08:25.271Z",
+  "approvedBy": "web-direction-lab-bot"
+}

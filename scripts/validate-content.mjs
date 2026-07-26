@@ -13,7 +13,11 @@ const newsCategories = new Set([
   "Web制作・CMS", "クラウド・インフラ", "セキュリティ・プライバシー", "Webサービス",
   "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他",
 ]);
-const columnCategories = new Set(["Webの仕事術", "AI活用", "サイト改善", "キャリア・学習", "仕事術", "AI・効率化"]);
+const columnCategories = new Set([
+  "Webサイト制作", "Webサイト改善", "CMS・運用", "SEO・アクセス解析", "業務効率化・AI活用",
+  // Published automation history keeps its original category for auditability.
+  "Webの仕事術", "AI活用", "サイト改善", "キャリア・学習", "仕事術", "AI・効率化",
+]);
 
 let failures = 0;
 const knowledgeIndex = JSON.parse(await readFile("content/knowledge/articles.json", "utf8"));

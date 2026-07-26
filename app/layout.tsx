@@ -16,21 +16,21 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://web-direction-lab.vercel.app"),
-  title: "Web Growth Lab｜Webの知識と仕組みで、成果を育てる",
-  description: "Web制作・SEO・AI・業務改善の知識を発信し、ツール、テンプレート、Webサイト診断・改善・制作・運用支援を提供します。",
+  title: "Web Growth Lab｜Webサイトと仕組みで、事業の課題を小さく解決",
+  description: "小規模Webサイト制作、既存サイト改善、Web運用、業務効率化ツール、Web・AI活用の相談に対応します。",
   openGraph: {
     type: "website",
     locale: "ja_JP",
     url: "/",
     siteName: "Web Growth Lab",
-    title: "Web Growth Lab｜Webの知識と仕組みで、成果を育てる",
-    description: "Web制作・SEO・AI・業務改善を、学ぶ・使う・相談するまで一つにつなげます。",
+    title: "Web Growth Lab｜Webサイトと仕組みで、事業の課題を小さく解決",
+    description: "Web制作・改善・運用と、日常業務の小さな自動化を必要な規模で支援します。",
     images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Web Growth Lab" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Web Growth Lab",
-    description: "Web制作・SEO・AI・業務改善を、学ぶ・使う・相談するまで一つにつなげます。",
+    description: "Web制作・改善・運用と、日常業務の小さな自動化を必要な規模で支援します。",
     images: ["/twitter-image.png"],
   },
   other: {

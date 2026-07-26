@@ -135,7 +135,7 @@
         "status": { "enum": ["draft", "approved", "published"] },
         "title": { "type": "string", "minLength": 8 },
         "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        "category": { "enum": ["仕事術", "AI・効率化"] },
+        "category": { "enum": ["Webサイト制作", "Webサイト改善", "CMS・運用", "SEO・アクセス解析", "業務効率化・AI活用"] },
         "summary": { "type": "string", "minLength": 40 },
         "videoHook": { "type": "string", "minLength": 8 },
         "lead": { "type": "string", "minLength": 80 },

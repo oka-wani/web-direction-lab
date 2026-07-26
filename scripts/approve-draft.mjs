@@ -139,8 +139,11 @@ if (approveColumn) {
   const index = JSON.parse(await readFile(indexPath, "utf8"));
   assertNoCollision(index, draft.column, "Column");
   const image = {
-    "仕事術": "/images/column/web-system-learning.webp",
-    "AI・効率化": "/images/column/ai-human-judgement.webp",
+    "Webサイト制作": "/images/column/web-system-learning.webp",
+    "Webサイト改善": "/images/column/web-system-learning.webp",
+    "CMS・運用": "/images/column/web-system-learning.webp",
+    "SEO・アクセス解析": "/images/column/web-system-learning.webp",
+    "業務効率化・AI活用": "/images/column/ai-human-judgement.webp",
   }[draft.column.category] || "/images/column/web-system-learning.webp";
   const post = {
     ...draft.column,

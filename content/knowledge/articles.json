@@ -1,5 +1,35 @@
 [
   {
+    "slug": "http-cache-mechanism-and-configuration",
+    "category": "システム",
+    "date": "2026.07.28",
+    "title": "HTTPキャッシュとは何か：表示速度と更新反映を両立する仕組みと設定",
+    "description": "HTTPキャッシュがレスポンスを再利用する仕組みを、Cache-Control、ETag、CDN、ブラウザキャッシュの関係から解説します。表示速度を高めながら更新内容を正しく反映するための判断基準と確認手順を、Web制作・運用の実務に沿って整理します。",
+    "level": "中級",
+    "minutes": 12,
+    "type": "system",
+    "tags": [
+      "HTTPキャッシュ",
+      "Cache-Control",
+      "ブラウザキャッシュ",
+      "共有キャッシュ",
+      "CDN",
+      "ETag",
+      "Last-Modified",
+      "条件付きリクエスト"
+    ],
+    "keywords": [
+      "HTTPキャッシュ",
+      "Cache-Control",
+      "ETag",
+      "304 Not Modified",
+      "ブラウザキャッシュ",
+      "CDNキャッシュ",
+      "キャッシュバスティング",
+      "レスポンスヘッダー"
+    ]
+  },
+  {
     "slug": "http-cache-mechanism-and-operation",
     "category": "システム",
     "date": "2026.07.25",

@@ -1,0 +1,16 @@
+{
+  "runDate": "2026-07-28",
+  "publishedAt": "2026-07-28T00:16:14.667Z",
+  "updatedAt": "2026-07-28T00:16:14.667Z",
+  "publishedBy": "web-direction-lab-bot",
+  "publishedKinds": [
+    "knowledge",
+    "news",
+    "column"
+  ],
+  "urls": {
+    "knowledge": "/articles/http-cache-mechanism-and-configuration",
+    "news": "/news/wordpress-7-0-2-security-update",
+    "column": "/column/website-inquiry-decision-information"
+  }
+}

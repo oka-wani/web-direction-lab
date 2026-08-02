@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import ArticlesList from "../articles/ArticlesList";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
-import { guideSteps } from "../guide/guide-data";
 
-export const metadata: Metadata = { title:"Webナレッジ｜Wani san Web", description:"Webの仕組み、制作、サーバー、SEO、解析、マーケティング、AI活用を、基礎から実務まで体系的に学べます。" };
+export const metadata: Metadata = { title:"ナレッジ｜Wani san Web", description:"SEO、業務効率化、Webマーケティングの判断と改善に役立つ実践ナレッジを発信します。" };
+
+const categories = [
+  { number: "01", label: "SEO", title: "SEO", text: "検索で見つかり、サービスへの相談につなげるための考え方と改善方法。" },
+  { number: "02", label: "EFFICIENCY", title: "効率化", text: "AI・自動化・運用設計を使い、日々の作業と判断の負担を減らす方法。" },
+  { number: "03", label: "MARKETING", title: "マーケティング", text: "サイト・SNS・広告をつなぎ、認知から問い合わせまでを設計する方法。" },
+] as const;
 
 export default function KnowledgePage() {
   return <main className="knowledge-hub"><SiteHeader current="knowledge" />
-    <section className="knowledge-hub-hero knowledge-hub-hero--simple"><div><div className="knowledge-hero-copy"><span className="section-kicker" aria-hidden="true">WEB KNOWLEDGE</span><h1>Webナレッジ</h1><p className="knowledge-hero-subtitle">Webの知識を、基礎から実務まで。</p><p className="knowledge-hero-description">基礎知識は学習順に、ナレッジはカテゴリやキーワードから。目的に合わせて二つの入口を使い分けられます。</p></div><nav className="knowledge-entry-links" aria-label="Webナレッジ内のコンテンツ"><a href="#basics"><span>01</span><div><b>基礎知識</b><small>順番に学ぶ</small></div><i>↓</i></a><a href="#articles"><span>02</span><div><b>ナレッジ</b><small>テーマから探す</small></div><i>↓</i></a></nav></div></section>
-
-    <section className="knowledge-paths knowledge-paths--compact" id="basics"><header><span className="section-kicker" aria-hidden="true">BASIC KNOWLEDGE</span><h2>基礎知識</h2><p>Webサイトが表示される仕組みから、制作・公開・集客・改善・提案までを順番に学びます。</p></header><ol className="knowledge-path-grid">{guideSteps.map((step) => <li key={step.slug}><a href={`/knowledge/${step.slug}`}><span>{step.number}</span><div><small>STEP {step.number}</small><h3>{step.title}</h3><p>{step.description}</p><em>{step.articles.length}テーマ</em></div><b>→</b></a></li>)}</ol></section>
-
-    <section className="knowledge-library" id="articles"><header><span className="section-kicker" aria-hidden="true">KNOWLEDGE</span><h2>ナレッジ</h2><p>実務で確認したいテーマを、カテゴリまたはキーワードから探せます。</p></header><ArticlesList /></section><SiteFooter />
+    <section className="knowledge-hub-hero knowledge-hub-hero--simple"><div><div className="knowledge-hero-copy"><span className="section-kicker" aria-hidden="true">KNOWLEDGE</span><h1>ナレッジ</h1><p className="knowledge-hero-subtitle">知るだけで終わらない、成果につなげるWebの知識。</p><p className="knowledge-hero-description">SEO、効率化、マーケティングを中心に、小さな会社が次の一手を判断できる実践的な内容を発信します。</p></div></div></section>
+    <section className="knowledge-reset"><header><span className="section-kicker" aria-hidden="true">CATEGORIES</span><h2>3つのテーマから探す</h2></header><div className="knowledge-reset-grid">{categories.map((category) => <article key={category.title}><span>{category.number}</span><small>{category.label}</small><h3>{category.title}</h3><p>{category.text}</p></article>)}</div><div className="knowledge-reset-empty"><span>NEW CONTENT COMING SOON</span><h2>新しい方針で、ナレッジを準備しています。</h2><p>集客や業務改善の相談につながるテーマから、順次公開します。</p></div></section>
+    <SiteFooter />
   </main>;
 }

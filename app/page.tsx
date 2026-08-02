@@ -5,22 +5,20 @@ import { faqs, serviceGroups, services } from "./platform-data";
 
 function HeroBusinessVisual() {
   return <div className="wsw-hero-business" aria-hidden="true">
-    <div className="wsw-hero-business-grid" />
-    <span className="wsw-hero-business-label">BUSINESS GROWTH</span>
-    <div className="wsw-hero-business-line"><i /><i /><i /><i /></div>
-    <div className="wsw-hero-business-card wsw-hero-business-card--marketing"><small>01 / WEB MARKETING</small><b>集客の仕組みをつくる</b><span>WEB / SEO / SNS / AD</span></div>
-    <div className="wsw-hero-business-card wsw-hero-business-card--dx"><small>02 / AI &amp; DX</small><b>業務の無駄を減らす</b><span>AI / AUTOMATION / OPERATION</span></div>
-    <strong>GROW<br />SMART.</strong>
+    <span className="wsw-hero-business-label">WEB &amp; BUSINESS PARTNER</span>
+    <strong>整えて、<br />成果につなぐ。</strong>
+    <div className="wsw-hero-business-menu">
+      <div><span>01</span><small>WEB MARKETING</small><b>集客の仕組みをつくる</b><i>WEB / SEO / SNS / AD</i></div>
+      <div><span>02</span><small>AI &amp; OPERATION</small><b>日々の業務を整える</b><i>AI / AUTOMATION / DX</i></div>
+    </div>
+    <p>PLAN　→　BUILD　→　IMPROVE</p>
   </div>;
 }
 
 const problems = [
-  "Webサイトを作りたいが、何から始めればよいか分からない",
-  "Web担当者がおらず、何から始めるべきか分からない",
-  "今のサイトから問い合わせが来ない",
-  "SEO・SNS・広告をどう組み合わせるべきか分からない",
-  "公開後の更新や集客もまとめて相談したい",
-  "日々の面倒な作業を自動化したい",
+  { label: "START", title: "Web活用の土台をつくる", text: "サイト制作、情報整理、計測環境まで、最初に必要なものを整理します。" },
+  { label: "GROW", title: "集客を成果につなげる", text: "SEO・SNS・広告とサイト内の導線をつなぎ、問い合わせまで改善します。" },
+  { label: "IMPROVE", title: "日々の業務を軽くする", text: "更新や集計などの手作業を見直し、AI・自動化を必要な範囲から導入します。" },
 ];
 
 const steps = [
@@ -45,8 +43,8 @@ export default function Home() {
     </section>
 
     <section className="platform-section home-problems">
-      <div className="home-problems-intro"><span>START WITH YOUR CHALLENGE</span><h2>依頼内容ではなく、<br />今の困りごとから聞かせてください。</h2><p>Web制作、集客、業務改善。何を頼むべきか決まっていなくても、課題と優先順位から必要な対応を整理します。</p><a className="text-link" href="/contact">困りごとを相談する →</a></div>
-      <ol>{problems.map((problem, index) => <li key={problem}><span>{String(index + 1).padStart(2, "0")}</span><p>{problem}</p></li>)}</ol>
+      <div className="home-problems-intro"><span>WHERE TO BEGIN</span><h2>いま必要なところから、<br />一緒に整える。</h2><p>依頼するサービスを先に決める必要はありません。現状と目標を伺い、優先順位と無理のない進め方を整理します。</p><a className="text-link" href="/contact">現在の状況を相談する →</a></div>
+      <ol>{problems.map((problem, index) => <li key={problem.title}><span>{String(index + 1).padStart(2, "0")} / {problem.label}</span><h3>{problem.title}</h3><p>{problem.text}</p></li>)}</ol>
     </section>
 
     <section className="platform-section home-services">
@@ -75,7 +73,7 @@ export default function Home() {
       <div className="faq-list">{faqs.slice(0, 5).map((faq, index) => <details key={faq.question} open={index === 0}><summary><span>Q</span>{faq.question}<i aria-hidden="true">＋</i></summary><div><span>A</span><p>{faq.answer}</p></div></details>)}</div>
     </section>
 
-    <section className="home-final-cta"><span>CONTACT</span><h2>集客と業務の悩みを、<br />まず一緒に整理しませんか。</h2><p>何を頼むべきか決まっていなくても大丈夫です。現在の課題と予算に合う、小さな一歩から提案します。</p><div className="hero-actions"><a className="button button--primary" href="/contact">無料で相談する <b>→</b></a><a className="button button--secondary" href="/pricing">料金の目安を見る <b>→</b></a></div></section>
+    <section className="home-final-cta"><span>CONTACT</span><h2>集客と業務の悩みを、<br />まず一緒に整理しませんか。</h2><p>何を頼むべきか決まっていなくても大丈夫です。現在の課題と予算に合う、小さな一歩から提案します。</p><div className="hero-actions"><a className="button button--primary" href="/contact">無料で相談する <b>→</b></a><a className="button button--secondary" href="/services#pricing">料金の目安を見る <b>→</b></a></div></section>
     <SiteFooter />
   </main>;
 }

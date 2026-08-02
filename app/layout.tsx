@@ -3,7 +3,7 @@ import "./globals.css";
 import "./content-refresh.css";
 import "./platform.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://web-direction-lab.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://web-direction-lab.kwmno.workers.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

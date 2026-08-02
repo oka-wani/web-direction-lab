@@ -23,6 +23,8 @@ npm install
 npm run dev
 ```
 
+本番環境はCloudflare Workersへデプロイします。Cloudflare向けの設定は `wrangler.jsonc` と `open-next.config.ts` で管理します。
+
 公開用のAPIキーやSNSトークンはリポジトリへ保存せず、GitHub Actions Secretsで管理します。
 
 自動更新の設定と確認手順は [`automation/README.md`](automation/README.md) を参照してください。

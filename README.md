@@ -25,6 +25,8 @@ npm run dev
 
 本番環境はCloudflare Workersへデプロイします。Cloudflare向けの設定は `wrangler.jsonc` と `open-next.config.ts` で管理します。
 
+Cloudflare標準URLは `https://web-direction-lab.kwmno.workers.dev/` です。独自ドメインは表示確認後に接続します。
+
 公開用のAPIキーやSNSトークンはリポジトリへ保存せず、GitHub Actions Secretsで管理します。
 
 自動更新の設定と確認手順は [`automation/README.md`](automation/README.md) を参照してください。

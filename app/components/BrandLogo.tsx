@@ -9,7 +9,7 @@ export function WaniMark({ className = "" }: { className?: string }) {
     <circle cx="34" cy="38" r="6" fill="#fff" />
     <path d="M18 58h48" stroke="#fff" strokeWidth="6" strokeLinecap="round" />
     <path d="M116 33V23c0-9 7-16 16-16s16 7 16 16v10h-32Z" fill="#fff" />
-    <circle cx="133" cy="23" r="8" fill="#A8D65E" />
+    <circle cx="133" cy="23" r="8" fill="#0B6B46" />
   </svg>;
 }
 

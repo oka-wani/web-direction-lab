@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root { --navy:#075b3a; --navy-2:#0b6b46; --yellow:#a8d65e; --cream:#ffffff; --ink:#17352a; --muted:#66766e; --line:#dce8e0; --font-geist-sans:"Helvetica Neue","Yu Gothic",Meiryo,system-ui,sans-serif; --font-geist-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace; }
+:root { --navy:#075b3a; --navy-2:#0b6b46; --yellow:#dfe9e3; --accent:#0b6b46; --accent-soft:#f2f6f4; --cream:#ffffff; --ink:#111715; --muted:#65716b; --line:#dce5e0; --font-geist-sans:"Helvetica Neue","Yu Gothic",Meiryo,system-ui,sans-serif; --font-geist-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; background:var(--cream); color:var(--ink); font-family:var(--font-geist-sans), "Noto Sans JP", system-ui, sans-serif; }

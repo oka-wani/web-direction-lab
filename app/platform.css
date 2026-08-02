@@ -255,6 +255,38 @@ footer.site-footer{background:#043b28}
 @media(max-width:920px){.wsw-hero-visual{max-width:620px!important}.wsw-service-axes{grid-template-columns:1fr}.wsw-service-axes article+article{border-left:0;border-top:1px solid rgba(255,255,255,.2)}}
 @media(max-width:720px){.brand-logo-mark{width:52px}.brand-logo-type{font-size:18px}.site-header .brand-logo-mark{width:48px}.site-header .brand-logo-type{font-size:17px}.wsw-hero-visual{min-height:350px}.wsw-hero-mark{left:7%;top:30%;width:86%}.wsw-hero-card{width:190px;padding:14px}.wsw-hero-card--marketing{left:0;top:3%}.wsw-hero-card--dx{right:0;bottom:1%}.wsw-hero-orbit--one{width:230px;height:230px}.wsw-service-axes article{min-height:220px;padding:28px 24px}.home-service-grid,.service-group .service-grid{grid-template-columns:1fr}.service-group>header{grid-template-columns:1fr}.service-group>header p{grid-column:1;grid-row:auto}.site-footer .brand-logo-type{font-size:21px}}
 
+/* 2026-08-02: restrained WSW palette — black wordmark, deep green actions, quiet sage details */
+.site-header .brand-logo{color:var(--ink)}
+.site-header .brand-logo-mark{color:var(--navy)}
+.site-footer .brand-logo{color:#fff}
+.site-footer .brand-logo-mark{color:#fff}
+.hero-inline-brand .brand-logo{color:var(--ink)}
+.hero-inline-brand .brand-logo-mark{color:var(--navy)}
+.site-header>nav .header-contact{color:#fff;background:var(--navy);border-color:var(--navy)}
+.site-header>nav .header-contact:hover{color:#fff;background:var(--navy-2);border-color:var(--navy-2)}
+.simple-home-hero h1 span:after{background:rgba(7,91,58,.16)}
+.wsw-hero-visual:before{background:var(--accent-soft);box-shadow:26px 26px 0 rgba(7,91,58,.16)}
+.wsw-hero-card--dx{border-left-color:var(--accent)}
+.home-services .button--primary,.platform-wide-band .button--primary,.service-detail .button--primary{background:#fff;color:var(--navy)}
+.wsw-service-axes small,.wsw-service-axes b,.case-preview-panel>div>span{color:#dcebe4}
+.case-preview-panel{box-shadow:14px 14px 0 #dfe9e3}
+.service-concerns li:before{background:var(--accent)}
+.home-features .home-feature-grid article>span,.case-type-grid article>span,.column-related-service{color:var(--accent)}
+.home-price-overview,.simple-home-offer,.simple-home-news,.service-tools-section,.home-knowledge-section,.home-news-section{background:var(--accent-soft)}
+.simple-offer-grid>a:hover,.knowledge-entry-links>a:hover{background:#f6f9f7;border-color:#b9cec3}
+.simple-offer-grid .simple-tool-card{border-top-color:var(--navy)}
+.column-card:hover{border-color:#9ab9aa}
+.column-card-visual>span{border-left-color:var(--navy)}
+.column-card-body>div span,.column-card-hook,.column-detail-body>section>small{color:var(--accent)!important}
+.column-detail-meta span{background:#fff;color:var(--navy)}
+.column-detail-hook{color:#fff!important}
+.about-content mark,.knowledge-key-points mark{background:linear-gradient(transparent 62%,rgba(7,91,58,.16) 62%)!important}
+.knowledge-detail-sections mark{background:linear-gradient(transparent 58%,rgba(7,91,58,.16) 58%)}
+.about-note,.practice-points,.guide-note{background:var(--accent-soft);border-left-color:var(--navy)}
+.knowledge-paths--compact .knowledge-path-grid em{background:#edf3f0}
+.knowledge-paths--compact .knowledge-path-grid a>b,.home-news-vertical article:hover>a,.guide-learning-list>li>a:hover .guide-step-arrow{background:var(--navy);border-color:var(--navy);color:#fff}
+@media(max-width:720px){.case-preview-panel{box-shadow:8px 8px 0 #dfe9e3}}
+
 /* 2026-07-26: service-led business site */
 .home-features{padding-top:120px}.home-feature-grid{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}.home-feature-grid article{min-height:255px;padding:28px;display:flex;flex-direction:column;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.home-feature-grid article>span{color:#668c2c;font:750 12px var(--font-geist-mono)}.home-feature-grid h3{margin:auto 0 12px;font-size:20px;line-height:1.45}.home-feature-grid p{margin:0;color:var(--muted);font-size:13px;line-height:1.8}
 .home-price-overview{background:#f3f7ef}.home-price-overview>.platform-section{padding-top:95px;padding-bottom:95px}.home-price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.home-price-grid article{padding:28px;background:#fff;border:1px solid var(--line)}.home-price-grid h3{min-height:55px;margin:0 0 20px;font-size:20px}.home-price-grid dl{margin:0;padding:15px 0;border-top:1px solid var(--line)}.home-price-grid dt{color:var(--muted);font-size:12px}.home-price-grid dd{margin:7px 0 0;font-size:17px;font-weight:850}
@@ -265,3 +297,11 @@ footer.site-footer{background:#043b28}
 .case-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.case-type-grid article{min-height:300px;padding:30px;display:flex;flex-direction:column;border:1px solid var(--line)}.case-type-grid article>span{color:#668c2c;font:800 11px var(--font-geist-mono);letter-spacing:.12em}.case-type-grid h2{margin:42px 0 13px;font-size:25px}.case-type-grid p{margin:0;color:var(--muted);line-height:1.8}.case-type-grid b{margin-top:auto;padding-top:25px;color:#718058}
 @media(max-width:1050px){.home-feature-grid{grid-template-columns:1fr 1fr}.home-price-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.home-feature-grid,.home-price-grid,.price-group-grid,.case-type-grid{grid-template-columns:1fr}.case-preview-panel{padding:30px 24px;grid-template-columns:1fr;gap:35px;box-shadow:8px 8px 0 var(--yellow)}.service-concerns ul{grid-template-columns:1fr}.price-group-grid dl{display:block}.price-group-grid dd{margin-top:7px}.home-features{padding-top:80px}}
+
+/* Keep the restrained palette after legacy service-page rules. */
+.home-price-overview{background:var(--accent-soft)}
+.case-preview-panel{box-shadow:14px 14px 0 #dfe9e3}
+.case-preview-panel>div>span{color:#dcebe4}
+.service-concerns li:before{background:var(--accent)}
+.home-feature-grid article>span,.column-related-service,.case-type-grid article>span{color:var(--accent)}
+@media(max-width:720px){.case-preview-panel{box-shadow:8px 8px 0 #dfe9e3}}

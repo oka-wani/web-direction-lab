@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Web Direction Lab daily content bundle",
+  "title": "Wani san Web daily content bundle",
   "type": "object",
   "additionalProperties": true,
   "required": ["runDate", "knowledge", "news", "column", "reviewChecklist"],
@@ -135,7 +135,7 @@
         "status": { "enum": ["draft", "approved", "published"] },
         "title": { "type": "string", "minLength": 8 },
         "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        "category": { "enum": ["Webサイト制作", "Webサイト改善", "CMS・運用", "SEO・アクセス解析", "業務効率化・AI活用"] },
+        "category": { "enum": ["Webマーケティング", "AI・業務改善"] },
         "summary": { "type": "string", "minLength": 40 },
         "videoHook": { "type": "string", "minLength": 8 },
         "lead": { "type": "string", "minLength": 80 },

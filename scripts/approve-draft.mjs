@@ -139,6 +139,8 @@ if (approveColumn) {
   const index = JSON.parse(await readFile(indexPath, "utf8"));
   assertNoCollision(index, draft.column, "Column");
   const image = {
+    "Webマーケティング": "/images/column/web-system-learning.webp",
+    "AI・業務改善": "/images/column/ai-human-judgement.webp",
     "Webサイト制作": "/images/column/web-system-learning.webp",
     "Webサイト改善": "/images/column/web-system-learning.webp",
     "CMS・運用": "/images/column/web-system-learning.webp",

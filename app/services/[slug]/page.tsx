@@ -11,7 +11,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const service = getService((await params).slug);
-  return service ? { title: `${service.title}｜Web Growth Lab`, description: service.summary } : {};
+  return service ? { title: `${service.title}｜Wani san Web`, description: service.summary } : {};
 }
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -19,7 +19,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   if (!service) notFound();
   return <main className="platform-page service-detail"><SiteHeader current="services" />
     <div className="platform-breadcrumb"><a href="/">トップ</a><span>›</span><a href="/services">サービス</a><span>›</span><span>{service.title}</span></div>
-    <section className="service-detail-hero"><div><span>{service.label}</span><h1>{service.title}</h1><p>{service.description}</p><div className="hero-actions"><a className="button button--primary" href="/contact">このサービスについて相談する <b>→</b></a><a className="button button--secondary" href="/pricing">料金の目安を見る <b>→</b></a></div></div><dl><div><dt>料金の目安</dt><dd>{service.price}</dd></div><div><dt>納期・期間の目安</dt><dd>{service.period}</dd></div></dl></section>
+    <section className="service-detail-hero"><div><span>{service.group} / {service.label}</span><h1>{service.title}</h1><p>{service.description}</p><div className="hero-actions"><a className="button button--primary" href="/contact">このサービスを相談する <b>→</b></a><a className="button button--secondary" href="/pricing">料金の目安を見る <b>→</b></a></div></div><dl><div><dt>料金の目安</dt><dd>{service.price}</dd></div><div><dt>納期・期間の目安</dt><dd>{service.period}</dd></div></dl></section>
     <section className="service-detail-section service-detail-section--tint"><div><span>RECOMMENDED FOR</span><h2>このような方におすすめ</h2></div><ul className="check-panel">{service.recommendedFor.map((item) => <li key={item}>{item}</li>)}</ul></section>
     <section className="service-detail-section"><div><span>SOLUTIONS</span><h2>解決できる課題</h2></div><ul className="number-list">{service.solvedIssues.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><b>{item}</b></li>)}</ul></section>
     <section className="service-detail-section"><div><span>DELIVERABLES</span><h2>対応内容</h2></div><ul className="number-list">{service.deliverables.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><b>{item}</b></li>)}</ul></section>

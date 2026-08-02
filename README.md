@@ -1,4 +1,4 @@
-# Web Growth Lab
+# Wani san Web
 
 Webで成果を出すための知識・ツール・サービスを提供するプラットフォームです。
 

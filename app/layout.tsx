@@ -1,45 +1,35 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "./content-refresh.css";
 import "./platform.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://web-direction-lab.vercel.app";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://web-direction-lab.vercel.app"),
-  title: "Web Growth Lab｜Webサイトと仕組みで、事業の課題を小さく解決",
-  description: "小規模Webサイト制作、既存サイト改善、Web運用、業務効率化ツール、Web・AI活用の相談に対応します。",
+  metadataBase: new URL(siteUrl),
+  title: "Wani san Web｜小さな会社の集客と業務を改善するWeb・DXパートナー",
+  description: "Webサイト制作・運用、SEO・LLMO、Instagram・Web広告相談、AI活用・業務自動化まで。小さな会社の売上と利益を増やす仕組みづくりを支援します。",
   openGraph: {
     type: "website",
     locale: "ja_JP",
     url: "/",
-    siteName: "Web Growth Lab",
-    title: "Web Growth Lab｜Webサイトと仕組みで、事業の課題を小さく解決",
-    description: "Web制作・改善・運用と、日常業務の小さな自動化を必要な規模で支援します。",
-    images: [{ url: "/opengraph-image.png", width: 1200, height: 630, alt: "Web Growth Lab" }],
+    siteName: "Wani san Web",
+    title: "Wani san Web｜小さな会社の集客と業務を改善する",
+    description: "WebマーケティングとAI・業務改善を、必要な規模から一貫して支援します。",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Wani san Web" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Web Growth Lab",
-    description: "Web制作・改善・運用と、日常業務の小さな自動化を必要な規模で支援します。",
-    images: ["/twitter-image.png"],
+    title: "Wani san Web",
+    description: "小さな会社の集客と業務を改善するWeb・DXパートナー。",
+    images: ["/twitter-image"],
   },
   other: {
     "codex-preview": "development",
   },
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    shortcut: "/favicon.ico",
-    apple: "/icon.png",
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
   },
 };
 
@@ -50,9 +40,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ProfessionalService",
+          name: "Wani san Web",
+          url: siteUrl,
+          description: "小さな会社の集客と業務を改善するWeb・DXパートナー",
+          areaServed: "JP",
+          serviceType: ["Webサイト制作", "Webマーケティング支援", "AI・業務改善支援"],
+        }) }} />
         {children}
       </body>
     </html>

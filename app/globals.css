@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root { --navy:#10243f; --navy-2:#244360; --yellow:#b8ed55; --cream:#ffffff; --ink:#14253d; --muted:#647184; --line:#dfe5e2; }
+:root { --navy:#075b3a; --navy-2:#0b6b46; --yellow:#a8d65e; --cream:#ffffff; --ink:#17352a; --muted:#66766e; --line:#dce8e0; --font-geist-sans:"Helvetica Neue","Yu Gothic",Meiryo,system-ui,sans-serif; --font-geist-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace; }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; background:var(--cream); color:var(--ink); font-family:var(--font-geist-sans), "Noto Sans JP", system-ui, sans-serif; }
@@ -11,7 +11,7 @@ a { color:inherit; text-decoration:none; }
 .logo span:after { content:""; position:absolute; left:0; right:0; height:5px; bottom:-5px; background:var(--yellow); }
 nav { display:flex; gap:36px; align-items:center; }
 nav a { font-size:14px; font-weight:650; transition:.2s; }
-nav a:hover, nav a:focus-visible { color:#4f7e10; }
+nav a:hover, nav a:focus-visible { color:#0b6b46; }
 .hero { min-height:590px; display:grid; grid-template-columns:58% 42%; border-bottom:1px solid var(--line); overflow:hidden; }
 .hero-copy { padding:clamp(66px,7vw,102px) clamp(30px,5.4vw,86px); display:flex; flex-direction:column; justify-content:center; }
 .eyebrow,.section-kicker { font-size:12px; letter-spacing:.18em; font-weight:800; color:#4f7e10; margin:0 0 20px; }

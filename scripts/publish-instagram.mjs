@@ -17,7 +17,7 @@ const post = async (path, params) => {
   if (!response.ok) throw new Error(`Instagram API error ${response.status}: ${JSON.stringify(result)}`);
   return result;
 };
-const caption = `${video.hook}\n\n${video.cta}\n\n※音声はAIで生成しています。\n#効率化 #行動経済 #仕事術`;
+const caption = `${video.hook}\n\n${video.cta}\n\n※音声はAIで生成しています。\n#Web集客 #AI活用 #業務改善`;
 const container = await post(`${process.env.INSTAGRAM_USER_ID}/media`, { media_type: "REELS", video_url: videoUrl, caption, share_to_feed: "true" });
 let status;
 for (let attempt = 0; attempt < 60; attempt += 1) {

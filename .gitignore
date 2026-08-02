@@ -7,3 +7,8 @@ out/
 .openai/
 .vinext/
 .sites-runtime/
+.open-next/
+.wrangler/
+.dev.vars
+cloudflare-env.d.ts
+*.tsbuildinfo

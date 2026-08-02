@@ -1,28 +1,24 @@
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
+import { BrandLogo, WaniMark } from "./components/BrandLogo";
 import { columnItems } from "./column/column-data";
-import { faqs, priceGroups, services } from "./platform-data";
-
-function HeroPageLayer({ className = "" }: { className?: string }) {
-  return <div className={`brand-page ${className}`}><span className="brand-page-bar"><i /><i /><i /></span><b /><em /><em /><div><i /><i /></div></div>;
-}
+import { faqs, priceGroups, serviceGroups, services } from "./platform-data";
 
 function HeroBrandVisual() {
-  return <div className="brand-visual brand-visual--layers simple-home-brand-visual" aria-hidden="true">
-    <HeroPageLayer className="brand-page--back" />
-    <HeroPageLayer className="brand-page--middle" />
-    <HeroPageLayer className="brand-page--front" />
-    <span className="brand-route brand-route--one" /><span className="brand-route brand-route--two" />
-    <i className="brand-route-dot brand-route-dot--one" /><i className="brand-route-dot brand-route-dot--two" />
-    <strong>WGL</strong><small>CREATE / IMPROVE / AUTOMATE</small>
+  return <div className="wsw-hero-visual" aria-hidden="true">
+    <span className="wsw-hero-orbit wsw-hero-orbit--one" /><span className="wsw-hero-orbit wsw-hero-orbit--two" />
+    <div className="wsw-hero-mark"><WaniMark /></div>
+    <div className="wsw-hero-card wsw-hero-card--marketing"><small>WEB MARKETING</small><b>集客と売上を増やす</b></div>
+    <div className="wsw-hero-card wsw-hero-card--dx"><small>AI &amp; DX</small><b>効率化して利益を増やす</b></div>
+    <strong>WSW</strong>
   </div>;
 }
 
 const problems = [
   "Webサイトを作りたいが、何から始めればよいか分からない",
-  "制作会社へ依頼するほどの予算はない",
+  "Web担当者がおらず、何から始めるべきか分からない",
   "今のサイトから問い合わせが来ない",
-  "お知らせや実績を自分たちで更新したい",
-  "公開後も更新や改善を手伝ってほしい",
+  "SEO・SNS・広告をどう組み合わせるべきか分からない",
+  "公開後の更新や集客もまとめて相談したい",
   "日々の面倒な作業を自動化したい",
 ];
 
@@ -30,7 +26,7 @@ const features = [
   { title: "小規模な相談から対応", text: "大規模なリニューアルだけでなく、1ページ改善や簡易診断から相談できます。" },
   { title: "制作前の整理から支援", text: "掲載内容やサイト構成が決まっていなくても、必要な情報の整理から対応します。" },
   { title: "制作後も相談できる", text: "公開して終わりではなく、更新、改善、アクセス確認まで継続して支援します。" },
-  { title: "Web以外の業務改善にも対応", text: "日々の作業を効率化する小規模ツールや自動化も相談できます。" },
+  { title: "集客と業務改善を一緒に考える", text: "WebマーケティングとAI・自動化を分けず、売上と利益の両面から支援します。" },
   { title: "必要以上に複雑にしない", text: "予算と運用体制に合わせて、必要な機能だけを提案します。" },
 ];
 
@@ -47,10 +43,11 @@ export default function Home() {
     <SiteHeader />
     <section className="simple-home-hero simple-home-hero--white-grid">
       <div className="simple-home-hero-copy">
-        <p className="eyebrow">WEB GROWTH LAB</p>
-        <h1>Webサイトと仕組みで、<br /><span>事業の課題</span>を小さく解決する。</h1>
-        <p>小規模なWebサイト制作から、既存サイトの改善、更新代行、業務効率化ツールまで。必要なものを必要な規模で提案します。</p>
-        <div className="hero-actions"><a className="button button--primary" href="/contact">Web制作について相談する <b>→</b></a><a className="button button--navy" href="/services">サービスを見る <b>→</b></a></div>
+        <p className="eyebrow">SMALL BUSINESS, SMART GROWTH.</p>
+        <h1>小さな会社の、<br /><span>集客と業務</span>を改善する。</h1>
+        <p>Webサイト、SEO、SNS、広告で売上を増やす。AIと自動化で無駄な作業を減らし、利益を増やす。Web担当者がいない会社の外部パートナーとして支援します。</p>
+        <div className="hero-actions"><a className="button button--primary" href="/contact">無料で相談する <b>→</b></a><a className="button button--secondary" href="/services">サービスを見る <b>→</b></a></div>
+        <BrandLogo className="hero-inline-brand" />
       </div>
       <HeroBrandVisual />
     </section>
@@ -62,12 +59,13 @@ export default function Home() {
     </section>
 
     <section className="platform-section home-services">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>対応できること</h2><p>技術名ではなく、解決したい課題からサービスを選べます。</p></div><a href="/services">サービスを比較する →</a></div>
-      <div className="home-service-grid">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><small>{service.label}</small><h3>{service.title}</h3><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
+      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>売上と利益を、2つの軸から支援します。</h2><p>目の前の悩みだけでなく、集客から日々の業務まで一つの相談先で整理できます。</p></div><a href="/services">サービスを比較する →</a></div>
+      <div className="wsw-service-axes">{serviceGroups.map((group, index) => <article key={group.title}><span>0{index + 1}</span><small>{index === 0 ? "WEB MARKETING" : "AI & BUSINESS IMPROVEMENT"}</small><h3>{group.title}</h3><b>{group.copy}</b><p>{group.description}</p></article>)}</div>
+      <div className="home-service-grid">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><small>{service.group}</small><h3>{service.title}</h3><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
     </section>
 
     <section className="platform-section home-features">
-      <div className="platform-section-heading"><span>WHY WGL</span><h2>小さく始めて、必要な分だけ育てる。</h2><p>制作前の整理から公開後の改善まで、事業と運用に無理のない進め方を大切にします。</p></div>
+      <div className="platform-section-heading"><span>WHY WANI SAN WEB</span><h2>小さく始めて、必要な分だけ育てる。</h2><p>制作前の整理から公開後の集客・改善まで、事業と運用に無理のない進め方を大切にします。</p></div>
       <div className="home-feature-grid">{features.map((feature, index) => <article key={feature.title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{feature.title}</h3><p>{feature.text}</p></article>)}</div>
     </section>
 
@@ -89,7 +87,7 @@ export default function Home() {
     </section>
 
     <section className="platform-section home-column">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>COLUMN</span><h2>事業に役立つ新着コラム</h2><p>Web制作、改善、運用、SEO、業務効率化を、判断と実践につながる形で解説します。</p></div><a href="/column">コラムをすべて見る →</a></div>
+      <div className="platform-section-heading platform-section-heading--link"><div><span>COLUMN</span><h2>集客と業務改善の新着コラム</h2><p>社長や担当者が抱える具体的な悩みから、判断と実践につながる方法を解説します。</p></div><a href="/column">コラムをすべて見る →</a></div>
       <div className="simple-column-grid">{columnItems.slice(0, 3).map((item) => <a href={`/column/${item.slug}`} key={item.slug}><div style={{ backgroundImage: `url(${item.image})` }} /><small>{item.category}　{item.date}</small><h3>{item.title}</h3><p>{item.summary}</p><b className="card-read-link"><span>続きを読む</span><i>→</i></b></a>)}</div>
     </section>
 
@@ -98,7 +96,7 @@ export default function Home() {
       <div className="faq-list">{faqs.slice(0, 5).map((faq, index) => <details key={faq.question} open={index === 0}><summary><span>Q</span>{faq.question}<i aria-hidden="true">＋</i></summary><div><span>A</span><p>{faq.answer}</p></div></details>)}</div>
     </section>
 
-    <section className="home-final-cta"><span>CONTACT</span><h2>何を頼むべきか、<br />決まっていなくても大丈夫です。</h2><p>Webサイト、運用、業務効率化について、現在の課題と予算に合う方法から一緒に整理します。</p><div className="hero-actions"><a className="button button--primary" href="/contact">今の悩みを相談する <b>→</b></a><a className="button button--navy" href="/pricing">料金の目安を見る <b>→</b></a></div></section>
+    <section className="home-final-cta"><span>CONTACT</span><h2>集客と業務の悩みを、<br />まず一緒に整理しませんか。</h2><p>何を頼むべきか決まっていなくても大丈夫です。現在の課題と予算に合う、小さな一歩から提案します。</p><div className="hero-actions"><a className="button button--primary" href="/contact">無料で相談する <b>→</b></a><a className="button button--secondary" href="/pricing">料金の目安を見る <b>→</b></a></div></section>
     <SiteFooter />
   </main>;
 }

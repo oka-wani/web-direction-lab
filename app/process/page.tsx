@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-export const metadata: Metadata = { title: "制作・改善の進め方｜Web Growth Lab", description: "お問い合わせからヒアリング、診断、提案、制作、公開、運用までの進め方をご案内します。" };
+export const metadata: Metadata = { title: "ご依頼の流れ｜Wani san Web", description: "お問い合わせからヒアリング、調査、提案、実行、運用・効果確認までの流れをご案内します。" };
 
 const steps = [
   { number: "01", title: "お問い合わせ", text: "対象サイト、現在のお悩み、希望する支援内容をお送りください。" },
@@ -15,7 +15,7 @@ const steps = [
 
 export default function ProcessPage() {
   return <main className="platform-page"><SiteHeader />
-    <section className="platform-hero platform-hero--compact"><span className="section-kicker" aria-hidden="true">PROCESS</span><h1>制作・改善の進め方</h1><p>ご相談内容に合わせて範囲を調整します。最初から大きな制作を前提にはしません。</p></section>
+    <section className="platform-hero platform-hero--compact"><span className="section-kicker" aria-hidden="true">PROCESS</span><h1>ご依頼の流れ</h1><p>Webマーケティングも業務改善も、ご相談内容に合わせて範囲を調整します。最初から大きな契約を前提にはしません。</p></section>
     <section className="platform-section"><ol className="process-timeline">{steps.map((step) => <li key={step.number}><span>{step.number}</span><div><small>STEP {step.number}</small><h2>{step.title}</h2><p>{step.text}</p></div></li>)}</ol></section>
     <section className="platform-note"><div><span className="section-kicker" aria-hidden="true">CLEAR SCOPE</span><h2>始める前に、範囲と料金を明確に。</h2></div><p>ヒアリング後に作業内容、成果物、料金、スケジュールをご提示し、合意してから着手します。</p></section>
     <SiteFooter />

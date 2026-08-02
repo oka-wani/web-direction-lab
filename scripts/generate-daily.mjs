@@ -243,7 +243,7 @@ const responseSchema = {
         status: { type: "string", enum: ["draft"] },
         title: { type: "string" },
         slug: { type: "string", pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
-        category: { type: "string", enum: ["Webサイト制作", "Webサイト改善", "CMS・運用", "SEO・アクセス解析", "業務効率化・AI活用"] },
+        category: { type: "string", enum: ["Webマーケティング", "AI・業務改善"] },
         summary: { type: "string" },
         videoHook: { type: "string" },
         lead: { type: "string" },
@@ -294,8 +294,8 @@ const responseSchema = {
   },
 };
 
-const developerPrompt = `あなたはWeb Growth Labの編集者です。
-対象読者は、Webディレクター・Webコンサルを目指す20〜40代です。
+const developerPrompt = `あなたはWani san Webの編集者です。
+対象読者は、Web担当者がいない中小企業の経営者・担当者、個人事業主です。
 
 成果物:
 - 長く役立つナレッジ記事の下書き1件
@@ -342,9 +342,11 @@ const developerPrompt = `あなたはWeb Growth Labの編集者です。
 - 検索結果だけで裏付けられない主張を作らない
 - 確認できない内容は断定しない
 - SEOタイトルは誇張や煽りを避ける
-- コラムは「Webサイト制作」「Webサイト改善」「CMS・運用」「SEO・アクセス解析」「業務効率化・AI活用」のいずれかにする
-- 読者の悩み、原因、解決方法、自分で対応できる範囲、専門家へ依頼した方がよいケース、WGLで支援できる内容、関連サービスへのCTAにつながる内容にする
-- 一般的な仕事術ではなく、Web制作・改善・運用、または小規模な業務自動化の依頼につながる具体的なテーマを選ぶ
+- コラムは「Webマーケティング」「AI・業務改善」のいずれかにする
+- 読者の悩み、原因、解決方法、自分で対応できる範囲、専門家へ依頼した方がよいケース、WSWで支援できる内容、関連サービスへのCTAにつながる内容にする
+- 単なる用語解説ではなく、社長が思わずクリックしたくなる悩み解決型のテーマを選ぶ
+- WebマーケティングではWeb制作、SEO、LLMO、UX、アクセス解析、Instagram、Web広告、コンテンツマーケティングを扱う
+- AI・業務改善ではChatGPT、業務整理、自動化、Excel、GAS、Python、API、AIエージェントを扱う
 - コラムは検索流入と30〜60秒のショート動画化を前提に、読者が思わず理由を知りたくなる疑問・意外な結論・現場の失敗を入口にする
 - タイトルは具体的な悩みまたは意外性を含め、videoHookは冒頭3秒で続きを見たくなる一文にする。ただし内容以上に煽らない
 - コラムは専門用語の辞書解説ではなく、Webの現場で起きる悩み、判断、失敗、変化を入口にする

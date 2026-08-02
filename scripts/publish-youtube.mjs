@@ -14,8 +14,8 @@ const tokenResponse = await fetch("https://oauth2.googleapis.com/token", { metho
 const token = await tokenResponse.json();
 if (!tokenResponse.ok) throw new Error(`YouTube token error ${tokenResponse.status}: ${JSON.stringify(token)}`);
 const bytes = await readFile(file);
-const description = `${video.reason}\n\n${video.cta}\n\n※音声はAIで生成しています。\n#効率化 #行動経済 #仕事術 #Shorts`;
-const init = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", { method: "POST", headers: { Authorization: `Bearer ${token.access_token}`, "Content-Type": "application/json", "X-Upload-Content-Type": "video/mp4", "X-Upload-Content-Length": String(bytes.length) }, body: JSON.stringify({ snippet: { title: video.hook.slice(0, 100), description, categoryId: "27", tags: ["効率化", "行動経済", "仕事術"] }, status: { privacyStatus: process.env.YOUTUBE_PRIVACY_STATUS || "public", selfDeclaredMadeForKids: false } }) });
+const description = `${video.reason}\n\n${video.cta}\n\n※音声はAIで生成しています。\n#Web集客 #AI活用 #業務改善 #Shorts`;
+const init = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", { method: "POST", headers: { Authorization: `Bearer ${token.access_token}`, "Content-Type": "application/json", "X-Upload-Content-Type": "video/mp4", "X-Upload-Content-Length": String(bytes.length) }, body: JSON.stringify({ snippet: { title: video.hook.slice(0, 100), description, categoryId: "27", tags: ["Web集客", "AI活用", "業務改善"] }, status: { privacyStatus: process.env.YOUTUBE_PRIVACY_STATUS || "public", selfDeclaredMadeForKids: false } }) });
 if (!init.ok) throw new Error(`YouTube upload initialization error ${init.status}: ${await init.text()}`);
 const location = init.headers.get("location");
 if (!location) throw new Error("YouTube did not return a resumable upload URL.");

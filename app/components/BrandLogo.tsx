@@ -1,0 +1,21 @@
+type BrandLogoProps = {
+  compact?: boolean;
+  className?: string;
+};
+
+export function WaniMark({ className = "" }: { className?: string }) {
+  return <svg className={className} viewBox="0 0 240 112" role="img" aria-label="横向きのワニをWの形で表したWani san Webのシンボル">
+    <path d="M18 36c0-8 6-14 14-14h55L116 4c5-3 10-4 16-4h18c8 0 14 4 18 11l20 35 18-20c5-6 11-9 18-9 9 0 16 5 19 13 3 7 1 15-4 21l-28 35c-5 7-12 10-21 10h-10c-9 0-16-4-20-12l-15-25-16 27c-5 8-12 12-21 12h-9c-8 0-15-3-20-9L62 72H32c-8 0-14-6-14-14V36Z" fill="currentColor" />
+    <circle cx="34" cy="38" r="6" fill="#fff" />
+    <path d="M18 58h48" stroke="#fff" strokeWidth="6" strokeLinecap="round" />
+    <path d="M116 33V23c0-9 7-16 16-16s16 7 16 16v10h-32Z" fill="#fff" />
+    <circle cx="133" cy="23" r="8" fill="#A8D65E" />
+  </svg>;
+}
+
+export function BrandLogo({ compact = false, className = "" }: BrandLogoProps) {
+  return <span className={`brand-logo ${compact ? "brand-logo--compact" : ""} ${className}`.trim()}>
+    <WaniMark className="brand-logo-mark" />
+    {!compact && <span className="brand-logo-type">Wani san <b>Web</b></span>}
+  </span>;
+}

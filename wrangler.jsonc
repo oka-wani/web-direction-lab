@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "wani-san-web",
+  "name": "web-direction-lab",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-08-02",
   "compatibility_flags": [
@@ -14,7 +14,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "wani-san-web"
+      "service": "web-direction-lab"
     }
   ],
   "observability": {

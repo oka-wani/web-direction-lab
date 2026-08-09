@@ -1,19 +1,8 @@
+import { BrandLogo } from "./components/BrandLogo";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
 import { faqs, serviceGroups, services } from "./platform-data";
-
-function HeroBusinessVisual() {
-  return <div className="wsw-hero-business" aria-hidden="true">
-    <span className="wsw-hero-business-label">WEB &amp; BUSINESS PARTNER</span>
-    <strong>整えて、<br />成果につなぐ。</strong>
-    <div className="wsw-hero-business-menu">
-      <div><span>01</span><small>WEB MARKETING</small><b>集客の仕組みをつくる</b><i>WEB / SEO / SNS / AD</i></div>
-      <div><span>02</span><small>AI &amp; OPERATION</small><b>日々の業務を整える</b><i>AI / AUTOMATION / DX</i></div>
-    </div>
-    <p>PLAN　→　BUILD　→　IMPROVE</p>
-  </div>;
-}
 
 const problems = [
   { label: "START", title: "Web活用の土台をつくる", text: "サイト制作、情報整理、計測環境まで、最初に必要なものを整理します。" },
@@ -32,14 +21,14 @@ const steps = [
 export default function Home() {
   return <main>
     <SiteHeader />
-    <section className="simple-home-hero simple-home-hero--white-grid">
-      <div className="simple-home-hero-copy">
-        <p className="eyebrow">SMALL BUSINESS, SMART GROWTH</p>
-        <h1>小さな会社の、<br /><span>集客と業務</span>を改善する。</h1>
-        <p>Webサイト、SEO、SNS、広告で売上を増やす。AIと自動化で無駄な作業を減らし、利益を増やす。Web担当者がいない会社の外部パートナーとして支援します。</p>
-        <div className="hero-actions"><a className="button button--primary" href="/contact">無料で相談する <b>→</b></a><a className="button button--secondary" href="/services">サービスを見る <b>→</b></a></div>
+    <section className="wsw-minimal-hero">
+      <div className="wsw-minimal-hero-inner">
+        <BrandLogo />
+        <p className="eyebrow">WEB. SIMPLE. WORK.</p>
+        <h1>考える・動く・伝えるを、<br />もっとシンプルに。</h1>
+        <p className="wsw-minimal-hero-lead">Web集客と日々の業務を、わかりやすく、無理のない形で。小さな会社の外部パートナーとして、一緒に整えます。</p>
+        <a className="wsw-minimal-hero-link" href="/contact">無料で相談する <span aria-hidden="true">→</span></a>
       </div>
-      <HeroBusinessVisual />
     </section>
 
     <section className="platform-section home-problems">

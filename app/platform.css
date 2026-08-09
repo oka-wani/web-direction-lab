@@ -733,3 +733,6 @@ footer.site-footer{background:var(--charcoal)}
   .knowledge-library--search .article-tools{padding:16px}
   .service-choice-grid>article{min-height:0}
 }
+
+.wsw-minimal-hero h1>span::after,
+.wsw-minimal-hero h1>span:after{content:none!important;display:none!important;background:none!important}

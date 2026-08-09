@@ -20,12 +20,18 @@ function dateValue(date: string) {
 export const articleItems = [...(items as ArticleItem[])].sort(
   (a, b) => dateValue(b.date) - dateValue(a.date),
 );
-export const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他"];
 
-export function matchesCategory(article: ArticleItem, category: string) {
-  if (category === "すべて") return true;
-  if (category === "マーケティング・解析") return article.category === "マーケティング" || article.category === "アクセス解析";
-  if (category === "デザイン・UX") return article.category === "デザイン・UX" || article.slug === "site-improvement" || article.slug === "customer-journey";
-  if (category === "その他") return !["SEO", "Web制作", "デザイン・UX", "アクセス解析", "マーケティング", "システム", "AI活用", "Webディレクション"].includes(article.category);
-  return article.category === category;
+export const categories = ["すべて", "フロント", "システム", "SEO", "マーケティング"] as const;
+
+type CategorySource = Pick<ArticleItem, "category" | "type">;
+
+export function getKnowledgeCategory(article: CategorySource) {
+  if (article.category === "SEO" || article.type === "seo") return "SEO";
+  if (["システム", "AI活用"].includes(article.category) || ["system", "ai"].includes(article.type)) return "システム";
+  if (["マーケティング", "アクセス解析", "Webディレクション"].includes(article.category) || ["marketing", "analytics"].includes(article.type)) return "マーケティング";
+  return "フロント";
+}
+
+export function matchesCategory(article: CategorySource, category: string) {
+  return category === "すべて" || getKnowledgeCategory(article) === category;
 }

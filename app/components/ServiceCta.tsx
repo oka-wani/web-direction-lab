@@ -10,7 +10,7 @@ function selectCta(category = "", title = "") {
     label: "LLMO・AI検索対策を見る",
     title: "AI検索にも伝わる、信頼できる情報基盤を整えます。",
     body: "SEOと切り離さず、サービス情報、構造化データ、一次情報、運営者情報を確認します。",
-    href: "/services/llmo-support",
+    href: "/services/seo-support",
   };
   if (/instagram|インスタ|sns/.test(text)) return {
     label: "Instagram運用支援を見る",
@@ -22,7 +22,7 @@ function selectCta(category = "", title = "") {
     label: "Web広告相談を見る",
     title: "広告を出す前に、目的・予算・遷移先を整理します。",
     body: "少額から判断できる計測方法と、広告の受け皿となるページを確認します。",
-    href: "/services/web-ads-consulting",
+    href: "/services/instagram-support",
   };
   if (/seo|検索|title|core web vitals|lcp|インデックス|クロール|アクセス解析/.test(text)) return {
     label: "SEO・アクセス解析を見る",
@@ -34,7 +34,7 @@ function selectCta(category = "", title = "") {
     label: "更新・運用サービスを見る",
     title: "自社更新できる仕組みと、公開後の運用を支援します。",
     body: "管理画面付きサイトの制作から、日々の更新、品質確認、改善まで必要な範囲を整理します。",
-    href: /制作|導入/.test(text) ? "/services/web-production" : "/services/web-operation",
+    href: "/services/web-production",
   };
   if (/ai|chatgpt|自動|効率|仕事術|csv|excel|api/.test(text)) return {
     label: "自動化ツール開発を見る",
@@ -58,7 +58,7 @@ function selectCta(category = "", title = "") {
     label: "AI・業務改善相談",
     title: "何から始めるべきか分からない方へ。",
     body: "現在の課題と目的を伺い、制作、改善、運用、自動化の選択肢を整理します。",
-    href: "/services/ai-business-improvement",
+    href: "/services/automation-tools",
   };
 }
 

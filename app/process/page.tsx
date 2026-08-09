@@ -1,21 +1,18 @@
 import type { Metadata } from "next";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-export const metadata: Metadata = { title: "ご依頼の流れ｜Wani san Web", description: "お問い合わせからヒアリング、調査、提案、実行、運用・効果確認までの流れをご案内します。" };
+export const metadata: Metadata = { title: "ご依頼の流れ｜Wani san Web", description: "相談、整理、提案、実行の4段階で進めます。" };
 
 const steps = [
-  { number: "01", title: "お問い合わせ", text: "対象サイト、現在のお悩み、希望する支援内容をお送りください。" },
-  { number: "02", title: "ヒアリング", text: "目的、背景、体制、予算、希望時期を確認し、課題を整理します。" },
-  { number: "03", title: "診断・調査", text: "必要に応じてサイト、競合、計測状況、運用フローを確認します。" },
-  { number: "04", title: "ご提案・お見積り", text: "対応範囲、優先順位、進め方、料金、スケジュールをご提示します。" },
-  { number: "05", title: "制作・改善", text: "合意した内容に沿って設計、制作、実装、レビューを進めます。" },
-  { number: "06", title: "確認・公開", text: "表示、動作、内容を確認し、必要な手順に沿って公開します。" },
-  { number: "07", title: "運用・効果確認", text: "公開後のデータと利用状況を確認し、次の改善へつなげます。" },
+  { number: "01", title: "相談", text: "現在の悩み、実現したいこと、予算、希望時期をお聞かせください。" },
+  { number: "02", title: "整理", text: "サイトや業務の現状を確認し、課題と優先順位を整理します。" },
+  { number: "03", title: "提案", text: "対応範囲、成果物、料金、スケジュールを分かりやすく提示します。" },
+  { number: "04", title: "実行", text: "合意した内容を制作・改善し、必要に応じて公開後も支援します。" },
 ] as const;
 
 export default function ProcessPage() {
   return <main className="platform-page"><SiteHeader />
-    <section className="platform-hero platform-hero--compact"><span className="section-kicker" aria-hidden="true">PROCESS</span><h1>ご依頼の流れ</h1><p>Webマーケティングも業務改善も、ご相談内容に合わせて範囲を調整します。最初から大きな契約を前提にはしません。</p></section>
+    <section className="platform-hero platform-hero--compact"><span className="section-kicker" aria-hidden="true">PROCESS</span><h1>4段階で、<br />シンプルに進めます。</h1><p>どのサービスを選ぶか決まっていなくても、悩みを伺うところから始めます。</p></section>
     <section className="platform-section"><ol className="process-timeline">{steps.map((step) => <li key={step.number}><span>{step.number}</span><div><small>STEP {step.number}</small><h2>{step.title}</h2><p>{step.text}</p></div></li>)}</ol></section>
     <section className="platform-note"><div><span className="section-kicker" aria-hidden="true">CLEAR SCOPE</span><h2>始める前に、範囲と料金を明確に。</h2></div><p>ヒアリング後に作業内容、成果物、料金、スケジュールをご提示し、合意してから着手します。</p></section>
     <SiteFooter />

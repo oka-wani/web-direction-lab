@@ -8,14 +8,14 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://web-direction-lab.k
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Wani san Web｜小さな会社の集客と業務を改善するWeb・DXパートナー",
-  description: "Webサイト制作・運用、SEO・LLMO、Instagram・Web広告相談、AI活用・業務自動化まで。小さな会社の売上と利益を増やす仕組みづくりを支援します。",
+  description: "Web制作、SEO解析・LLMO、SNS運用・広告、業務改善・ツール開発。小さな会社に必要な4つの支援を、分かりやすく提供します。",
   openGraph: {
     type: "website",
     locale: "ja_JP",
     url: "/",
     siteName: "Wani san Web",
     title: "Wani san Web｜小さな会社の集客と業務を改善する",
-    description: "WebマーケティングとAI・業務改善を、必要な規模から一貫して支援します。",
+    description: "Web制作、SEO解析、SNS・広告、業務改善を、必要な規模から支援します。",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Wani san Web" }],
   },
   twitter: {
@@ -48,7 +48,7 @@ export default function RootLayout({
           url: siteUrl,
           description: "小さな会社の集客と業務を改善するWeb・DXパートナー",
           areaServed: "JP",
-          serviceType: ["Webサイト制作", "Webマーケティング支援", "AI・業務改善支援"],
+          serviceType: ["Web制作", "SEO解析・LLMO", "SNS運用・Web広告", "業務改善・ツール開発"],
         }) }} />
         {children}
       </body>

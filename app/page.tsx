@@ -2,12 +2,13 @@ import { BrandLogo } from "./components/BrandLogo";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
-import { faqs, serviceGroups, services } from "./platform-data";
+import { faqs, services } from "./platform-data";
 
 const problems = [
-  { label: "START", title: "Web活用の土台をつくる", text: "サイト制作、情報整理、計測環境まで、最初に必要なものを整理します。" },
-  { label: "GROW", title: "集客を成果につなげる", text: "SEO・SNS・広告とサイト内の導線をつなぎ、問い合わせまで改善します。" },
-  { label: "IMPROVE", title: "日々の業務を軽くする", text: "更新や集計などの手作業を見直し、AI・自動化を必要な範囲から導入します。" },
+  { label: "WEB", title: "Webサイトをつくりたい", text: "企画・制作・公開まで対応。公開後の運用も追加できます。" },
+  { label: "SEARCH", title: "検索からの集客を増やしたい", text: "SEOとアクセスデータを分析。LLMOもまとめて改善します。" },
+  { label: "SNS / ADS", title: "SNSや広告を活用したい", text: "認知からWebサイト、問い合わせまでの導線を整えます。" },
+  { label: "BUSINESS", title: "手作業を減らしたい", text: "業務を整理し、AI・自動化・小さなツールで改善します。" },
 ];
 
 const steps = [
@@ -43,8 +44,7 @@ export default function Home() {
     </section>
 
     <section className="platform-section home-services">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>Web集客と業務改善を、必要なところから。</h2><p>サイト制作だけ、SEOだけと決めなくても大丈夫です。いまの悩みから、必要な支援を整理します。</p></div><a href="/services">悩みからサービスを探す →</a></div>
-      <div className="wsw-service-axes">{serviceGroups.map((group, index) => <article key={group.title}><span>0{index + 1}</span><small>{index === 0 ? "WEB MARKETING" : "AI & BUSINESS IMPROVEMENT"}</small><h3>{group.title}</h3><b>{group.copy}</b><p>{group.description}</p></article>)}</div>
+      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>できることは、4つです。</h2><p>Web制作、SEO解析、SNS・広告、業務改善。必要なものだけを選べます。</p></div><a href="/services">サービスを見る →</a></div>
       <div className="home-service-grid">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><small>{service.group}</small><h3>{service.title}</h3><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
     </section>
 

@@ -7,7 +7,7 @@ const columnCategories = ["すべて", "Webマーケティング", "AI・業務�
 
 const relatedService: Record<string, { label: string; href: string }> = {
   "Webマーケティング": { label: "Webマーケティング支援", href: "/services" },
-  "AI・業務改善": { label: "AI・業務改善支援", href: "/services/ai-business-improvement" },
+  "AI・業務改善": { label: "業務改善・ツール開発", href: "/services/automation-tools" },
 };
 
 export default function ColumnList() {

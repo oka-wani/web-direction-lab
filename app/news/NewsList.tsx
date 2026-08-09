@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { newsItems, type NewsItem } from "./news-data";
 
-const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "Webディレクション", "その他"];
+const categories = ["すべて", "SEO", "Web制作", "デザイン・UX", "マーケティング・解析", "システム", "AI活用", "その他"];
 
 function matchesNewsCategory(item: NewsItem, category: string) {
   return category === "すべて" || item.category === category;

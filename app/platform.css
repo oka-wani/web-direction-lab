@@ -736,3 +736,6 @@ footer.site-footer{background:var(--charcoal)}
 
 .wsw-minimal-hero h1>span::after,
 .wsw-minimal-hero h1>span:after{content:none!important;display:none!important;background:none!important}
+
+.services-page .service-page-index{grid-template-columns:repeat(4,1fr)}
+@media(max-width:720px){.services-page .service-page-index{grid-template-columns:1fr 1fr}}

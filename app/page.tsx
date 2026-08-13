@@ -44,7 +44,7 @@ export default function Home() {
     </section>
 
     <section className="platform-section home-services">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>できることは、4つです。</h2><p>Web制作、SEO解析、SNS・広告、業務改善。必要なものだけを選べます。</p></div><a href="/services">サービスを見る →</a></div>
+      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>Webと業務の悩みに、4つの支援。</h2><p>一つだけでも、組み合わせても。いま必要なところから支援します。</p></div><a href="/services">サービスを見る →</a></div>
       <div className="home-service-grid">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><small>{service.group}</small><h3>{service.title}</h3><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
     </section>
 

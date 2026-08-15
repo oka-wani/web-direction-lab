@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "web-direction-lab",
   "main": "@astrojs/cloudflare/entrypoints/server",
-  "compatibility_date": "2026-08-16",
+  "compatibility_date": "2026-08-15",
   "compatibility_flags": [
     "nodejs_compat",
     "global_fetch_strictly_public"

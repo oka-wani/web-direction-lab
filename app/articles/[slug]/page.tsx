@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "../../astro-compat";
+import { notFound } from "../../astro-compat";
 import LearningArticle from "../../components/LearningArticle";
 import { getRelatedKnowledge } from "../../knowledge/related";
 
@@ -78,12 +78,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function GeneratedKnowledgePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+export default async function GeneratedKnowledgePage({ slug }: { slug: string }) {
   const post = await readPost(slug);
   if (!post) notFound();
 

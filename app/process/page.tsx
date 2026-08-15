@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 export const metadata: Metadata = { title: "ご依頼の流れ｜Wani san Web", description: "相談、整理、提案、実行の4段階で進めます。" };

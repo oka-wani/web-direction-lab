@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 export const metadata: Metadata = { title: "実績・事例｜Wani san Web", description: "WebマーケティングとAI・業務改善の事例を、課題、対応、結果が分かる形で掲載します。" };

@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Page from "../../../../app/knowledge/[slug]/[topic]/page";
+import { getAllGuideArticles } from "../../../../app/guide/guide-data";
+export function getStaticPaths() { return getAllGuideArticles().map((item) => ({ params: { slug: item.step.slug, topic: item.slug }, props: { item } })); }
+const { slug, topic } = Astro.params;
+const { item } = Astro.props;
+---
+<BaseLayout title={`${item.article.title}｜${item.step.title}｜Wani san Web`} description={item.article.summary}><Page client:load slug={slug!} topic={topic!} /></BaseLayout>

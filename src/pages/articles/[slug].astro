@@ -1,0 +1,29 @@
+---
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GeneratedPage from "../../../app/articles/[slug]/page";
+import TitleTag from "../../../app/articles/title-tag/page";
+import Ga4 from "../../../app/articles/ga4-first-metrics/page";
+import SiteImprovement from "../../../app/articles/site-improvement/page";
+import Dns from "../../../app/articles/dns-basics/page";
+import Api from "../../../app/articles/api-basics/page";
+import AiWorkflow from "../../../app/articles/ai-content-workflow/page";
+import SearchIntent from "../../../app/articles/search-intent/page";
+import CustomerJourney from "../../../app/articles/customer-journey/page";
+import { articleItems } from "../../../app/articles/article-data";
+const hardcoded = { "title-tag": TitleTag, "ga4-first-metrics": Ga4, "site-improvement": SiteImprovement, "dns-basics": Dns, "api-basics": Api, "ai-content-workflow": AiWorkflow, "search-intent": SearchIntent, "customer-journey": CustomerJourney };
+export async function getStaticPaths() {
+  return Promise.all(articleItems.map(async (item) => {
+    let generated = false;
+    try { await readFile(join(process.cwd(), "content/knowledge/posts", `${item.slug}.json`), "utf8"); generated = true; } catch {}
+    return { params: { slug: item.slug }, props: { item, generated } };
+  }));
+}
+const { slug } = Astro.params;
+const { item, generated } = Astro.props;
+const Component = hardcoded[slug as keyof typeof hardcoded];
+---
+<BaseLayout title={item.title} description={item.description}>
+  {generated ? <GeneratedPage slug={slug!} /> : Component ? <Component /> : null}
+</BaseLayout>

@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "../../../astro-compat";
+import { notFound } from "../../../astro-compat";
 import LearningArticle from "../../../components/LearningArticle";
 import { getFoundationContent } from "../../../guide/foundation-content";
 import { getAllGuideArticles, getGuideArticle, getGuideArticleCategory } from "../../../guide/guide-data";
@@ -19,8 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   } : {};
 }
 
-export default async function FoundationTopicPage({ params }: { params: Promise<{ slug: string; topic: string }> }) {
-  const { slug, topic } = await params;
+export default function FoundationTopicPage({ slug, topic }: { slug: string; topic: string }) {
   const item = getGuideArticle(slug, topic);
   if (!item) notFound();
 

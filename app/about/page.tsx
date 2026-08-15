@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 export const metadata: Metadata = { title:"このサイトについて｜Wani san Web", description:"Wani san Webの目的、運営者情報、提供する知識・ツール・サービス、記事作成・編集方針、AI利用、プライバシーについてご案内します。" };

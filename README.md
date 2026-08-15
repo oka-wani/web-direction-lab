@@ -23,10 +23,32 @@ npm install
 npm run dev
 ```
 
-本番環境はCloudflare Workersへデプロイします。Cloudflare向けの設定は `wrangler.jsonc` と `open-next.config.ts` で管理します。
+本番環境はAstroで静的生成したページと、問い合わせAPIのみを含むCloudflare Workerで構成します。Cloudflare向けの設定は `astro.config.mjs` と `wrangler.jsonc` で管理します。
 
 Cloudflare標準の確認用URLは `https://web-direction-lab.kwmno.workers.dev/` です。独自ドメインは表示確認後に接続します。
 
-公開用のAPIキーやSNSトークンはリポジトリへ保存せず、GitHub Actions Secretsで管理します。
+公開用のAPIキーやSNSトークンはリポジトリへ保存せず、GitHub Actions SecretsまたはCloudflare Secretsで管理します。
+
+## 問い合わせフォーム
+
+本番反映前に、Cloudflareで次の値を設定してください。
+
+- Secret: `RESEND_API_KEY`
+- Secret: `TURNSTILE_SECRET_KEY`
+- Variable: `PUBLIC_TURNSTILE_SITE_KEY`
+- Variable: `CONTACT_ADMIN_EMAIL`
+- Variable: `CONTACT_FROM_EMAIL`（Resendで認証済みの送信元）
+
+ローカル確認では `.dev.vars.example` を `.dev.vars` にコピーし、Turnstileの公式テストキーとResendのテスト用設定へ差し替えます。`.dev.vars` はコミットしません。
+
+Cloudflare Dashboardでは、`/api/contact` の `POST` を対象にWAFとRate Limitingも設定します。これらはリポジトリ内のコードではなくゾーン設定です。
+
+## Cloudflare Workers Builds
+
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy --keep-vars`
+- Node.js: 22
+
+`main` へのpushをトリガーにCloudflare側でビルド・デプロイします。GitHub Actionsはコンテンツ生成・検証・Astroビルドチェックを担当します。
 
 自動更新の設定と確認手順は [`automation/README.md`](automation/README.md) を参照してください。

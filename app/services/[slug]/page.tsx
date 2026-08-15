@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "../../astro-compat";
+import { notFound } from "../../astro-compat";
 import { SiteFooter, SiteHeader } from "../../components/SiteChrome";
 import { getService, services } from "../../platform-data";
 
@@ -14,8 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return service ? { title: `${service.title}｜Wani san Web`, description: service.summary } : {};
 }
 
-export default async function ServiceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const service = getService((await params).slug);
+export default function ServiceDetailPage({ slug }: { slug: string }) {
+  const service = getService(slug);
   if (!service) notFound();
   return <main className="platform-page service-detail"><SiteHeader current="services" />
     <div className="platform-breadcrumb"><a href="/">トップ</a><span>›</span><a href="/services">サービス</a><span>›</span><span>{service.title}</span></div>

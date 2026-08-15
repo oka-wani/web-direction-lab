@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Page from "../../../../app/knowledge/[slug]/page";
+import { guideSteps } from "../../../../app/guide/guide-data";
+export function getStaticPaths() { return guideSteps.map((step) => ({ params: { slug: step.slug }, props: { step } })); }
+const { slug } = Astro.params;
+const { step } = Astro.props;
+---
+<BaseLayout title={`${step.title}｜Webナレッジ`} description={step.description}><Page client:load slug={slug!} /></BaseLayout>

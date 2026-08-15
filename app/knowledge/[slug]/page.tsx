@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "../../astro-compat";
+import { notFound } from "../../astro-compat";
 import { SiteFooter, SiteHeader } from "../../components/SiteChrome";
 import { getGuideArticleHref, getGuideStep, guideSteps } from "../../guide/guide-data";
 
@@ -10,8 +10,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return step ? { title: `${step.title}｜Webナレッジ`, description: step.description } : {};
 }
 
-export default async function KnowledgeStepPage({ params }: { params: Promise<{ slug: string }> }) {
-  const step = getGuideStep((await params).slug);
+export default function KnowledgeStepPage({ slug }: { slug: string }) {
+  const step = getGuideStep(slug);
   if (!step) notFound();
   return <main className="guide-page guide-step-page">
     <SiteHeader current="knowledge" />

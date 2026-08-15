@@ -1,0 +1,15 @@
+---
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Page from "../../../../app/preview/[date]/[kind]/page";
+export async function getStaticPaths() {
+  const files = await readdir(join(process.cwd(), "automation/drafts"));
+  return files.filter((file) => /^daily-\d{4}-\d{2}-\d{2}\.json$/.test(file)).flatMap((file) => {
+    const date = file.slice(6, -5);
+    return ["knowledge", "news"].map((kind) => ({ params: { date, kind } }));
+  });
+}
+const { date, kind } = Astro.params;
+---
+<BaseLayout title="下書きプレビュー｜Wani san Web" noindex><Page date={date!} kind={kind!} /></BaseLayout>

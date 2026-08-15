@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 import { priceGroups, services } from "../platform-data";
 

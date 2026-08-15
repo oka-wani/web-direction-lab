@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Page from "../../../app/services/[slug]/page";
+import { services } from "../../../app/platform-data";
+export function getStaticPaths() { return services.map((service) => ({ params: { slug: service.slug }, props: { service } })); }
+const { slug } = Astro.params;
+const { service } = Astro.props;
+---
+<BaseLayout title={`${service.title}｜Wani san Web`} description={service.summary}><Page client:load slug={slug!} /></BaseLayout>

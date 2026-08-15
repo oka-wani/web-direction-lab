@@ -1,23 +1,21 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "web-direction-lab",
-  "main": ".open-next/worker.js",
-  "compatibility_date": "2026-08-02",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-08-16",
   "compatibility_flags": [
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
   "assets": {
-    "directory": ".open-next/assets",
+    "directory": "dist",
     "binding": "ASSETS"
   },
-  "services": [
-    {
-      "binding": "WORKER_SELF_REFERENCE",
-      "service": "web-direction-lab"
-    }
-  ],
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "PUBLIC_SITE_URL": "https://www.wani-san.com"
   }
 }

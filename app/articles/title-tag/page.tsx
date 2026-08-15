@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "../../astro-compat";
 import LearningArticle from "../../components/LearningArticle";
 
 export const metadata: Metadata = {

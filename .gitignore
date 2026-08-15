@@ -1,5 +1,7 @@
 node_modules/
 .next/
+dist/
+.astro/
 out/
 .env
 .env.*

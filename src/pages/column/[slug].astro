@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Page from "../../../app/column/[slug]/page";
+import { columnItems } from "../../../app/column/column-data";
+export function getStaticPaths() { return columnItems.map((item) => ({ params: { slug: item.slug }, props: { item } })); }
+const { slug } = Astro.params;
+const { item } = Astro.props;
+---
+<BaseLayout title={`${item.title}｜コラム`} description={item.summary}><Page client:load slug={slug!} /></BaseLayout>

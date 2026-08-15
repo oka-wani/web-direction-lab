@@ -1,0 +1,71 @@
+---
+import "../../app/globals.css";
+import "../../app/content-refresh.css";
+import "../../app/platform.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = "Wani san Web｜小さな会社の集客と業務を改善するWeb・DXパートナー",
+  description = "Web制作、SEO解析・LLMO、SNS運用・広告、業務改善・ツール開発。小さな会社に必要な支援を、分かりやすく提供します。",
+  noindex = false,
+} = Astro.props;
+const siteUrl = Astro.site ?? new URL("https://www.wani-san.com");
+const canonical = new URL(Astro.url.pathname, siteUrl);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "Wani san Web",
+  url: siteUrl.href,
+  description: "小さな会社の集客と業務を改善するWeb・DXパートナー",
+  areaServed: "JP",
+  serviceType: ["Web制作", "SEO解析・LLMO", "SNS運用・Web広告", "業務改善・ツール開発"],
+};
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:site_name" content="Wani san Web" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL("/images/og-default.svg", siteUrl)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body>
+    <slot />
+    <script>
+      const toggle = document.querySelector<HTMLButtonElement>(".nav-toggle");
+      const navigation = document.querySelector<HTMLElement>("#site-navigation");
+      if (toggle && navigation && !toggle.dataset.astroBound) {
+        toggle.dataset.astroBound = "true";
+        toggle.addEventListener("click", () => {
+          const open = !navigation.classList.contains("is-open");
+          navigation.classList.toggle("is-open", open);
+          toggle.setAttribute("aria-expanded", String(open));
+          toggle.setAttribute("aria-label", open ? "メニューを閉じる" : "メニューを開く");
+        });
+        navigation.addEventListener("click", (event) => {
+          if ((event.target as Element).closest("a")) {
+            navigation.classList.remove("is-open");
+            toggle.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "../../../astro-compat";
+import { notFound } from "../../../astro-compat";
 import LearningArticle from "../../../components/LearningArticle";
 import NewsArticle from "../../../components/NewsArticle";
 import type { NewsItem } from "../../../news/news-data";
@@ -88,12 +88,7 @@ function PreviewBanner({ date, kind }: { date: string; kind: string }) {
   );
 }
 
-export default async function DraftPreviewPage({
-  params,
-}: {
-  params: Promise<{ date: string; kind: string }>;
-}) {
-  const { date, kind } = await params;
+export default async function DraftPreviewPage({ date, kind }: { date: string; kind: string }) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !["knowledge", "news"].includes(kind)) {
     notFound();
   }

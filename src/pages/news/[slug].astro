@@ -1,0 +1,17 @@
+---
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NewsArticle from "../../../app/components/NewsArticle";
+export async function getStaticPaths() {
+  const directory = join(process.cwd(), "content/news/posts");
+  const files = await readdir(directory);
+  return Promise.all(files.filter((file) => file.endsWith(".json")).map(async (file) => {
+    const post = JSON.parse(await readFile(join(directory, file), "utf8"));
+    return { params: { slug: file.replace(/\.json$/, "") }, props: { post } };
+  }));
+}
+const { post } = Astro.props;
+const primary = post.sources.find((source: { isPrimary?: boolean }) => source.isPrimary) ?? post.sources[0];
+---
+<BaseLayout title={`${post.title}｜ニュース`} description={post.summary}><NewsArticle client:load item={{ ...post, sourceName: primary.name, sourceUrl: primary.url, sources: post.sources }} /></BaseLayout>

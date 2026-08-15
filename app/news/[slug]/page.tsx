@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { notFound } from "next/navigation";
+import { notFound } from "../../astro-compat";
 import NewsArticle from "../../components/NewsArticle";
 import type { NewsItem } from "../news-data";
 
@@ -19,8 +19,7 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function GeneratedNewsPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function GeneratedNewsPage({ slug }: { slug: string }) {
   let post: GeneratedNews;
   try {
     post = JSON.parse(await readFile(join(postsDirectory, `${slug}.json`), "utf8"));

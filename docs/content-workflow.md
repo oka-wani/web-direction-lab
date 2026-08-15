@@ -16,7 +16,7 @@
 1. `draft`: AIが生成し、日付別PRで確認中
 2. `approved`: PRを人がマージし、承認者と承認日時を記録
 3. `published`: 公開用インデックスと記事JSONをmainへ追加
-4. Vercel: mainの公開コミットを自動デプロイ
+4. Cloudflare Workers: mainの公開コミットを自動デプロイ
 
 PRを閉じただけの場合は承認も公開も行いません。生成処理が失敗した場合も、途中データをmainへ直接追加しません。
 

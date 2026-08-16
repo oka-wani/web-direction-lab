@@ -29,7 +29,7 @@ export default function InquiryForm() {
       });
     };
 
-    window.turnstile?.ready(renderWidget);
+    renderWidget();
     let script = document.querySelector<HTMLScriptElement>('script[data-turnstile-script]');
     if (!script) {
       script = document.createElement("script");
@@ -37,18 +37,18 @@ export default function InquiryForm() {
       script.async = true;
       script.defer = true;
       script.dataset.turnstileScript = "true";
-      script.addEventListener("load", () => window.turnstile?.ready(renderWidget), { once: true });
+      script.addEventListener("load", renderWidget, { once: true });
       script.addEventListener("error", () => setTurnstileStatus("error"), { once: true });
       document.head.appendChild(script);
     } else {
-      script.addEventListener("load", () => window.turnstile?.ready(renderWidget), { once: true });
+      script.addEventListener("load", renderWidget, { once: true });
     }
 
     let attempts = 0;
     const timer = window.setInterval(() => {
       attempts += 1;
       if (window.turnstile) {
-        window.turnstile.ready(renderWidget);
+        renderWidget();
         if (widgetIdRef.current) window.clearInterval(timer);
       } else if (attempts >= 100) {
         window.clearInterval(timer);
@@ -108,7 +108,6 @@ export default function InquiryForm() {
 declare global {
   interface Window {
     turnstile?: {
-      ready: (callback: () => void) => void;
       render: (container: HTMLElement, options: {
         sitekey: string;
         action: string;

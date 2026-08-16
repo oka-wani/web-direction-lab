@@ -878,3 +878,6 @@ footer.site-footer{background:var(--charcoal)}
   .module-catalog-section{padding:54px 0}
   .module-preview{padding:24px 20px}
 }
+
+/* Keep the contact CTA legible when /contact marks it as the current page. */
+.site-header>nav a.header-contact[aria-current="page"]{color:#fff}

@@ -1,10 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function InquiryForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [turnstileStatus, setTurnstileStatus] = useState<"loading" | "ready" | "error">("loading");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+    if (!sitekey) {
+      setTurnstileStatus("error");
+      return;
+    }
+
+    let cancelled = false;
+    const renderWidget = () => {
+      if (cancelled || !turnstileRef.current || !window.turnstile || widgetIdRef.current) return;
+      widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey,
+        action: "contact",
+        theme: "light",
+        callback: () => setTurnstileStatus("ready"),
+        "expired-callback": () => setTurnstileStatus("loading"),
+        "error-callback": () => setTurnstileStatus("error"),
+      });
+    };
+
+    window.turnstile?.ready(renderWidget);
+    let script = document.querySelector<HTMLScriptElement>('script[data-turnstile-script]');
+    if (!script) {
+      script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.dataset.turnstileScript = "true";
+      script.addEventListener("load", () => window.turnstile?.ready(renderWidget), { once: true });
+      script.addEventListener("error", () => setTurnstileStatus("error"), { once: true });
+      document.head.appendChild(script);
+    } else {
+      script.addEventListener("load", () => window.turnstile?.ready(renderWidget), { once: true });
+    }
+
+    return () => { cancelled = true; };
+  }, []);
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (status === "sending") return;
@@ -18,7 +59,8 @@ export default function InquiryForm() {
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "送信できませんでした。時間を置いてもう一度お試しください。");
-      window.turnstile?.reset();
+      if (widgetIdRef.current) window.turnstile?.reset(widgetIdRef.current);
+      setTurnstileStatus("loading");
     }
   }
   return <form className="inquiry-form" onSubmit={handleSubmit}>
@@ -33,10 +75,29 @@ export default function InquiryForm() {
     <label><span>相談内容 <b>必須</b></span><textarea name="message" rows={8} maxLength={4000} required placeholder="現在困っていること、実現したいこと、繰り返し行っている作業などをご記入ください。" /></label>
     <label className="form-consent"><input type="checkbox" name="consent" value="agreed" required /><span><a href="/about#privacy" target="_blank">個人情報の取り扱い</a>に同意する <b>必須</b></span></label>
     <div className="form-trap" aria-hidden="true"><label>この項目は入力しないでください<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
-    <div className="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY} data-action="contact" data-theme="light" />
+    <div className="form-turnstile">
+      <div ref={turnstileRef} />
+      {turnstileStatus === "loading" && <p>Bot確認を行っています。確認が完了してから送信してください。</p>}
+      {turnstileStatus === "error" && <p role="alert">Bot確認を表示できませんでした。ページを再読み込みしてください。</p>}
+    </div>
     {status === "error" && <p className="form-notice" role="alert"><b>送信できませんでした。</b><br />{message}</p>}
     <button className="button button--primary" type="submit" disabled={status === "sending"}>{status === "sending" ? "送信中…" : "問い合わせを送信する"} <b>→</b></button>
   </form>;
 }
 
-declare global { interface Window { turnstile?: { reset: () => void }; } }
+declare global {
+  interface Window {
+    turnstile?: {
+      ready: (callback: () => void) => void;
+      render: (container: HTMLElement, options: {
+        sitekey: string;
+        action: string;
+        theme: "light" | "dark" | "auto";
+        callback: () => void;
+        "expired-callback": () => void;
+        "error-callback": () => void;
+      }) => string;
+      reset: (widgetId: string) => void;
+    };
+  }
+}

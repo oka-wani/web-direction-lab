@@ -6,4 +6,4 @@ export function getStaticPaths() { return getAllGuideArticles().map((item) => ({
 const { slug, topic } = Astro.params;
 const { item } = Astro.props;
 ---
-<BaseLayout title={`${item.article.title}｜${item.step.title}｜Wani san Web`} description={item.article.summary}><Page client:load slug={slug!} topic={topic!} /></BaseLayout>
+<BaseLayout title={`${item.article.title}｜${item.step.title}｜Wani san Web`} description={item.article.summary} noindex={true}><Page client:load slug={slug!} topic={topic!} /></BaseLayout>

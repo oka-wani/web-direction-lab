@@ -45,7 +45,7 @@ export default function Home() {
 
     <section className="platform-section home-services">
       <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>Webと業務の悩みに、4つの支援。</h2><p>一つだけでも、組み合わせても。いま必要なところから支援します。</p></div><a href="/services">サービスを見る →</a></div>
-      <div className="home-service-grid">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><small>{service.group}</small><h3>{service.title}</h3><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
+      <div className="home-service-list">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><div><small>{service.group}</small><h3>{service.title}</h3></div><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
     </section>
 
     <section className="platform-section home-process">

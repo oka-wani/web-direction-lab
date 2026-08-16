@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "無料相談・お問い合わせ｜
 export default function ContactPage() {
   return <main className="platform-page"><SiteHeader current="contact" />
     <section className="platform-hero platform-hero--compact"><span className="section-kicker" aria-hidden="true">CONTACT</span><h1>無料相談・お問い合わせ</h1><p>何を依頼すべきか決まっていなくても大丈夫です。集客や業務の悩みを、そのままお聞かせください。</p></section>
-    <section className="contact-layout"><aside><span>BEFORE CONTACT</span><h2>まずは状況を<br />お聞かせください。</h2><ul><li>WebサイトのURLがあると確認がスムーズです。</li><li>現在困っていることを、箇条書きでも構いません。</li><li>予算や時期が未定でも相談できます。</li></ul><p>通常、内容を確認後2〜3営業日以内にご連絡します。</p></aside><InquiryForm /></section>
+    <section className="contact-layout"><aside><div><span>BEFORE CONTACT</span><h2>まずは状況をお聞かせください。</h2></div><ul><li>WebサイトのURLがあると確認がスムーズです。</li><li>現在困っていることを、箇条書きでも構いません。</li><li>予算や時期が未定でも相談できます。</li></ul><p>通常、内容を確認後2〜3営業日以内にご連絡します。</p></aside><InquiryForm /></section>
     <SiteFooter />
   </main>;
 }

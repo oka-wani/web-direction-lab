@@ -881,3 +881,50 @@ footer.site-footer{background:var(--charcoal)}
 
 /* Keep the contact CTA legible when /contact marks it as the current page. */
 .site-header>nav a.header-contact[aria-current="page"]{color:#fff}
+
+/* Contact: one-column introduction, review step and deliberate completion heading. */
+.contact-layout{max-width:980px;padding-top:54px;display:block}
+.contact-layout aside{margin-bottom:58px;padding:34px 38px;display:grid;grid-template-columns:minmax(260px,.9fr) minmax(320px,1.2fr);gap:18px 56px;background:var(--accent-soft);border-radius:10px}
+.contact-layout aside>div{grid-row:1/3}
+.contact-layout aside>div>span{display:block;margin-bottom:13px;color:var(--navy);font:800 11px/1.4 var(--font-geist-mono);letter-spacing:.16em}
+.contact-layout aside h2{margin:0;font-size:30px;line-height:1.45}
+.contact-layout aside ul{margin:0;padding-left:20px}
+.contact-layout aside>p{margin:0;padding:15px 18px;color:var(--navy);background:#fff;border-left:4px solid var(--navy)}
+.inquiry-form{max-width:860px;margin:auto}
+.inquiry-form--confirm>.form-required-note,
+.inquiry-form--confirm>label,
+.inquiry-form--confirm>.form-trap{display:none}
+.inquiry-form--input>.form-turnstile{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.form-confirm>span{display:block;margin-bottom:12px;color:var(--navy);font:800 11px var(--font-geist-mono);letter-spacing:.16em}
+.form-confirm h2{margin:0;font-size:clamp(30px,4vw,42px)}
+.form-confirm>p{margin:16px 0 32px;color:var(--muted);line-height:1.8}
+.form-confirm dl{margin:0;border-top:1px solid var(--line)}
+.form-confirm dl>div{padding:20px 4px;display:grid;grid-template-columns:210px minmax(0,1fr);gap:26px;border-bottom:1px solid var(--line)}
+.form-confirm dt{font-weight:800}
+.form-confirm dd{margin:0;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
+.inquiry-form .form-back{margin-left:235px;width:280px;padding:14px;color:var(--navy);background:#fff;border:1px solid var(--navy);font:800 14px inherit;cursor:pointer}
+.thanks-hero h1{max-width:none;font-size:clamp(44px,5.4vw,68px);line-height:1.28}
+.thanks-hero h1>span{display:block;word-break:keep-all}
+
+/* Home services: an editorial list instead of four heavy white panels. */
+.home-service-list{border-top:1px solid rgba(255,255,255,.28)}
+.home-service-list>a{min-height:154px;padding:27px 10px;display:grid;grid-template-columns:54px minmax(180px,.7fr) minmax(260px,1.25fr) 120px 44px;gap:24px;align-items:center;color:#fff;border-bottom:1px solid rgba(255,255,255,.28);transition:.2s}
+.home-service-list>a:hover{padding-left:22px;background:rgba(255,255,255,.07)}
+.home-service-list>a>span{color:#9dc9b5;font:800 13px var(--font-geist-mono)}
+.home-service-list small{color:#aebdb6;font:750 11px var(--font-geist-mono);letter-spacing:.12em}
+.home-service-list h3{margin:8px 0 0;color:#fff;font-size:25px}
+.home-service-list p{margin:0;color:#cad5d0;line-height:1.8}
+.home-service-list b{color:#fff;font-size:14px}
+.home-service-list i{width:42px;height:42px;display:grid;place-items:center;color:var(--charcoal);background:#fff;border-radius:50%;font-style:normal}
+
+@media(max-width:900px){
+  .contact-layout aside{grid-template-columns:1fr}.contact-layout aside>div{grid-row:auto}
+  .home-service-list>a{grid-template-columns:42px 1fr 44px}.home-service-list p,.home-service-list b{grid-column:2}.home-service-list i{grid-column:3;grid-row:1/4}
+}
+@media(max-width:720px){
+  .contact-layout aside{margin-bottom:42px;padding:28px 22px}.contact-layout aside h2{font-size:26px}
+  .form-confirm dl>div{grid-template-columns:1fr;gap:8px}.form-confirm dd{color:var(--muted)}
+  .inquiry-form .form-back{margin-left:0;width:100%}
+  .thanks-hero h1{font-size:clamp(38px,11vw,50px)}
+  .home-service-list>a{padding:24px 4px;gap:14px}.home-service-list>a:hover{padding-left:10px}.home-service-list h3{font-size:22px}.home-service-list p{font-size:13px}
+}

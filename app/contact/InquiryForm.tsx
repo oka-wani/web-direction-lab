@@ -44,11 +44,31 @@ export default function InquiryForm() {
       script.addEventListener("load", () => window.turnstile?.ready(renderWidget), { once: true });
     }
 
-    return () => { cancelled = true; };
+    let attempts = 0;
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      if (window.turnstile) {
+        window.turnstile.ready(renderWidget);
+        if (widgetIdRef.current) window.clearInterval(timer);
+      } else if (attempts >= 100) {
+        window.clearInterval(timer);
+        setTurnstileStatus("error");
+      }
+    }, 100);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
   }, []);
   async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     if (status === "sending") return;
+    if (turnstileStatus !== "ready") {
+      setStatus("error");
+      setMessage("Bot確認が完了するまでお待ちください。");
+      return;
+    }
     setStatus("sending");
     setMessage("");
     try {
@@ -81,7 +101,7 @@ export default function InquiryForm() {
       {turnstileStatus === "error" && <p role="alert">Bot確認を表示できませんでした。ページを再読み込みしてください。</p>}
     </div>
     {status === "error" && <p className="form-notice" role="alert"><b>送信できませんでした。</b><br />{message}</p>}
-    <button className="button button--primary" type="submit" disabled={status === "sending"}>{status === "sending" ? "送信中…" : "問い合わせを送信する"} <b>→</b></button>
+    <button className="button button--primary" type="submit" disabled={status === "sending" || turnstileStatus !== "ready"}>{status === "sending" ? "送信中…" : "問い合わせを送信する"} <b>→</b></button>
   </form>;
 }
 

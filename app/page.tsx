@@ -1,79 +1,94 @@
-import { BrandLogo } from "./components/BrandLogo";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
 import { faqs, services } from "./platform-data";
 
-const problems = [
-  { label: "WEB", title: "Webサイトをつくりたい", text: "企画・制作・公開まで対応。公開後の運用も追加できます。" },
-  { label: "SEARCH", title: "検索からの集客を増やしたい", text: "SEOとアクセスデータを分析。LLMOもまとめて改善します。" },
-  { label: "SNS / ADS", title: "SNSや広告を活用したい", text: "認知からWebサイト、問い合わせまでの導線を整えます。" },
-  { label: "BUSINESS", title: "手作業を減らしたい", text: "業務を整理し、AI・自動化・小さなツールで改善します。" },
+const qualityAxes = [
+  { label: "ACCESSIBILITY", title: "アクセシビリティ", text: "WCAG 2.2 Level A相当を標準目標として、読みやすさ・操作しやすさを設計します。" },
+  { label: "RESPONSIVE", title: "レスポンシブ", text: "スマートフォン、タブレット、PCを前提に、画面幅に応じて崩れにくい設計にします。" },
+  { label: "SEO", title: "基本SEO", text: "HTML構造、title、description、見出し、canonical、OGP、sitemapなどを標準で確認します。" },
+  { label: "PERFORMANCE", title: "パフォーマンス", text: "AstroとCloudflareを基本に、不要なJavaScriptを抑えた軽量なサイトを目指します。" },
+  { label: "SECURITY", title: "セキュリティ", text: "HTTPS、Cloudflare、Bot対策、セキュリティヘッダーなどを案件条件に応じて設計します。" },
+  { label: "MAINTAINABILITY", title: "保守しやすさ", text: "GitHubと共通モジュールを使い、公開後も修正・改善しやすい構成にします。" },
 ];
 
-const steps = [
-  { label: "LISTEN", title: "相談する", text: "いま困っていることや、実現したいことを伺います。" },
-  { label: "ORGANIZE", title: "整理する", text: "目的・予算・優先順位を整理し、必要な範囲を決めます。" },
-  { label: "PROPOSE", title: "提案する", text: "対応内容・料金・進め方を、着手前に明確にします。" },
-  { label: "DELIVER", title: "実行・改善する", text: "合意した内容を実行し、公開後も必要に応じて改善します。" },
-];
-
-const knowledgeCategories = [
-  { label: "FRONTEND", title: "フロント", text: "HTML・CSS・JavaScript、デザイン実装、アクセシビリティ。" },
-  { label: "SYSTEM", title: "システム", text: "CMS、サーバー、Cloudflare、API、AI活用。" },
-  { label: "SEO", title: "SEO", text: "検索の仕組み、内部対策、解析、コンテンツ改善。" },
-  { label: "MARKETING", title: "マーケティング", text: "集客、導線設計、解析、広告、SNS活用。" },
-];
+const processSteps = [
+  ["01", "問い合わせ", "サイトから相談"],
+  ["02", "初回ミーティング", "内容・進め方をご説明"],
+  ["03", "ヒアリング", "必要事項をご回答"],
+  ["04", "要件整理", "構成・機能・技術を整理"],
+  ["05", "ラフ案", "構成＋デザインを提示"],
+  ["06", "フィードバック", "2〜3回程度を想定"],
+  ["07", "サイト実装", "承認案を制作"],
+  ["08", "デモ確認", "公開前環境で確認"],
+  ["09", "公開", "最終承認後に本番反映"],
+  ["10", "運用・改善", "必要に応じて継続支援"],
+] as const;
 
 export default function Home() {
-  return <main>
+  return <main className="order-home">
     <SiteHeader />
-    <section className="wsw-minimal-hero">
-      <div className="wsw-minimal-hero-inner">
-        <BrandLogo />
-        <p className="eyebrow">WEB. SIMPLE. WORK.</p>
-        <h1><span>考える・動く・伝えるを、</span><span>もっとシンプルに。</span></h1>
-        <p className="wsw-minimal-hero-lead">Web集客と日々の業務を、わかりやすく、無理のない形で整える。小さな会社の外部パートナーとして、一緒に考え、実行します。</p>
-        <a className="wsw-minimal-hero-link" href="/contact">無料で相談する <span aria-hidden="true">→</span></a>
+
+    <section className="order-hero">
+      <div className="order-hero-inner">
+        <span className="order-kicker">WEB PRODUCTION &amp; IMPROVEMENT</span>
+        <h1><span>短期間でも、</span><span>品質は妥協しない。</span></h1>
+        <p className="order-hero-lead">Webサイトを作りたい方と、いまあるサイトを良くしたい方へ。分かりやすい進め方と標準化した制作基盤で、必要なWebサイト・改善を形にします。</p>
+        <div className="order-hero-actions"><a className="order-primary-link" href="/demo">完成イメージを見る <b>→</b></a><a className="order-secondary-link" href="/contact">まず相談する <b>→</b></a></div>
       </div>
     </section>
 
-    <section className="platform-section home-problems">
-      <div className="home-problems-intro"><span>WHERE TO BEGIN</span><h2><span>いま必要なところから、</span><span>一緒に整える。</span></h2><p>依頼するサービスを先に決める必要はありません。現状と目標を伺い、優先順位と無理のない進め方を整理します。</p><a className="text-link" href="/contact">現在の状況を相談する →</a></div>
-      <ol>{problems.map((problem, index) => <li key={problem.title}><span>{String(index + 1).padStart(2, "0")} / {problem.label}</span><h3>{problem.title}</h3><p>{problem.text}</p></li>)}</ol>
+    <div className="order-proof-strip" aria-label="WSWの特徴">
+      <div><b>Web制作 3万円〜</b><span>小規模サイトから相談可能</span></div>
+      <div><b>完成イメージを確認</b><span>業種・用途別のデモを用意</span></div>
+      <div><b>標準品質を定義</b><span>SEO・A11y・速度・安全性</span></div>
+      <div><b>公開後もつながる</b><span>保守・解析・Web改善へ</span></div>
+    </div>
+
+    <section className="order-section">
+      <div className="order-section-heading"><div><span>SERVICES</span><h2>サービスは、2つです。</h2></div><p>新しく作る「Web制作」と、いまあるサイトを調べて良くする「Web改善」。目的に合わせて、必要な方から始められます。</p></div>
+      <div className="order-service-grid">{services.map((service, index) => <article className="order-service-card" key={service.slug}><span className="order-number">0{index + 1}</span><small>{service.label}</small><h3>{service.title}</h3><p>{service.summary}</p><ul>{service.deliverables.slice(0, 4).map((item) => <li key={item}>{item}</li>)}</ul><a className="order-card-link" href={`/services/${service.slug}`}>詳しく見る →</a></article>)}</div>
+      <div className="order-actions"><a className="order-secondary-link" href="/services">サービス・料金をまとめて見る <b>→</b></a></div>
     </section>
 
-    <section className="platform-section home-services">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>SERVICES</span><h2>Webと業務の悩みに、4つの支援。</h2><p>一つだけでも、組み合わせても。いま必要なところから支援します。</p></div><a href="/services">サービスを見る →</a></div>
-      <div className="home-service-list">{services.map((service, index) => <a href={`/services/${service.slug}`} key={service.slug}><span>{String(index + 1).padStart(2, "0")}</span><div><small>{service.group}</small><h3>{service.title}</h3></div><p>{service.summary}</p><b>{service.price}</b><i>→</i></a>)}</div>
+    <section className="order-section order-section--tint">
+      <div className="order-section-heading"><div><span>SEE BEFORE YOU ORDER</span><h2>依頼する前に、完成形をイメージできる。</h2></div><p>「どんなサイトになるか分からない」を減らすために、業種別・用途別の制作イメージを用意します。必要な情報、ページ構成、デザイン、追加機能まで確認できます。</p></div>
+      <div className="order-demo-grid">
+        <article className="order-card order-demo-feature" id="restaurant"><small>FIRST DEMO / RESTAURANT</small><h3>飲食店サイトなら、こんな形から考えられます。</h3><p>メニュー、店舗情報、予約導線、写真、SNS連携など、来店前に知りたい情報を分かりやすく整理したイメージです。</p><a className="order-card-link" href="/demo#restaurant-demo">飲食店の制作イメージを見る →</a><div className="order-browser" aria-hidden="true"><div className="order-browser-bar"><i /><i /><i /></div><div className="order-browser-body"><small>SMALL RESTAURANT</small><b>今日食べたい、を<br />すぐ見つけられる。</b><div className="order-browser-tags"><span>MENU</span><span>ACCESS</span><span>RESERVATION</span></div></div></div></article>
+        <div className="order-demo-side"><article className="order-card"><small>FOR SMALL BUSINESS</small><h3>小規模コーポレート</h3><p>事業内容、強み、会社情報、問い合わせをコンパクトに整理する構成。</p><span className="order-card-link">準備中</span></article><article className="order-card is-muted"><small>NEXT TEMPLATE</small><h3>店舗・スクール</h3><p>料金、コース、アクセス、よくある質問などを中心にした構成を追加予定です。</p></article></div>
+      </div>
     </section>
 
-    <section className="platform-section home-process">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>HOW WE WORK</span><h2>相談から実行まで、迷わない4段階。</h2><p>範囲と料金を確認し、納得してから始めます。</p></div><a href="/process">詳しい進め方を見る →</a></div>
-      <ol>{steps.map((step, index) => <li key={step.title}><span>{String(index + 1).padStart(2, "0")}</span><small>{step.label}</small><b>{step.title}</b><p>{step.text}</p></li>)}</ol>
+    <section className="order-section">
+      <div className="order-section-heading"><div><span>STANDARD QUALITY</span><h2>安価・短納期でも、品質項目は省略しない。</h2></div><p>制作フローと共通モジュールを標準化し、手を動かす時間を減らします。削るのは品質ではなく、毎回ゼロから作る工数です。</p></div>
+      <div className="order-quality-grid">{qualityAxes.map((item) => <article className="order-quality-card" key={item.title}><small>{item.label}</small><h3>{item.title}</h3><p>{item.text}</p></article>)}</div>
+      <div className="order-actions"><a className="order-secondary-link" href="/quality">品質・技術・セキュリティを見る <b>→</b></a></div>
     </section>
 
-    <section className="platform-section home-column">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>COLUMN</span><h2>コラム</h2><p>集客や業務改善の判断に役立つテーマを、実務の視点から解説します。</p></div><a href="/column">コラムを見る →</a></div>
-      {columnItems.length > 0 ? <div className="simple-column-grid">{columnItems.slice(0, 3).map((item) => <a href={`/column/${item.slug}`} key={item.slug}><div style={{ backgroundImage: `url(${item.image})` }} /><small>{item.category}　{item.date}</small><h3>{item.title}</h3><p>{item.summary}</p><b className="card-read-link"><span>続きを読む</span><i>→</i></b></a>)}</div> : <div className="content-reset-note"><span>NEW COLUMNS COMING SOON</span><p>コラムは新しい方針で準備中です。</p></div>}
+    <section className="order-section order-section--tint">
+      <div className="order-section-heading"><div><span>HOW WE WORK</span><h2>相談から公開後まで、流れを見える化。</h2></div><p>最初に一度打ち合わせを行い、その後はヒアリングシートと資料を中心に効率よく進めます。必要な場面だけミーティングを追加します。</p></div>
+      <ol className="order-process">{processSteps.map(([number, title, text]) => <li key={number}><span>STEP {number}</span><b>{title}</b><p>{text}</p></li>)}</ol>
+      <div className="order-actions"><a className="order-secondary-link" href="/process">詳しい制作フローを見る <b>→</b></a></div>
     </section>
 
-    <section className="platform-section home-knowledge-section">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>KNOWLEDGE</span><h2>ナレッジ</h2><p>フロント、システム、SEO、マーケティングの4カテゴリとキーワードから探せます。</p></div><a href="/knowledge">キーワードで探す →</a></div>
-      <div className="home-knowledge-category-grid">{knowledgeCategories.map((category) => <a href={`/knowledge?category=${encodeURIComponent(category.title)}#articles`} key={category.title}><small>{category.label}</small><h3>{category.title}</h3><p>{category.text}</p><span>記事を探す →</span></a>)}</div>
+    <section className="order-section">
+      <div className="order-section-heading"><div><span>COLUMN</span><h2>ホームページを依頼する前後に、知っておきたいこと。</h2></div><p>費用、制作期間、CMS、SEO、アクセス解析など、将来のお客様が判断するときに役立つテーマへ絞って発信します。</p></div>
+      {columnItems.length > 0 ? <div className="simple-column-grid">{columnItems.slice(0, 3).map((item) => <a href={`/column/${item.slug}`} key={item.slug}><div style={{ backgroundImage: `url(${item.image})` }} /><small>{item.category}　{item.date}</small><h3>{item.title}</h3><p>{item.summary}</p><b className="card-read-link"><span>続きを読む</span><i>→</i></b></a>)}</div> : <div className="content-reset-note"><span>NEW COLUMNS COMING SOON</span><p>制作・改善を検討している方に向けたコラムを準備中です。</p></div>}
     </section>
 
-    <section className="platform-section home-news-section">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>NEWS</span><h2>Webニュース</h2><p>Web、SEO、AIの重要な変化を、事業への影響と一緒に整理します。</p></div><a href="/news">ニュースをすべて見る →</a></div>
-      <div className="simple-news-list">{newsItems.slice(0, 3).map((item) => <a href={`/news/${item.slug}`} key={item.slug}><time>{item.date}</time><span>{item.category}</span><h3>{item.title}</h3><b>→</b></a>)}</div>
+    <section className="order-section">
+      <div className="order-section-heading"><div><span>NEWS</span><h2>WSWからのお知らせ</h2></div><p>制作パッケージ、サービス、制作イメージ、サイト更新など、WSW自身のお知らせを掲載します。</p></div>
+      <div className="order-news-list">{newsItems.slice(0, 3).map((item) => <article className="order-news-item" key={item.slug}><time>{item.date}</time><span>{item.category}</span><div><h3>{item.title}</h3><p>{item.summary}</p></div></article>)}</div>
+      <div className="order-actions"><a className="order-secondary-link" href="/news">お知らせ一覧を見る <b>→</b></a></div>
     </section>
 
-    <section className="platform-section home-faq">
-      <div className="platform-section-heading platform-section-heading--link"><div><span>FAQ</span><h2>よくある質問</h2></div><a href="/faq">すべて見る →</a></div>
+    <section className="order-section">
+      <div className="order-section-heading"><div><span>FAQ</span><h2>よくある質問</h2></div><p>制作前に気になりやすい内容をまとめています。</p></div>
       <div className="faq-list">{faqs.slice(0, 5).map((faq, index) => <details key={faq.question} open={index === 0}><summary><span>Q</span>{faq.question}<i aria-hidden="true">＋</i></summary><div><span>A</span><p>{faq.answer}</p></div></details>)}</div>
     </section>
 
-    <section className="home-final-cta"><span>CONTACT</span><h2>まずは、いまの状況を<br />聞かせてください。</h2><p>何を頼むべきか決まっていなくても大丈夫です。課題と予算に合う、小さな一歩から整理します。</p><div className="hero-actions"><a className="button button--primary" href="/contact">無料で相談する <b>→</b></a><a className="button button--secondary" href="/services#pricing">料金の目安を見る <b>→</b></a></div></section>
+    <section className="order-final-cta"><span>CONTACT</span><h2>作りたいものが固まっていなくても、相談できます。</h2><p>初回ミーティングで、目的・予算・希望時期・必要な機能を一緒に整理します。制作か改善か迷っている段階でも大丈夫です。</p><div className="order-actions"><a className="order-primary-link" href="/contact">相談内容を送る <b>→</b></a><a className="order-secondary-link" href="/demo">制作イメージを見る <b>→</b></a></div></section>
+
     <SiteFooter />
   </main>;
 }

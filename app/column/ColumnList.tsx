@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import { columnItems } from "./column-data";
 
-const columnCategories = ["すべて", "Webマーケティング", "AI・業務改善"];
+const columnCategories = ["すべて", "ホームページ制作", "運用・改善", "SEO・解析"];
 
 const relatedService: Record<string, { label: string; href: string }> = {
-  "Webマーケティング": { label: "Webマーケティング支援", href: "/services" },
-  "AI・業務改善": { label: "業務改善・ツール開発", href: "/services/automation-tools" },
+  "ホームページ制作": { label: "Web制作", href: "/services/web-production" },
+  "運用・改善": { label: "Web改善", href: "/services/web-improvement" },
+  "SEO・解析": { label: "Web改善", href: "/services/web-improvement" },
 };
 
 export default function ColumnList() {
@@ -27,7 +28,7 @@ export default function ColumnList() {
     {shown.length > 0 ? <div className="column-card-grid">{visibleItems.map((item) => <article className="column-card" key={item.slug}>
       <a className="column-card-visual" href={`/column/${item.slug}`} style={{ backgroundImage:`url(${item.image})` }} aria-label={`${item.title}を読む`}><span>{item.category}</span></a>
       <div className="column-card-body"><div><time>{item.date}</time><span>WEB COLUMN</span></div><h2><a href={`/column/${item.slug}`}>{item.title}</a></h2><p className="column-card-summary">{item.summary}</p>{relatedService[item.category] && <a className="column-related-service" href={relatedService[item.category].href}>関連サービス：{relatedService[item.category].label}</a>}<a className="text-link card-read-link" href={`/column/${item.slug}`}><span>続きを読む</span><i>→</i></a></div>
-    </article>)}</div> : <div className="empty-state"><b>該当するコラムは準備中です</b><p>WebマーケティングとAI・業務改善に役立つテーマを順次公開します。</p></div>}
+    </article>)}</div> : <div className="empty-state"><b>該当するコラムは準備中です</b><p>ホームページ制作やWeb改善を検討している方に役立つテーマを順次追加します。</p></div>}
     {visibleCount < shown.length && <button className="load-more-button" type="button" onClick={() => setVisibleCount((count) => count + 9)}>もっと見る <span>＋9件</span></button>}
   </>;
 }

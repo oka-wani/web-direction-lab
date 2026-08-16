@@ -6,4 +6,4 @@ export function getStaticPaths() { return guideSteps.map((step) => ({ params: { 
 const { slug } = Astro.params;
 const { step } = Astro.props;
 ---
-<BaseLayout title={`${step.title}｜Webナレッジ`} description={step.description}><Page client:load slug={slug!} /></BaseLayout>
+<BaseLayout title={`${step.title}｜Webナレッジ`} description={step.description} noindex={true}><Page client:load slug={slug!} /></BaseLayout>

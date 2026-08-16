@@ -1,22 +1,25 @@
 import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-export const metadata: Metadata = { title:"このサイトについて｜Wani san Web", description:"Wani san Webの目的、運営者情報、提供する知識・ツール・サービス、記事作成・編集方針、AI利用、プライバシーについてご案内します。" };
+export const metadata: Metadata = {
+  title: "WSWについて｜Wani san Web",
+  description: "Wani san Webのサービス方針、運営者、品質への考え方、制作体制、プライバシーについてご案内します。",
+};
 
 const sections = [
-  { id:"site", number:"01", title:"Wani san Webについて", body:<><p>Wani san Webは、<mark>小さな会社の集客と業務を改善するWeb・DXパートナー</mark>です。Web担当者やITに詳しい人がいない会社でも、WebマーケティングとAI・業務改善を気軽に相談できる存在を目指しています。</p><dl><div><dt>ミッション</dt><dd>WebとAIを活用し、小さな会社の売上と利益を増やすこと。</dd></div><div><dt>対象となる方</dt><dd>中小企業、個人事業主、店舗、Web担当者がいない組織。</dd></div><div><dt>支援の考え方</dt><dd>必要以上に複雑な仕組みを提案せず、目的と予算に合う小さな一歩から始めます。</dd></div></dl></> },
-  { id:"operator", number:"02", title:"運営者について", body:<><p>Wani san Webは、<mark>Web制作会社でディレクター／プロジェクトマネージャーとして実務に携わる運営者</mark>が、現場で得た知識を整理して運営しています。実名は公開していませんが、責任の所在と経験が伝わるよう、実務領域を明示します。</p><dl><div><dt>主な経験</dt><dd>企業サイトの新規構築・リニューアル・運用改善、大規模案件の進行管理、チームマネジメント。</dd></div><div><dt>対応領域</dt><dd>情報設計、制作ディレクション、CMS・検索・翻訳・クラウドサービス連携、SEO、アクセシビリティ、セキュリティ要件整理。</dd></div><div><dt>記事の視点</dt><dd>机上の説明だけでなく、要件整理・提案・実装・検品・公開・運用で実際に使える判断を重視します。</dd></div></dl></> },
-  { id:"contents", number:"03", title:"提供内容について", body:<dl><div><dt>Webマーケティング</dt><dd>Webサイト制作・運用、SEO・LLMO、Instagram運用、Web広告相談、アクセス解析に対応します。</dd></div><div><dt>AI・業務改善</dt><dd>AI活用、業務フロー整理、Excel・CSV処理、API連携、小規模な自動化ツール制作に対応します。</dd></div><div><dt>コラム・ナレッジ</dt><dd>社長や担当者の悩みを起点に、集客と業務改善の判断に役立つ情報を発信します。</dd></div><div><dt>将来のプロダクト</dt><dd>受託で得たノウハウを、テンプレート、AIツール、SaaSとして展開します。</dd></div></dl> },
-  { id:"editorial", number:"04", title:"記事作成・編集方針", body:<ul><li>正確性を重視し、可能な限り公式発表・仕様書などの一次情報を確認します。</li><li>事実と解釈を分け、読者が判断できる情報を提示します。</li><li>公開前に内容を確認し、必要な修正を行います。</li><li>誤りや情報の更新を確認した場合は、随時修正します。</li></ul> },
-  { id:"ai", number:"05", title:"AI利用について", body:<><p>テーマ整理、情報の分類、構成案、文章の下書き、校正、画像制作などにAIを活用する場合があります。</p><p><mark>AIの出力をそのまま公開せず、内容を確認・編集したうえで公開します。</mark> 最新情報は公式情報を優先し、重要な判断は人が行います。</p></> },
-  { id:"advertising", number:"06", title:"広告・商品紹介について", body:<><p>広告、アフィリエイト、Wani san Webが提供する商品・サービスを掲載する場合は、その関係が分かるよう明示します。</p><p>広告掲載や販売の有無によって、サービスや製品への評価を変更することはありません。</p></> },
-  { id:"copyright", number:"07", title:"著作権について", body:<><p>当サイトに掲載する文章・編集画像・構成などの著作権は、権利者から許諾を得たものを除き、当サイト運営者に帰属します。無断転載・無断複製はご遠慮ください。</p><p>外部情報を引用する場合は、引用部分を明確にし、出典と参照リンクを掲載します。</p></> },
-  { id:"disclaimer", number:"08", title:"免責事項", body:<><p>掲載内容の正確性・安全性・最新性には注意を払いますが、完全性を保証するものではありません。当サイトの情報を利用したことによって生じた損害について、運営者は責任を負いかねます。</p><p>料金・仕様・制度などは変更される場合があります。重要な判断を行う際は、必ず公式情報もご確認ください。</p></> },
-  { id:"contact", number:"09", title:"お問い合わせ", body:<><p>記事の誤記・修正依頼に加え、Webサイト、SEO・LLMO、SNS・広告、AI活用、業務自動化についてご相談いただけます。</p><p className="about-note">送信先の設定が完了するまでは入力内容は送信されません。入力項目は<a href="/contact">お問い合わせページ</a>でご確認いただけます。</p></> },
-  { id:"privacy", number:"10", title:"プライバシーポリシー", body:<><p>当サイトでは、アクセス状況の把握とサイト改善のためにアクセス解析ツールを利用する場合があります。取得する情報には、通常、個人を直接特定する情報は含まれません。</p><p>お問い合わせで取得した情報は、回答および必要な連絡のためにのみ利用し、法令に基づく場合を除いて第三者へ提供しません。</p></> },
+  { id: "site", number: "01", title: "Wani san Webについて", body: <><p>Wani san Web（WSW）は、<mark>Webサイト制作とWeb改善を提供するサービス</mark>です。</p><p>「短期間でも、品質は妥協しない」を基本方針に、制作フロー、共通モジュール、技術基盤を標準化し、毎回ゼロから作る工数を減らしながら、必要な品質を保つことを目指しています。</p></> },
+  { id: "services", number: "02", title: "提供するサービス", body: <dl><div><dt>Web制作</dt><dd>新規サイト、リニューアル、LP、小規模コーポレートサイト、店舗・スクール、サービスサイトなどを、構成整理から公開まで制作します。</dd></div><div><dt>Web改善</dt><dd>SEO、Search Console、GA4、アクセシビリティ、ユーザビリティ、パフォーマンス、技術的SEOなどを調査し、改善点を整理します。</dd></div><div><dt>公開後</dt><dd>保守、更新、アクセス解析、SEO改善、軽微な改修などの継続支援にも対応します。</dd></div></dl> },
+  { id: "operator", number: "03", title: "運営者について", body: <><p>WSWは、<mark>Web制作・運用に携わる制作者が運営しています。</mark></p><p>制作体制や詳しい進め方については、お問い合わせ後のお打ち合わせにて丁寧にご説明します。運営者情報を必要以上に前面へ出すのではなく、どのような考え方で制作し、どこまで責任を持って対応するかを明確にすることを重視しています。</p></> },
+  { id: "quality", number: "04", title: "品質への考え方", body: <><p>安価・短納期だからという理由で、基本品質を省略する考え方にはしません。</p><ul><li>WCAG 2.2 Level A相当を標準目標としたアクセシビリティ</li><li>スマートフォン・タブレット・PCへのレスポンシブ対応</li><li>title、見出し、canonical、OGP、sitemapなどの基本SEO</li><li>AstroとCloudflareを基本にした軽量な構成</li><li>HTTPS、Bot対策、セキュリティヘッダーなどの安全性</li></ul><p><a href="/quality">品質・技術について詳しく見る →</a></p></> },
+  { id: "process", number: "05", title: "制作の進め方", body: <><p>完全非対面・完全自動にはせず、最初に一度ミーティングを行います。その後はヒアリングシートと資料を中心に、必要な場面だけ確認を挟みながら効率よく進めます。</p><p>構成とデザインを細かく分けすぎず、完成イメージが分かるラフ案を2〜3案程度提示してから実装へ進むことを基本とします。</p><p><a href="/process">詳しい制作フローを見る →</a></p></> },
+  { id: "contact", number: "06", title: "お問い合わせ・制作体制について", body: <><p>サービス内容、制作可否、費用、制作体制、公開後の運用など、詳しい内容はお問い合わせ後にご説明します。</p><p>ご相談時点で要件が固まっていなくても問題ありません。目的、予算、希望時期から必要な範囲を整理します。</p><p><a href="/contact">お問い合わせページへ →</a></p></> },
+  { id: "privacy", number: "07", title: "プライバシーポリシー", body: <><p>当サイトでは、アクセス状況の把握とサイト改善のためにアクセス解析ツールを利用する場合があります。取得する情報には、通常、個人を直接特定する情報は含まれません。</p><p>お問い合わせで取得した情報は、回答、制作相談、必要な連絡のために利用し、法令に基づく場合を除いて第三者へ提供しません。</p><p>当サイトに掲載する文章・編集画像・構成などの著作権は、権利者から許諾を得たものを除き、当サイト運営者に帰属します。</p></> },
 ];
 
-// Editorial policies are maintained on this page.
 export default function AboutPage() {
-  return <main className="about-page"><SiteHeader current="about" /><section className="about-hero"><span className="section-kicker" aria-hidden="true">ABOUT</span><h1>Wani san Webについて</h1><p>小さな会社の集客と業務を改善する。私たちの目的、運営者、サービスと編集方針をまとめています。</p><nav className="about-anchor-links" aria-label="ページ内ナビゲーション">{sections.map((section)=><a href={`#${section.id}`} key={section.id}><span>{section.number}</span>{section.title}</a>)}</nav></section><div className="about-layout"><div className="about-content">{sections.map((section)=><section id={section.id} key={section.id}><header><span>{section.number}</span><h2>{section.title}</h2></header>{section.body}</section>)}</div></div><SiteFooter /></main>;
+  return <main className="about-page"><SiteHeader current="about" />
+    <section className="about-hero"><span className="section-kicker" aria-hidden="true">ABOUT WSW</span><h1>WSWについて</h1><p>Webサイトを作りたい・改善したい方へ、分かりやすく、安心して相談できる制作サービスを目指しています。</p><nav className="about-anchor-links" aria-label="ページ内ナビゲーション">{sections.map((section) => <a href={`#${section.id}`} key={section.id}><span>{section.number}</span>{section.title}</a>)}</nav></section>
+    <div className="about-layout"><div className="about-content">{sections.map((section) => <section id={section.id} key={section.id}><header><span>{section.number}</span><h2>{section.title}</h2></header>{section.body}</section>)}</div></div>
+    <SiteFooter />
+  </main>;
 }

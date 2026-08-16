@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { BrandLogo } from "./BrandLogo";
 
-type Current = "learn" | "news" | "knowledge" | "column" | "tools" | "services" | "pricing" | "cases" | "about" | "contact";
+type Current = "learn" | "news" | "knowledge" | "column" | "tools" | "services" | "pricing" | "cases" | "about" | "contact" | "demo" | "quality";
 
 const navigation = [
   { href: "/services", label: "サービス", current: "services" },
+  { href: "/demo", label: "制作イメージ", current: "demo" },
   { href: "/column", label: "コラム", current: "column" },
-  { href: "/knowledge", label: "ナレッジ", current: "knowledge" },
-  { href: "/news", label: "ニュース", current: "news" },
-  { href: "/about", label: "Wani san Webについて", current: "about" },
+  { href: "/news", label: "お知らせ", current: "news" },
+  { href: "/about", label: "WSWについて", current: "about" },
 ] as const;
 
 export function SiteHeader({ current }: { current?: Current }) {
@@ -23,23 +23,23 @@ export function SiteHeader({ current }: { current?: Current }) {
     </button>
     <nav id="site-navigation" className={menuOpen ? "is-open" : undefined} aria-label="メインナビゲーション">
       {navigation.map((item) => {
-        const selected = current === item.current || (item.current === "services" && current === "tools");
+        const selected = current === item.current;
         return <a href={item.href} aria-current={selected ? "page" : undefined} onClick={() => setMenuOpen(false)} key={item.href}>{item.label}</a>;
       })}
-      <a className="header-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined} onClick={() => setMenuOpen(false)}>無料で相談する <span>→</span></a>
+      <a className="header-contact" href="/contact" aria-current={current === "contact" ? "page" : undefined} onClick={() => setMenuOpen(false)}>相談する <span>→</span></a>
     </nav>
   </header>;
 }
 
 export function SiteFooter() {
   return <footer className="site-footer">
-    <div className="footer-brand"><a className="logo" href="/"><BrandLogo /></a><p>小さな会社の集客と業務を改善する。WebとAIを活用し、売上と利益を増やすWeb・DXパートナーです。</p></div>
+    <div className="footer-brand"><a className="logo" href="/"><BrandLogo /></a><p>短期間でも、品質は妥協しない。Webサイト制作とWeb改善を、分かりやすく提供します。</p></div>
     <div className="footer-nav-groups">
-      <nav aria-label="サービス"><b>サービス</b><a href="/services">サービス・料金</a><a href="/process">制作・支援の流れ</a><a href="/cases">制作・改善事例</a></nav>
-      <nav aria-label="コンテンツ"><b>コンテンツ</b><a href="/column">コラム</a><a href="/knowledge">ナレッジ</a><a href="/news">Webニュース</a></nav>
-      <nav aria-label="Wani san Web"><b>Wani san Web</b><a href="/about">私たちについて</a><a href="/faq">よくある質問</a><a href="/contact">相談・問い合わせ</a></nav>
+      <nav aria-label="サービス"><b>サービス</b><a href="/services/web-production">Web制作</a><a href="/services/web-improvement">Web改善</a><a href="/process">ご依頼の流れ</a></nav>
+      <nav aria-label="制作と品質"><b>制作と品質</b><a href="/demo">制作イメージ</a><a href="/quality">品質・技術について</a><a href="/quality/cms">CMSについて</a><a href="/quality/form">問い合わせフォームについて</a></nav>
+      <nav aria-label="Wani san Web"><b>Wani san Web</b><a href="/column">コラム</a><a href="/news">お知らせ</a><a href="/about">WSWについて</a><a href="/contact">お問い合わせ</a></nav>
     </div>
-    <div className="footer-policy"><a href="/about#editorial">記事作成・編集方針</a><a href="/about#privacy">プライバシーポリシー</a></div>
+    <div className="footer-policy"><a href="/about#privacy">プライバシーポリシー</a><a href="/about#contact">運営・お問い合わせ</a></div>
     <small>© 2026 Wani san Web</small>
   </footer>;
 }

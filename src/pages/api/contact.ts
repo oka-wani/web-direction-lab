@@ -4,8 +4,17 @@ import { env } from "cloudflare:workers";
 export const prerender = false;
 
 type TurnstileResult = { success: boolean; action?: string; "error-codes"?: string[] };
-const services = new Set(["何を依頼すべきか相談したい", "Webサイトを制作・改善したい", "Webサイトの運用を依頼したい", "SEO・アクセス解析を相談したい", "LLMO・AI検索対策を相談したい", "Instagram運用を相談したい", "Web広告を相談したい", "AI・業務改善を相談したい", "自動化ツールを制作したい", "その他"]);
-const budgets = new Set(["", "1万円未満", "1〜5万円", "5〜10万円", "10〜30万円", "30万円以上", "まだ決めていない"]);
+const services = new Set([
+  "Webサイトを新しく制作したい",
+  "Webサイトをリニューアルしたい",
+  "既存サイトを診断・改善したい",
+  "SEO・アクセス解析を相談したい",
+  "アクセシビリティ・表示速度を確認したい",
+  "公開後の保守・更新を相談したい",
+  "何を依頼すべきか相談したい",
+  "その他",
+]);
+const budgets = new Set(["", "3万円未満", "3〜5万円", "5〜10万円", "10〜30万円", "30万円以上", "まだ決めていない"]);
 const json = (status: number, message: string) => Response.json({ message }, { status });
 const get = (data: FormData, key: string) => typeof data.get(key) === "string" ? String(data.get(key)).trim() : "";
 const escapeHtml = (input: string) => input.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);

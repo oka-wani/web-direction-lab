@@ -1,7 +1,7 @@
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
-import { faqs, services } from "./platform-data";
+import { faqs } from "./platform-data";
 
 const qualityAxes = [
   { label: "ACCESSIBILITY", title: "アクセシビリティ", text: "WCAG 2.2 Level A相当を標準目標として、読みやすさ・操作しやすさを設計します。" },
@@ -27,34 +27,35 @@ const processSteps = [
 
 export default function Home() {
   return <main className="order-home">
-    <SiteHeader />
+    <SiteHeader current="home" />
 
     <section className="order-hero">
       <div className="order-hero-inner">
-        <span className="order-kicker">WEB PRODUCTION &amp; IMPROVEMENT</span>
-        <h1><span>短期間でも、</span><span>品質は妥協しない。</span></h1>
-        <p className="order-hero-lead">Webサイトを作りたい方と、いまあるサイトを良くしたい方へ。分かりやすい進め方と標準化した制作基盤で、必要なWebサイト・改善を形にします。</p>
-        <div className="order-hero-actions"><a className="order-primary-link" href="/demo">完成イメージを見る <b>→</b></a><a className="order-secondary-link" href="/contact">まず相談する <b>→</b></a></div>
+        <span className="order-kicker">FAST, FAIR &amp; WELL-BUILT</span>
+        <h1><span>早く、手頃に、</span><span>ちゃんとしたWebサイトを。</span></h1>
+        <p className="order-hero-lead">標準化した制作フローと共通モジュールで、制作にかかる無駄を減らす。短期間・手頃な価格でも、品質は妥協しません。</p>
+        <div className="order-hero-actions"><a className="order-primary-link" href="/examples">制作イメージを見る <b>→</b></a><a className="order-secondary-link" href="/contact">無料で相談する <b>→</b></a></div>
       </div>
     </section>
 
     <div className="order-proof-strip" aria-label="WSWの特徴">
-      <div><b>Web制作 3万円〜</b><span>小規模サイトから相談可能</span></div>
-      <div><b>完成イメージを確認</b><span>業種・用途別のデモを用意</span></div>
-      <div><b>標準品質を定義</b><span>SEO・A11y・速度・安全性</span></div>
-      <div><b>公開後もつながる</b><span>保守・解析・Web改善へ</span></div>
+      <div><b>早い</b><span>標準化した流れで効率よく制作</span></div>
+      <div><b>手頃</b><span>小規模サイトは3万円〜</span></div>
+      <div><b>品質</b><span>SEO・A11y・速度・安全性</span></div>
+      <div><b>公開後も支援</b><span>保守・解析・改善まで対応</span></div>
     </div>
 
     <section className="order-section">
-      <div className="order-section-heading"><div><span>SERVICES</span><h2>サービスは、2つです。</h2></div><p>新しく作る「Web制作」と、いまあるサイトを調べて良くする「Web改善」。目的に合わせて、必要な方から始められます。</p></div>
-      <div className="order-service-grid">{services.map((service, index) => <article className="order-service-card" key={service.slug}><span className="order-number">0{index + 1}</span><small>{service.label}</small><h3>{service.title}</h3><p>{service.summary}</p><ul>{service.deliverables.slice(0, 4).map((item) => <li key={item}>{item}</li>)}</ul><a className="order-card-link" href={`/services/${service.slug}`}>詳しく見る →</a></article>)}</div>
-      <div className="order-actions"><a className="order-secondary-link" href="/services">サービス・料金をまとめて見る <b>→</b></a></div>
+      <div className="order-section-heading"><div><span>WEB PRODUCTION</span><h2>WSWは、Webサイトを作るサービスです。</h2></div><p>店舗、スクール、小規模企業、士業、サービスサイト、LPなどに対応。構成整理からデザイン、実装、公開まで一貫して進めます。</p></div>
+      <div className="order-strength-grid"><article><b>01</b><small>FAST</small><h3>早い</h3><p>共通モジュールと標準化した制作フローによって、一般的な制作工程を効率化します。</p></article><article><b>02</b><small>FAIR PRICE</small><h3>手頃</h3><p>毎回ゼロから作る工数を減らし、必要以上に制作費を膨らませません。</p></article><article><b>03</b><small>QUALITY</small><h3>品質</h3><p>レスポンシブ、SEO、アクセシビリティ、速度、安全性を標準品質として設計します。</p></article></div>
+      <p className="order-efficiency-note"><strong>品質を削るから安いのではありません。</strong>制作方法を効率化しているから、早く・手頃に提供できます。</p>
+      <div className="order-actions"><a className="order-secondary-link" href="/services">サービス・料金を見る <b>→</b></a><a className="order-secondary-link" href="/flow">制作の流れを見る <b>→</b></a></div>
     </section>
 
     <section className="order-section order-section--tint">
       <div className="order-section-heading"><div><span>SEE BEFORE YOU ORDER</span><h2>依頼する前に、完成形をイメージできる。</h2></div><p>「どんなサイトになるか分からない」を減らすために、業種別・用途別の制作イメージを用意します。必要な情報、ページ構成、デザイン、追加機能まで確認できます。</p></div>
       <div className="order-demo-grid">
-        <article className="order-card order-demo-feature" id="restaurant"><small>FIRST DEMO / RESTAURANT</small><h3>飲食店サイトなら、こんな形から考えられます。</h3><p>メニュー、店舗情報、予約導線、写真、SNS連携など、来店前に知りたい情報を分かりやすく整理したイメージです。</p><a className="order-card-link" href="/demo#restaurant-demo">飲食店の制作イメージを見る →</a><div className="order-browser" aria-hidden="true"><div className="order-browser-bar"><i /><i /><i /></div><div className="order-browser-body"><small>SMALL RESTAURANT</small><b>今日食べたい、を<br />すぐ見つけられる。</b><div className="order-browser-tags"><span>MENU</span><span>ACCESS</span><span>RESERVATION</span></div></div></div></article>
+        <article className="order-card order-demo-feature" id="restaurant"><small>FIRST PACKAGE / RESTAURANT</small><h3>飲食店サイトなら、こんな形から考えられます。</h3><p>メニュー、店舗情報、予約導線、写真、SNS連携など、来店前に知りたい情報を分かりやすく整理した制作パッケージです。</p><a className="order-card-link" href="/examples/restaurant">飲食店の制作イメージを見る →</a><div className="order-browser" aria-hidden="true"><div className="order-browser-bar"><i /><i /><i /></div><div className="order-browser-body"><small>SMALL RESTAURANT</small><b>今日食べたい、を<br />すぐ見つけられる。</b><div className="order-browser-tags"><span>MENU</span><span>ACCESS</span><span>RESERVATION</span></div></div></div></article>
         <div className="order-demo-side"><article className="order-card"><small>FOR SMALL BUSINESS</small><h3>小規模コーポレート</h3><p>事業内容、強み、会社情報、問い合わせをコンパクトに整理する構成。</p><span className="order-card-link">準備中</span></article><article className="order-card is-muted"><small>NEXT TEMPLATE</small><h3>店舗・スクール</h3><p>料金、コース、アクセス、よくある質問などを中心にした構成を追加予定です。</p></article></div>
       </div>
     </section>
@@ -68,7 +69,7 @@ export default function Home() {
     <section className="order-section order-section--tint">
       <div className="order-section-heading"><div><span>HOW WE WORK</span><h2>相談から公開後まで、流れを見える化。</h2></div><p>最初に一度打ち合わせを行い、その後はヒアリングシートと資料を中心に効率よく進めます。必要な場面だけミーティングを追加します。</p></div>
       <ol className="order-process">{processSteps.map(([number, title, text]) => <li key={number}><span>STEP {number}</span><b>{title}</b><p>{text}</p></li>)}</ol>
-      <div className="order-actions"><a className="order-secondary-link" href="/process">詳しい制作フローを見る <b>→</b></a></div>
+      <div className="order-actions"><a className="order-secondary-link" href="/flow">詳しい制作フローを見る <b>→</b></a></div>
     </section>
 
     <section className="order-section">
@@ -87,7 +88,7 @@ export default function Home() {
       <div className="faq-list">{faqs.slice(0, 5).map((faq, index) => <details key={faq.question} open={index === 0}><summary><span>Q</span>{faq.question}<i aria-hidden="true">＋</i></summary><div><span>A</span><p>{faq.answer}</p></div></details>)}</div>
     </section>
 
-    <section className="order-final-cta"><span>CONTACT</span><h2>作りたいものが固まっていなくても、相談できます。</h2><p>初回ミーティングで、目的・予算・希望時期・必要な機能を一緒に整理します。制作か改善か迷っている段階でも大丈夫です。</p><div className="order-actions"><a className="order-primary-link" href="/contact">相談内容を送る <b>→</b></a><a className="order-secondary-link" href="/demo">制作イメージを見る <b>→</b></a></div></section>
+    <section className="order-final-cta"><span>CONTACT</span><h2>作りたいものが固まっていなくても、相談できます。</h2><p>初回ミーティングで、目的・予算・希望時期・必要な機能を一緒に整理します。</p><div className="order-actions"><a className="order-primary-link" href="/contact">無料で相談する <b>→</b></a><a className="order-secondary-link" href="/examples">制作イメージを見る <b>→</b></a></div></section>
 
     <SiteFooter />
   </main>;

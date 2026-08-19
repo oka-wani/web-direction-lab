@@ -11,8 +11,8 @@ interface Props {
 }
 
 const {
-  title = "Wani san Web｜Web制作・Web改善",
-  description = "短期間でも、品質は妥協しない。小〜中規模のWebサイト制作と、SEO・解析・アクセシビリティ・パフォーマンスなどのWeb改善を提供します。",
+  title = "Wani san Web｜早く・手頃に・ちゃんとしたWebサイトを",
+  description = "標準化した制作フローで、短期間・手頃な価格でも品質は妥協しないWebサイト制作。公開後の保守・改善まで対応します。",
   noindex = false,
 } = Astro.props;
 const siteUrl = Astro.site ?? new URL("https://www.wani-san.com");
@@ -22,9 +22,9 @@ const structuredData = {
   "@type": "ProfessionalService",
   name: "Wani san Web",
   url: siteUrl.href,
-  description: "Webサイト制作とWeb改善を提供する制作サービス",
+  description: "短期間・手頃な価格でも品質は妥協しないWebサイト制作サービス",
   areaServed: "JP",
-  serviceType: ["Webサイト制作", "Webサイト改善", "SEO診断", "アクセス解析", "アクセシビリティ診断"],
+  serviceType: ["Webサイト制作", "Webサイト保守", "SEO診断", "アクセス解析", "アクセシビリティ診断"],
 };
 ---
 <!doctype html>

@@ -9,6 +9,7 @@ const get=(data:FormData,key:string)=>typeof data.get(key)==="string"?String(dat
 const getAll=(data:FormData,key:string)=>data.getAll(key).map(String).map((value)=>value.trim()).filter(Boolean);
 const escapeHtml=(input:string)=>input.replace(/[&<>"']/g,(character)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[character]!);
 const configured=(input:string|undefined)=>Boolean(input&&!input.startsWith("SET_IN_"));
+const ADMIN_EMAIL="contact@wani-san.com";
 
 const known=new Set(["name","email","company","industry","location","currentUrl","sns","launch","background","purpose","problem","target","strength1","strength2","strength3","content","cta","mood","colors","reference1","referenceNote1","reference2","referenceNote2","materials","functions","updates","other","consent","website","cf-turnstile-response"]);
 const multiKeys=["purpose","content","mood","materials","functions","updates"] as const;
@@ -39,7 +40,7 @@ export const POST:APIRoute=async({request})=>{
   const turnstile=await verification.json() as TurnstileResult;
   if(!verification.ok||!turnstile.success||turnstile.action!=="hearing")return json(400,"Bot確認に失敗しました。もう一度お試しください。");
 
-  if(!configured(env.RESEND_API_KEY)||!configured(env.CONTACT_ADMIN_EMAIL)||!configured(env.CONTACT_FROM_EMAIL))return json(503,"現在送信を受け付けられません。時間を置いてもう一度お試しください。");
+  if(!configured(env.RESEND_API_KEY)||!configured(env.CONTACT_FROM_EMAIL))return json(503,"現在送信を受け付けられません。時間を置いてもう一度お試しください。");
 
   const hearingId=`H-${new Date().toISOString().slice(0,10).replace(/-/g,"")}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
   const sentAt=new Intl.DateTimeFormat("ja-JP",{dateStyle:"medium",timeStyle:"medium",timeZone:"Asia/Tokyo"}).format(new Date());
@@ -52,8 +53,8 @@ export const POST:APIRoute=async({request})=>{
   const structured=JSON.stringify(generationData,null,2);
 
   const response=await fetch("https://api.resend.com/emails/batch",{method:"POST",headers:{Authorization:`Bearer ${env.RESEND_API_KEY}`,"Content-Type":"application/json","Idempotency-Key":crypto.randomUUID()},body:JSON.stringify([
-    {from:env.CONTACT_FROM_EMAIL,to:[env.CONTACT_ADMIN_EMAIL],reply_to:input.email,subject:`【WSW ヒアリング】${input.company} / ${input.name}様`,text:`${text}\n\n--- ROUGH_GENERATION_DATA ---\n${structured}`,html:`${html}<hr><h2>ROUGH_GENERATION_DATA</h2><pre style="white-space:pre-wrap">${escapeHtml(structured)}</pre>`},
-    {from:env.CONTACT_FROM_EMAIL,to:[input.email],reply_to:env.CONTACT_ADMIN_EMAIL,subject:"【Wani san Web】制作ヒアリングを受け付けました",text:`${input.name}様\n\n制作ヒアリングへのご回答ありがとうございます。受付IDは ${hearingId} です。回答内容をもとにサイト構成とラフ案を整理します。\n\n${text}`,html:`<p>${escapeHtml(input.name)}様</p><p>制作ヒアリングへのご回答ありがとうございます。受付IDは <strong>${escapeHtml(hearingId)}</strong> です。</p><p>回答内容をもとにサイト構成とラフ案を整理します。</p>${html}`}
+    {from:env.CONTACT_FROM_EMAIL,to:[ADMIN_EMAIL],reply_to:input.email,subject:`【WSW ヒアリング】${input.company} / ${input.name}様`,text:`${text}\n\n--- ROUGH_GENERATION_DATA ---\n${structured}`,html:`${html}<hr><h2>ROUGH_GENERATION_DATA</h2><pre style="white-space:pre-wrap">${escapeHtml(structured)}</pre>`},
+    {from:env.CONTACT_FROM_EMAIL,to:[input.email],reply_to:ADMIN_EMAIL,subject:"【Wani san Web】制作ヒアリングを受け付けました",text:`${input.name}様\n\n制作ヒアリングへのご回答ありがとうございます。受付IDは ${hearingId} です。回答内容をもとにサイト構成とラフ案を整理します。\n\n${text}`,html:`<p>${escapeHtml(input.name)}様</p><p>制作ヒアリングへのご回答ありがとうございます。受付IDは <strong>${escapeHtml(hearingId)}</strong> です。</p><p>回答内容をもとにサイト構成とラフ案を整理します。</p>${html}`}
   ])});
   if(!response.ok){console.error(JSON.stringify({event:"hearing_resend_error",status:response.status,body:await response.text()}));return json(502,"メール送信に失敗しました。時間を置いてもう一度お試しください。");}
   console.log(JSON.stringify({event:"hearing_sent",hearingId,company:input.company,sentAt}));

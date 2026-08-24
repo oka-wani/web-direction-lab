@@ -4,6 +4,9 @@ import { env } from "cloudflare:workers";
 export const prerender = false;
 
 type TurnstileResult = { success: boolean; action?: string; "error-codes"?: string[] };
+type GoogleTokenResult = { access_token?: string };
+type GoogleFreeBusyResult = { calendars?: Record<string, { busy?: { start: string; end: string }[] }> };
+
 const services = new Set([
   "Webサイトを新しく制作したい",
   "Webサイトをリニューアルしたい",
@@ -22,19 +25,115 @@ const configured = (input: string | undefined) => Boolean(input && !input.starts
 
 const ADMIN_EMAIL = "contact@wani-san.com";
 const HEARING_URL = "https://www.wani-san.com/hearing/";
-const MEETING_START_TIME = "19:00";
+const MEETING_START_HOUR = 19;
+const MEETING_DURATION_MINUTES = 60;
+const MEETING_CANDIDATE_COUNT = 3;
+const MEETING_SEARCH_DAYS = 21;
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-function getMeetingCandidates(base = new Date()) {
-  const candidates: Date[] = [];
-  const cursor = new Date(base);
-  cursor.setHours(0, 0, 0, 0);
-  while (candidates.length < 3) {
-    cursor.setDate(cursor.getDate() + 1);
-    const day = cursor.getDay();
-    if (day !== 0 && day !== 6) candidates.push(new Date(cursor));
-  }
+function toJstParts(date: Date) {
+  const shifted = new Date(date.getTime() + JST_OFFSET_MS);
+  return {
+    year: shifted.getUTCFullYear(),
+    month: shifted.getUTCMonth() + 1,
+    day: shifted.getUTCDate(),
+    weekday: shifted.getUTCDay(),
+  };
+}
+
+function dateOnlyToIso(year: number, month: number, day: number, hour: number) {
+  const mm = String(month).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  const hh = String(hour).padStart(2, "0");
+  return `${year}-${mm}-${dd}T${hh}:00:00+09:00`;
+}
+
+function addJstDays(base: Date, days: number) {
+  const shifted = new Date(base.getTime() + JST_OFFSET_MS);
+  shifted.setUTCDate(shifted.getUTCDate() + days);
+  return new Date(shifted.getTime() - JST_OFFSET_MS);
+}
+
+function formatCandidate(start: Date, index: number) {
   const formatter = new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", weekday: "short", timeZone: "Asia/Tokyo" });
-  return candidates.map((date, index) => `第${index + 1}候補：${formatter.format(date)} ${MEETING_START_TIME}〜`);
+  return `第${index + 1}候補：${formatter.format(start)} ${String(MEETING_START_HOUR).padStart(2, "0")}:00〜`;
+}
+
+function fallbackMeetingCandidates(base = new Date()) {
+  const slots: Date[] = [];
+  for (let offset = 1; slots.length < MEETING_CANDIDATE_COUNT && offset <= MEETING_SEARCH_DAYS; offset += 1) {
+    const day = addJstDays(base, offset);
+    const parts = toJstParts(day);
+    if (parts.weekday === 0 || parts.weekday === 6) continue;
+    slots.push(new Date(dateOnlyToIso(parts.year, parts.month, parts.day, MEETING_START_HOUR)));
+  }
+  return slots.map(formatCandidate);
+}
+
+async function getGoogleAccessToken() {
+  if (!configured(env.GOOGLE_CALENDAR_CLIENT_ID) || !configured(env.GOOGLE_CALENDAR_CLIENT_SECRET) || !configured(env.GOOGLE_CALENDAR_REFRESH_TOKEN)) return null;
+  const body = new URLSearchParams({
+    client_id: env.GOOGLE_CALENDAR_CLIENT_ID,
+    client_secret: env.GOOGLE_CALENDAR_CLIENT_SECRET,
+    refresh_token: env.GOOGLE_CALENDAR_REFRESH_TOKEN,
+    grant_type: "refresh_token",
+  });
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body,
+  });
+  if (!response.ok) throw new Error(`Google token error: ${response.status}`);
+  const result = await response.json() as GoogleTokenResult;
+  if (!result.access_token) throw new Error("Google access token missing");
+  return result.access_token;
+}
+
+async function getMeetingCandidates(base = new Date()) {
+  try {
+    const accessToken = await getGoogleAccessToken();
+    if (!accessToken) return fallbackMeetingCandidates(base);
+
+    const calendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+    const queryStart = addJstDays(base, 1);
+    const queryEnd = addJstDays(base, MEETING_SEARCH_DAYS + 1);
+    const startParts = toJstParts(queryStart);
+    const endParts = toJstParts(queryEnd);
+    const timeMin = dateOnlyToIso(startParts.year, startParts.month, startParts.day, 0);
+    const timeMax = dateOnlyToIso(endParts.year, endParts.month, endParts.day, 23);
+
+    const response = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        timeMin,
+        timeMax,
+        timeZone: "Asia/Tokyo",
+        items: [{ id: calendarId }],
+      }),
+    });
+    if (!response.ok) throw new Error(`Google freeBusy error: ${response.status}`);
+    const result = await response.json() as GoogleFreeBusyResult;
+    const busy = result.calendars?.[calendarId]?.busy ?? [];
+
+    const slots: Date[] = [];
+    for (let offset = 1; slots.length < MEETING_CANDIDATE_COUNT && offset <= MEETING_SEARCH_DAYS; offset += 1) {
+      const day = addJstDays(base, offset);
+      const parts = toJstParts(day);
+      if (parts.weekday === 0 || parts.weekday === 6) continue;
+      const slotStart = new Date(dateOnlyToIso(parts.year, parts.month, parts.day, MEETING_START_HOUR));
+      const slotEnd = new Date(slotStart.getTime() + MEETING_DURATION_MINUTES * 60 * 1000);
+      const overlaps = busy.some((window) => new Date(window.start) < slotEnd && new Date(window.end) > slotStart);
+      if (!overlaps) slots.push(slotStart);
+    }
+    return slots.length >= MEETING_CANDIDATE_COUNT ? slots.map(formatCandidate) : fallbackMeetingCandidates(base);
+  } catch (error) {
+    console.error(JSON.stringify({ event: "calendar_availability_error", message: error instanceof Error ? error.message : String(error) }));
+    return fallbackMeetingCandidates(base);
+  }
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -71,7 +170,7 @@ export const POST: APIRoute = async ({ request }) => {
   const text = rows.map(([label, content]) => `${label}: ${content}`).join("\n\n");
   const html = rows.map(([label, content]) => `<p><strong>${escapeHtml(label)}</strong><br>${escapeHtml(content).replace(/\n/g, "<br>")}</p>`).join("");
   const sentAt = new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeStyle: "medium", timeZone: "Asia/Tokyo" }).format(new Date());
-  const candidates = getMeetingCandidates();
+  const candidates = await getMeetingCandidates();
   const candidateText = candidates.join("\n");
   const candidateHtml = candidates.map((candidate) => `<li>${escapeHtml(candidate)}</li>`).join("");
 

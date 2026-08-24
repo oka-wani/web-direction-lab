@@ -20,6 +20,23 @@ const get = (data: FormData, key: string) => typeof data.get(key) === "string" ?
 const escapeHtml = (input: string) => input.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const configured = (input: string | undefined) => Boolean(input && !input.startsWith("SET_IN_"));
 
+const ADMIN_EMAIL = "contact@wani-san.com";
+const HEARING_URL = "https://www.wani-san.com/hearing/";
+const MEETING_START_TIME = "19:00";
+
+function getMeetingCandidates(base = new Date()) {
+  const candidates: Date[] = [];
+  const cursor = new Date(base);
+  cursor.setHours(0, 0, 0, 0);
+  while (candidates.length < 3) {
+    cursor.setDate(cursor.getDate() + 1);
+    const day = cursor.getDay();
+    if (day !== 0 && day !== 6) candidates.push(new Date(cursor));
+  }
+  const formatter = new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", weekday: "short", timeZone: "Asia/Tokyo" });
+  return candidates.map((date, index) => `第${index + 1}候補：${formatter.format(date)} ${MEETING_START_TIME}〜`);
+}
+
 export const POST: APIRoute = async ({ request }) => {
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.includes("multipart/form-data") && !contentType.includes("application/x-www-form-urlencoded")) return json(415, "送信形式が正しくありません。");
@@ -45,17 +62,25 @@ export const POST: APIRoute = async ({ request }) => {
   const turnstile = await verification.json() as TurnstileResult;
   if (!verification.ok || !turnstile.success || turnstile.action !== "contact") return json(400, "Bot確認に失敗しました。もう一度お試しください。");
 
-  if (!configured(env.RESEND_API_KEY) || !configured(env.CONTACT_ADMIN_EMAIL) || !configured(env.CONTACT_FROM_EMAIL)) {
+  if (!configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) {
     console.error(JSON.stringify({ event: "contact_config_missing" }));
     return json(503, "現在送信を受け付けられません。時間を置いてもう一度お試しください。");
   }
+
   const rows = [["氏名", input.name], ["メールアドレス", input.email], ["会社名・屋号", input.company || "未入力"], ["対象サイトURL", input.url || "未入力"], ["問い合わせ種別", input.service], ["予算感", input.budget || "未選択"], ["希望時期", input.schedule || "未入力"], ["相談内容", input.message]];
   const text = rows.map(([label, content]) => `${label}: ${content}`).join("\n\n");
   const html = rows.map(([label, content]) => `<p><strong>${escapeHtml(label)}</strong><br>${escapeHtml(content).replace(/\n/g, "<br>")}</p>`).join("");
   const sentAt = new Intl.DateTimeFormat("ja-JP", { dateStyle: "medium", timeStyle: "medium", timeZone: "Asia/Tokyo" }).format(new Date());
+  const candidates = getMeetingCandidates();
+  const candidateText = candidates.join("\n");
+  const candidateHtml = candidates.map((candidate) => `<li>${escapeHtml(candidate)}</li>`).join("");
+
+  const customerIntroText = `${input.name}様\n\nお問い合わせありがとうございます。以下の内容で受け付けました。\n\n次のステップとして、初回打ち合わせと制作ヒアリングをお願いいたします。\n\n【初回打ち合わせ候補日】\n${candidateText}\n\nご都合のよい候補を、このメールへの返信でお知らせください。上記で難しい場合は、ご希望日時を2〜3候補お送りください。\n\n【制作ヒアリング】\n${HEARING_URL}\n\n打ち合わせ前に分かる範囲でご回答いただくと、その後のご案内がスムーズです。`;
+  const customerIntroHtml = `<p>${escapeHtml(input.name)}様</p><p>お問い合わせありがとうございます。以下の内容で受け付けました。</p><h2 style="font-size:18px">次のステップ</h2><p>初回打ち合わせと制作ヒアリングをお願いいたします。</p><p><strong>初回打ち合わせ候補日</strong></p><ul>${candidateHtml}</ul><p>ご都合のよい候補を、このメールへの返信でお知らせください。上記で難しい場合は、ご希望日時を2〜3候補お送りください。</p><p><strong>制作ヒアリング</strong><br><a href="${HEARING_URL}">${HEARING_URL}</a></p><p>打ち合わせ前に分かる範囲でご回答いただくと、その後のご案内がスムーズです。</p>`;
+
   const response = await fetch("https://api.resend.com/emails/batch", { method: "POST", headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify([
-    { from: env.CONTACT_FROM_EMAIL, to: [env.CONTACT_ADMIN_EMAIL], reply_to: input.email, subject: `【Wani san Web】${input.name}様からのお問い合わせ`, text: `${text}\n\n送信日時: ${sentAt}`, html: `${html}<p><strong>送信日時</strong><br>${escapeHtml(sentAt)}</p>` },
-    { from: env.CONTACT_FROM_EMAIL, to: [input.email], reply_to: env.CONTACT_ADMIN_EMAIL, subject: "【Wani san Web】お問い合わせを受け付けました", text: `${input.name}様\n\nお問い合わせありがとうございます。以下の内容で受け付けました。内容を確認後、2〜3営業日以内を目安にご連絡します。\n\n${text}`, html: `<p>${escapeHtml(input.name)}様</p><p>お問い合わせありがとうございます。以下の内容で受け付けました。内容を確認後、2〜3営業日以内を目安にご連絡します。</p>${html}` },
+    { from: env.CONTACT_FROM_EMAIL, to: [ADMIN_EMAIL], reply_to: input.email, subject: `【Wani san Web】${input.name}様からのお問い合わせ`, text: `${text}\n\n送信日時: ${sentAt}\n\n初回打ち合わせ候補日:\n${candidateText}\n\nヒアリングURL: ${HEARING_URL}`, html: `${html}<p><strong>送信日時</strong><br>${escapeHtml(sentAt)}</p><p><strong>初回打ち合わせ候補日</strong></p><ul>${candidateHtml}</ul><p><strong>ヒアリングURL</strong><br><a href="${HEARING_URL}">${HEARING_URL}</a></p>` },
+    { from: env.CONTACT_FROM_EMAIL, to: [input.email], reply_to: ADMIN_EMAIL, subject: "【Wani san Web】お問い合わせありがとうございます｜次のご案内", text: `${customerIntroText}\n\n--- お問い合わせ内容 ---\n${text}`, html: `${customerIntroHtml}<hr><h2 style="font-size:18px">お問い合わせ内容</h2>${html}` },
   ]) });
   if (!response.ok) { console.error(JSON.stringify({ event: "resend_error", status: response.status, body: await response.text() })); return json(502, "メール送信に失敗しました。時間を置いてもう一度お試しください。"); }
   console.log(JSON.stringify({ event: "contact_sent", service: input.service, sentAt }));

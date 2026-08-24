@@ -1,4 +1,5 @@
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
+import { HomeHero } from "./components/HomeHero";
 import { columnItems } from "./column/column-data";
 import { newsItems } from "./news/news-data";
 import { faqs } from "./platform-data";
@@ -28,22 +29,7 @@ const processSteps = [
 export default function Home() {
   return <main className="order-home">
     <SiteHeader current="home" />
-
-    <section className="order-hero">
-      <div className="order-hero-inner">
-        <span className="order-kicker">FAST, FAIR &amp; WELL-BUILT</span>
-        <h1><span>早く、手頃に、</span><span>ちゃんとしたWebサイトを。</span></h1>
-        <p className="order-hero-lead">標準化した制作フローと共通モジュールで、制作にかかる無駄を減らす。短期間・手頃な価格でも、品質は妥協しません。</p>
-        <div className="order-hero-actions"><a className="order-primary-link" href="/examples">制作イメージを見る <b>→</b></a><a className="order-secondary-link" href="/contact">無料で相談する <b>→</b></a></div>
-      </div>
-    </section>
-
-    <div className="order-proof-strip" aria-label="WSWの特徴">
-      <div><b>早い</b><span>標準化した流れで効率よく制作</span></div>
-      <div><b>手頃</b><span>小規模サイトは3万円〜</span></div>
-      <div><b>品質</b><span>SEO・A11y・速度・安全性</span></div>
-      <div><b>公開後も支援</b><span>保守・解析・改善まで対応</span></div>
-    </div>
+    <HomeHero />
 
     <section className="order-section">
       <div className="order-section-heading"><div><span>WEB PRODUCTION</span><h2>WSWは、Webサイトを作るサービスです。</h2></div><p>店舗、スクール、小規模企業、士業、サービスサイト、LPなどに対応。構成整理からデザイン、実装、公開まで一貫して進めます。</p></div>

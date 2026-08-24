@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "web-direction-lab",
-  "main": "@astrojs/cloudflare/entrypoints/server",
-  "compatibility_date": "2026-08-15",
+  "main": "./src/worker.ts",
+  "compatibility_date": "2026-08-25",
   "compatibility_flags": [
     "nodejs_compat",
     "global_fetch_strictly_public"
@@ -27,6 +27,13 @@
     {
       "binding": "SESSION",
       "id": "67272fbd3a2544e7be39b528e4f13dd1"
+    }
+  ],
+  "workflows": [
+    {
+      "name": "wsw-proposal-generation",
+      "binding": "PROPOSAL_WORKFLOW",
+      "class_name": "ProposalWorkflow"
     }
   ],
   "observability": {

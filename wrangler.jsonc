@@ -33,7 +33,7 @@
     {
       "name": "wsw-proposal-generation",
       "binding": "PROPOSAL_WORKFLOW",
-      "class_name": "ProposalWorkflow"
+      "class_name": "ProposalWorkflowV2"
     }
   ],
   "observability": {

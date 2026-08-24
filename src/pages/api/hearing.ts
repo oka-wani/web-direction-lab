@@ -10,6 +10,7 @@ type ProposalWorkflowBinding = {
 };
 type RuntimeEnv = typeof env & {
   SESSION?: KVNamespace;
+  PROPOSALS?: R2Bucket;
   PROPOSAL_WORKFLOW?: ProposalWorkflowBinding;
 };
 
@@ -181,6 +182,21 @@ export const POST: APIRoute = async ({ request }) => {
     return json(502, "サンクスメールを送信できませんでした。");
   }
 
+  if (runtime.PROPOSALS) {
+    await runtime.PROPOSALS.put(
+      `proposals/${accessId}/status.json`,
+      JSON.stringify({
+        hearingId,
+        accessId,
+        company: hearing.company,
+        status: "accepted",
+        message: "受付済み。Workflowの起動待ちです。",
+        updatedAt: new Date().toISOString(),
+      }, null, 2),
+      { httpMetadata: { contentType: "application/json; charset=utf-8" } },
+    ).catch((error) => console.error(JSON.stringify({ event: "proposal_status_init_error", hearingId, message: error instanceof Error ? error.message : String(error) })));
+  }
+
   if (!runtime.PROPOSAL_WORKFLOW) {
     console.error(JSON.stringify({ event: "proposal_workflow_binding_missing", hearingId }));
   } else {
@@ -192,6 +208,21 @@ export const POST: APIRoute = async ({ request }) => {
       console.log(JSON.stringify({ event: "proposal_workflow_started", hearingId, instanceId: instance.id }));
     } catch (error) {
       console.error(JSON.stringify({ event: "proposal_workflow_start_error", hearingId, message: error instanceof Error ? error.message : String(error) }));
+      if (runtime.PROPOSALS) {
+        await runtime.PROPOSALS.put(
+          `proposals/${accessId}/status.json`,
+          JSON.stringify({
+            hearingId,
+            accessId,
+            company: hearing.company,
+            status: "error",
+            message: "Workflowを起動できませんでした。",
+            error: error instanceof Error ? error.message : String(error),
+            updatedAt: new Date().toISOString(),
+          }, null, 2),
+          { httpMetadata: { contentType: "application/json; charset=utf-8" } },
+        ).catch(() => undefined);
+      }
       await sendMail({
         from: env.CONTACT_FROM_EMAIL,
         to: [ADMIN_EMAIL],

@@ -2,172 +2,57 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const industries = [
-  "飲食店・カフェ",
-  "小売・EC",
-  "美容・サロン",
-  "医療・クリニック",
-  "士業・コンサルティング",
-  "不動産・建築",
-  "製造業",
-  "IT・Web・SaaS",
-  "教育・スクール",
-  "人材・採用",
-  "その他",
-];
-const purposes = ["お問い合わせを増やしたい","予約を増やしたい","来店を増やしたい","商品・サービスを紹介したい","会社・店舗の信頼感を高めたい","採用につなげたい","情報を分かりやすく整理したい","その他"];
-const contents = ["私たちについて","会社・店舗紹介","サービス","商品","メニュー・料金","特徴・強み","実績・事例","スタッフ紹介","お客様の声","よくある質問","お知らせ","ブログ・コラム","アクセス","採用情報","お問い合わせ","予約","その他","よく分からないのでおまかせ"];
-const ctas = ["お問い合わせ","予約","来店","資料請求","商品購入","採用応募","電話","SNSを見る・フォロー","その他"];
-const moods = ["シンプル","親しみやすい","スタイリッシュ","高級感","ナチュラル","明るい","落ち着いた","信頼感","かわいい","力強い","先進的","おまかせ"];
-const functions = ["お問い合わせフォーム","予約フォーム","Google Maps","InstagramなどSNSとの連携","お知らせ更新","ブログ更新","CMS","商品検索","サイト内検索","多言語","外部予約サービスとの連携","その他","よく分からないので提案してほしい"];
-const updates = ["お知らせ","ブログ","商品・サービス","メニュー・料金","実績","スタッフ","特に更新しない","分からない"];
+const industries=["飲食店・カフェ","小売・EC","美容・サロン","医療・クリニック","士業・コンサルティング","不動産・建築","製造業","IT・Web・SaaS","教育・スクール","人材・採用","その他"];
+const launchOptions=["1か月以内","2〜3か月以内","3〜6か月以内","6か月以降","未定"];
+const siteStatusOptions=["現在Webサイトはない","現在Webサイトがあり、リニューアルしたい","現在Webサイトがあり、別サイトを新しく作りたい"];
+const purposes=["お問い合わせを増やしたい","予約を増やしたい","来店を増やしたい","商品・サービスを紹介したい","会社・店舗の信頼感を高めたい","採用につなげたい","情報を分かりやすく整理したい","その他"];
+const targetTypes=["個人のお客様","法人のお客様","個人・法人どちらも","採用候補者","既存のお客様","その他"];
+const targetAges=["10〜20代","20〜30代","30〜40代","40〜50代","50代以上","年齢は特に限定しない"];
+const contents=["私たちについて","会社・店舗紹介","サービス","商品","メニュー・料金","特徴・強み","実績・事例","スタッフ紹介","お客様の声","よくある質問","お知らせ","ブログ・コラム","アクセス","採用情報","お問い合わせ","予約","その他","よく分からないのでおまかせ"];
+const ctas=["お問い合わせ","予約","来店","資料請求","商品購入","採用応募","電話","SNSを見る・フォロー","その他"];
+const moods=["シンプル","親しみやすい","スタイリッシュ","高級感","ナチュラル","明るい","落ち着いた","信頼感","かわいい","力強い","先進的","おまかせ"];
+const functions=["お問い合わせフォーム","予約フォーム","Google Maps","InstagramなどSNSとの連携","お知らせ更新","ブログ更新","CMS","商品検索","サイト内検索","多言語","外部予約サービスとの連携","その他","よく分からないので提案してほしい"];
+const updates=["お知らせ","ブログ・コラム","商品・サービス","メニュー・料金","実績・事例","スタッフ","特に更新しない","分からないので提案してほしい"];
 
-export default function HearingForm() {
-  const [step,setStep]=useState<"input"|"confirm">("input");
-  const [status,setStatus]=useState<"idle"|"sending"|"error">("idle");
-  const [message,setMessage]=useState("");
-  const [confirmation,setConfirmation]=useState<Record<string,string[]>>({});
-  const [turnstileStatus,setTurnstileStatus]=useState<"loading"|"ready"|"error">("loading");
-  const turnstileRef=useRef<HTMLDivElement>(null);
-  const widgetIdRef=useRef<string|null>(null);
+export default function HearingForm(){
+  const[step,setStep]=useState<"input"|"confirm">("input");
+  const[status,setStatus]=useState<"idle"|"sending"|"error">("idle");
+  const[message,setMessage]=useState("");
+  const[confirmation,setConfirmation]=useState<Record<string,string[]>>({});
+  const[turnstileStatus,setTurnstileStatus]=useState<"loading"|"ready"|"error">("loading");
+  const turnstileRef=useRef<HTMLDivElement>(null);const widgetIdRef=useRef<string|null>(null);
 
-  useEffect(()=>{
-    const sitekey=import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
-    if(!sitekey){setTurnstileStatus("error");return;}
-    let cancelled=false;
-    const renderWidget=()=>{
-      if(cancelled||!turnstileRef.current||!window.turnstile||widgetIdRef.current)return;
-      widgetIdRef.current=window.turnstile.render(turnstileRef.current,{sitekey,action:"hearing",theme:"light",callback:()=>setTurnstileStatus("ready"),"expired-callback":()=>setTurnstileStatus("loading"),"error-callback":()=>setTurnstileStatus("error")});
-    };
-    renderWidget();
-    let script=document.querySelector<HTMLScriptElement>('script[data-turnstile-script]');
-    if(!script){
-      script=document.createElement("script");
-      script.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async=true;script.defer=true;script.dataset.turnstileScript="true";
-      script.addEventListener("load",renderWidget,{once:true});
-      script.addEventListener("error",()=>setTurnstileStatus("error"),{once:true});
-      document.head.appendChild(script);
-    } else script.addEventListener("load",renderWidget,{once:true});
-    const timer=window.setInterval(()=>{if(window.turnstile){renderWidget();if(widgetIdRef.current)window.clearInterval(timer);}},100);
-    return()=>{cancelled=true;window.clearInterval(timer);};
-  },[]);
+  useEffect(()=>{const sitekey=import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;if(!sitekey){setTurnstileStatus("error");return;}let cancelled=false;const renderWidget=()=>{if(cancelled||!turnstileRef.current||!window.turnstile||widgetIdRef.current)return;widgetIdRef.current=window.turnstile.render(turnstileRef.current,{sitekey,action:"hearing",theme:"light",callback:()=>setTurnstileStatus("ready"),"expired-callback":()=>setTurnstileStatus("loading"),"error-callback":()=>setTurnstileStatus("error")});};renderWidget();let script=document.querySelector<HTMLScriptElement>('script[data-turnstile-script]');if(!script){script=document.createElement("script");script.src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";script.async=true;script.defer=true;script.dataset.turnstileScript="true";script.addEventListener("load",renderWidget,{once:true});script.addEventListener("error",()=>setTurnstileStatus("error"),{once:true});document.head.appendChild(script);}else script.addEventListener("load",renderWidget,{once:true});const timer=window.setInterval(()=>{if(window.turnstile){renderWidget();if(widgetIdRef.current)window.clearInterval(timer);}},100);return()=>{cancelled=true;window.clearInterval(timer);};},[]);
 
-  function toRecord(data:FormData){
-    const record:Record<string,string[]>={};
-    data.forEach((value,key)=>{if(key==="cf-turnstile-response"||key==="website")return;(record[key]??=[]).push(String(value));});
-    return record;
-  }
+  function toRecord(data:FormData){const record:Record<string,string[]>={};data.forEach((value,key)=>{if(key==="cf-turnstile-response"||key==="website")return;(record[key]??=[]).push(String(value));});return record;}
+  function createSubmissionData(form:HTMLFormElement){const data=new FormData();Object.entries(confirmation).forEach(([key,values])=>values.forEach(value=>data.append(key,value)));const token=form.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value;if(token)data.append("cf-turnstile-response",token);return data;}
+  function scrollTop(){window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"smooth"})));}
+  async function handleSubmit(event:React.SubmitEvent<HTMLFormElement>){event.preventDefault();if(status==="sending")return;if(step==="input"){const data=new FormData(event.currentTarget);if(data.getAll("purpose").length===0){setStatus("error");setMessage("Webサイトの目的を1つ以上選択してください。");document.querySelector<HTMLElement>('[data-hearing-purpose]')?.scrollIntoView({behavior:"smooth",block:"center"});return;}setConfirmation(toRecord(data));setStatus("idle");setMessage("");setStep("confirm");scrollTop();return;}if(turnstileStatus!=="ready"){setStatus("error");setMessage("Bot確認が完了するまでお待ちください。");return;}setStatus("sending");setMessage("");try{const response=await fetch("/api/hearing",{method:"POST",body:createSubmissionData(event.currentTarget),headers:{Accept:"application/json"}});const result=await response.json().catch(()=>null) as {message?:string}|null;if(!response.ok)throw new Error(result?.message||"送信できませんでした。");window.location.assign("/hearing/thanks/");}catch(error){setStatus("error");setMessage(error instanceof Error?error.message:"送信できませんでした。");if(widgetIdRef.current)window.turnstile?.reset(widgetIdRef.current);setTurnstileStatus("loading");}}
 
-  function createSubmissionData(form:HTMLFormElement){
-    const data=new FormData();
-    Object.entries(confirmation).forEach(([key,values])=>values.forEach((value)=>data.append(key,value)));
-    const turnstileToken=form.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value;
-    if(turnstileToken)data.append("cf-turnstile-response",turnstileToken);
-    return data;
-  }
-
-  function scrollToTop(){
-    window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
-      window.scrollTo({top:0,left:0,behavior:"smooth"});
-      document.documentElement.scrollTop=0;
-      document.body.scrollTop=0;
-    }));
-  }
-
-  async function handleSubmit(event:React.SubmitEvent<HTMLFormElement>){
-    event.preventDefault();
-    if(status==="sending")return;
-    if(step==="input"){
-      const data=new FormData(event.currentTarget);
-      if(data.getAll("purpose").length===0){
-        setStatus("error");setMessage("Webサイトの目的を1つ以上選択してください。");
-        document.querySelector<HTMLElement>('[data-hearing-purpose]')?.scrollIntoView({behavior:"smooth",block:"center"});
-        return;
-      }
-      const record=toRecord(data);
-      setConfirmation(record);
-      setStatus("idle");setMessage("");setStep("confirm");
-      scrollToTop();
-      return;
-    }
-    if(turnstileStatus!=="ready"){setStatus("error");setMessage("Bot確認が完了するまでお待ちください。");return;}
-    setStatus("sending");setMessage("");
-    try{
-      const response=await fetch("/api/hearing",{method:"POST",body:createSubmissionData(event.currentTarget),headers:{Accept:"application/json"}});
-      const result=await response.json().catch(()=>null) as {message?:string}|null;
-      if(!response.ok)throw new Error(result?.message||"送信できませんでした。");
-      window.location.assign("/hearing/thanks/");
-    }catch(error){
-      setStatus("error");setMessage(error instanceof Error?error.message:"送信できませんでした。");
-      if(widgetIdRef.current)window.turnstile?.reset(widgetIdRef.current);
-      setTurnstileStatus("loading");
-    }
-  }
-
-  const summaryLabels:Record<string,string>={name:"お名前",email:"メールアドレス",company:"会社名・店舗名・サービス名",industry:"業種",location:"所在地・商圏",currentUrl:"現在のWebサイトURL",sns:"SNS",launch:"希望公開時期",background:"Webサイトを作るきっかけ",purpose:"Webサイトの目的",problem:"現在困っていること",target:"見てほしい人",strength1:"特に伝えたいこと 1",strength2:"特に伝えたいこと 2",strength3:"特に伝えたいこと 3",content:"掲載したい内容",cta:"最終的にしてほしい行動",mood:"デザインの雰囲気",colors:"使いたい色・避けたい色",reference1:"参考サイト 1",referenceNote1:"参考サイト 1 の好きな点",reference2:"参考サイト 2",referenceNote2:"参考サイト 2 の好きな点",materials:"用意できる素材",functions:"必要な機能",updates:"公開後に更新したい内容",other:"その他・相談事項"};
-
+  const labels:Record<string,string>={name:"お名前",email:"メールアドレス",company:"会社名・店舗名・サービス名",industry:"業種",businessSummary:"事業・サービス概要",location:"所在地・主な対応エリア",siteStatus:"現在のWebサイト",currentUrl:"現在のWebサイトURL",sns:"SNS",launch:"希望公開時期",background:"制作のきっかけ",purpose:"Webサイトの目的",problem:"現在の課題",targetType:"主な対象",targetAge:"年齢層",targetArea:"ターゲットのエリア",targetSituation:"利用シーン・悩み・目的",strength1:"特に伝えたいこと 1",strength2:"特に伝えたいこと 2",strength3:"特に伝えたいこと 3",content:"掲載したい内容",cta:"メインCTA",mood:"デザインの雰囲気",colors:"使いたい色・避けたい色",reference1:"参考サイト 1",referenceNote1:"参考サイト 1 の好きな点",reference2:"参考サイト 2",referenceNote2:"参考サイト 2 の好きな点",materials:"用意できる素材",functions:"必要な機能",updates:"公開後に更新したい内容",other:"その他・相談事項"};
   const CheckGroup=({name,items}:{name:string;items:string[]})=><div className="hearing-check-grid">{items.map(item=><label key={item}><input type="checkbox" name={name} value={item}/><span>{item}</span></label>)}</div>;
 
   return <form className={`hearing-form hearing-form--${step}`} onSubmit={handleSubmit}>
-    {step==="confirm"&&<section className="hearing-confirm"><span>CONFIRM</span><h2>入力内容をご確認ください。</h2><p>問題なければページ下部の送信ボタンを押してください。</p><dl>{Object.entries(confirmation).filter(([key])=>summaryLabels[key]).map(([key,values])=><div key={key}><dt>{summaryLabels[key]}</dt><dd>{values.join(" / ")||"未入力"}</dd></div>)}</dl></section>}
+    {step==="confirm"&&<section className="hearing-confirm"><span>CONFIRM</span><h2>入力内容をご確認ください。</h2><p>問題なければページ下部の送信ボタンを押してください。</p><dl>{Object.entries(confirmation).filter(([key])=>labels[key]).map(([key,values])=><div key={key}><dt>{labels[key]}</dt><dd>{values.join(" / ")||"未入力"}</dd></div>)}</dl></section>}
 
-    <section className="hearing-block"><div className="hearing-block-head"><b>01</b><div><span>BASIC INFORMATION</span><h2>基本情報</h2></div></div>
-      <div className="hearing-fields two"><label><span>お名前 <b>必須</b></span><input name="name" required maxLength={100}/></label><label><span>メールアドレス <b>必須</b></span><input type="email" name="email" required maxLength={254}/></label></div>
-      <div className="hearing-fields two"><label><span>会社名・店舗名・サービス名 <b>必須</b></span><input name="company" required maxLength={150}/></label><label><span>業種 <b>必須</b></span><select name="industry" required defaultValue=""><option value="" disabled>選択してください</option>{industries.map((item)=><option key={item}>{item}</option>)}</select></label></div>
-      <div className="hearing-fields two"><label><span>所在地・主な商圏</span><input name="location" maxLength={150} placeholder="例：東京都江東区、全国対応"/></label><label><span>希望公開時期</span><input name="launch" maxLength={100} placeholder="例：11月末、3か月以内、未定"/></label></div>
-      <div className="hearing-fields two"><label><span>現在のWebサイトURL</span><input type="url" name="currentUrl" placeholder="https://" maxLength={500}/></label><label><span>SNSアカウント</span><input name="sns" maxLength={500} placeholder="Instagramなど"/></label></div>
-      <label><span>Webサイトを作るきっかけ</span><textarea name="background" rows={4} maxLength={1500} placeholder="新規開業、既存サイトが古い、集客を増やしたい等"/></label>
-    </section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>01</b><div><span>BASIC INFORMATION</span><h2>基本情報</h2></div></div><div className="hearing-fields two"><label><span>お名前 <b>必須</b></span><input name="name" required maxLength={100}/></label><label><span>メールアドレス <b>必須</b></span><input type="email" name="email" required maxLength={254}/></label></div><div className="hearing-fields two"><label><span>会社名・店舗名・サービス名 <b>必須</b></span><input name="company" required maxLength={150}/></label><label><span>業種 <b>必須</b></span><select name="industry" required defaultValue=""><option value="" disabled>選択してください</option>{industries.map(item=><option key={item}>{item}</option>)}</select></label></div><label><span>事業・サービスの概要</span><textarea name="businessSummary" rows={4} maxLength={1500} placeholder="どんな商品・サービスを提供しているか、簡単にご記入ください。"/></label><div className="hearing-fields two"><label><span>所在地・主な対応エリア <b>必須</b></span><input name="location" required maxLength={150} placeholder="例：東京都江東区、首都圏、全国対応"/></label><label><span>希望公開時期 <b>必須</b></span><select name="launch" required defaultValue=""><option value="" disabled>選択してください</option>{launchOptions.map(item=><option key={item}>{item}</option>)}</select></label></div><label><span>現在のWebサイト <b>必須</b></span><select name="siteStatus" required defaultValue=""><option value="" disabled>選択してください</option>{siteStatusOptions.map(item=><option key={item}>{item}</option>)}</select></label><div className="hearing-fields two"><label><span>現在のWebサイトURL</span><input type="url" name="currentUrl" placeholder="https://" maxLength={500}/></label><label><span>SNSアカウント</span><input name="sns" maxLength={500} placeholder="Instagramなど"/></label></div><label><span>Webサイト制作・リニューアルのきっかけ</span><textarea name="background" rows={4} maxLength={1500}/></label></section>
 
-    <section className="hearing-block"><div className="hearing-block-head"><b>02</b><div><span>GOAL</span><h2>目的・課題</h2></div></div>
-      <fieldset data-hearing-purpose><legend>当てはまる目的を選んでください <b>必須</b></legend><CheckGroup name="purpose" items={purposes}/></fieldset>
-      <label><span>現在困っていること・改善したいこと</span><textarea name="problem" rows={5} maxLength={2000}/></label>
-    </section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>02</b><div><span>GOAL</span><h2>目的・課題</h2></div></div><fieldset data-hearing-purpose><legend>Webサイトで実現したいことを選んでください <b>必須</b></legend><CheckGroup name="purpose" items={purposes}/></fieldset><label><span>現在困っていること・改善したいこと</span><textarea name="problem" rows={5} maxLength={2000}/></label></section>
 
-    <section className="hearing-block"><div className="hearing-block-head"><b>03</b><div><span>TARGET</span><h2>見てほしい人</h2></div></div>
-      <label><span>どんな方にWebサイトを見てほしいですか？ <b>必須</b></span><textarea name="target" rows={5} required maxLength={2000} placeholder="例：30〜40代、江東区周辺、休日に家族で食事する店を探している方"/></label>
-      <p className="hearing-help">年齢・地域・個人/法人・どんな悩みや目的を持つ人か、分かる範囲でご記入ください。</p>
-    </section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>03</b><div><span>TARGET</span><h2>ターゲット</h2></div></div><div className="hearing-fields two"><label><span>主な対象 <b>必須</b></span><select name="targetType" required defaultValue=""><option value="" disabled>選択してください</option>{targetTypes.map(item=><option key={item}>{item}</option>)}</select></label><label><span>主な年齢層</span><select name="targetAge" defaultValue=""><option value="">選択してください</option>{targetAges.map(item=><option key={item}>{item}</option>)}</select></label></div><label><span>ターゲットのエリア</span><input name="targetArea" maxLength={300} placeholder="例：江東区周辺、首都圏、全国"/></label><label><span>どんな場面・悩み・目的でサイトを見ますか？ <b>必須</b></span><textarea name="targetSituation" rows={5} required maxLength={2000} placeholder="例：休日に家族で食事する店を探している、業務課題を解決できる会社を比較している等"/></label></section>
 
-    <section className="hearing-block"><div className="hearing-block-head"><b>04</b><div><span>MESSAGE</span><h2>特に伝えたいこと</h2></div></div>
-      <p className="hearing-help">サイトの「特徴」「選ばれる理由」などの構成に利用します。最大3つまでご記入ください。</p>
-      <div className="hearing-fields three"><label><span>1</span><input name="strength1" maxLength={300}/></label><label><span>2</span><input name="strength2" maxLength={300}/></label><label><span>3</span><input name="strength3" maxLength={300}/></label></div>
-    </section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>04</b><div><span>MESSAGE</span><h2>特に伝えたいこと</h2></div></div><p className="hearing-help">サイト上の「特徴」「選ばれる理由」の候補として使用します。最大3つまで。</p><div className="hearing-fields three"><label><span>1</span><input name="strength1" maxLength={300}/></label><label><span>2</span><input name="strength2" maxLength={300}/></label><label><span>3</span><input name="strength3" maxLength={300}/></label></div></section>
 
     <section className="hearing-block"><div className="hearing-block-head"><b>05</b><div><span>CONTENTS</span><h2>掲載したい内容</h2></div></div><fieldset><legend>必要そうなものを選択してください</legend><CheckGroup name="content" items={contents}/></fieldset></section>
-
-    <section className="hearing-block"><div className="hearing-block-head"><b>06</b><div><span>CTA</span><h2>最終的にしてほしい行動</h2></div></div><label><span>Webサイトを見た人に、最終的に何をしてほしいですか？ <b>必須</b></span><select name="cta" required defaultValue=""><option value="" disabled>選択してください</option>{ctas.map((item)=><option key={item}>{item}</option>)}</select></label></section>
-
-    <section className="hearing-block"><div className="hearing-block-head"><b>07</b><div><span>DESIGN</span><h2>デザインの方向性</h2></div></div><fieldset><legend>希望する雰囲気</legend><CheckGroup name="mood" items={moods}/></fieldset><label><span>使いたい色・避けたい色</span><input name="colors" maxLength={500}/></label></section>
-
-    <section className="hearing-block"><div className="hearing-block-head"><b>08</b><div><span>REFERENCE</span><h2>参考サイト</h2></div></div>
-      <div className="reference-set"><label><span>参考サイト 1</span><input type="url" name="reference1" placeholder="https://" maxLength={500}/></label><label><span>どこが好きですか？</span><input name="referenceNote1" maxLength={800} placeholder="色、写真、レイアウト、雰囲気など"/></label></div>
-      <div className="reference-set"><label><span>参考サイト 2</span><input type="url" name="reference2" placeholder="https://" maxLength={500}/></label><label><span>どこが好きですか？</span><input name="referenceNote2" maxLength={800}/></label></div>
-    </section>
-
-    <section className="hearing-block"><div className="hearing-block-head"><b>09</b><div><span>MATERIALS</span><h2>用意できる素材</h2></div></div><fieldset><legend>現在用意できるもの</legend><CheckGroup name="materials" items={["ロゴ","写真","イラスト","原稿","会社案内・パンフレット","商品資料","メニュー・料金表","動画","特に用意されていない"]}/></fieldset></section>
-
-    <section className="hearing-block"><div className="hearing-block-head"><b>10</b><div><span>FUNCTION</span><h2>必要な機能・更新</h2></div></div><fieldset><legend>必要そうな機能</legend><CheckGroup name="functions" items={functions}/></fieldset><fieldset><legend>公開後、ご自身で更新したい内容</legend><CheckGroup name="updates" items={updates}/></fieldset></section>
-
+    <section className="hearing-block"><div className="hearing-block-head"><b>06</b><div><span>CTA</span><h2>メインCTA</h2></div></div><label><span>Webサイトを見た人に、最終的にしてほしい行動 <b>必須</b></span><select name="cta" required defaultValue=""><option value="" disabled>選択してください</option>{ctas.map(item=><option key={item}>{item}</option>)}</select></label></section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>07</b><div><span>OPERATION</span><h2>公開後の更新</h2></div></div><fieldset><legend>ご自身で更新したい内容</legend><CheckGroup name="updates" items={updates}/></fieldset></section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>08</b><div><span>DESIGN</span><h2>デザインの方向性</h2></div></div><fieldset><legend>希望する雰囲気</legend><CheckGroup name="mood" items={moods}/></fieldset><label><span>使いたい色・避けたい色</span><input name="colors" maxLength={500}/></label></section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>09</b><div><span>REFERENCE</span><h2>参考サイト</h2></div></div><div className="reference-set"><label><span>参考サイト 1</span><input type="url" name="reference1" placeholder="https://" maxLength={500}/></label><label><span>好きな点</span><input name="referenceNote1" maxLength={800}/></label></div><div className="reference-set"><label><span>参考サイト 2</span><input type="url" name="reference2" placeholder="https://" maxLength={500}/></label><label><span>好きな点</span><input name="referenceNote2" maxLength={800}/></label></div></section>
+    <section className="hearing-block"><div className="hearing-block-head"><b>10</b><div><span>MATERIALS / FUNCTION</span><h2>素材・必要な機能</h2></div></div><fieldset><legend>現在用意できる素材</legend><CheckGroup name="materials" items={["ロゴ","写真","イラスト","原稿","会社案内・パンフレット","商品資料","メニュー・料金表","動画","特に用意されていない"]}/></fieldset><fieldset><legend>必要そうな機能</legend><CheckGroup name="functions" items={functions}/></fieldset></section>
     <section className="hearing-block"><div className="hearing-block-head"><b>11</b><div><span>OTHER</span><h2>その他</h2></div></div><label><span>ご希望・不安・相談したいこと</span><textarea name="other" rows={6} maxLength={3000}/></label></section>
 
-    <label className="form-consent"><input type="checkbox" name="consent" value="agreed" required/><span><a href="/about#privacy" target="_blank">個人情報の取り扱い</a>に同意する <b>必須</b></span></label>
-    <div className="form-trap" aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off"/></div>
-    <div className="form-turnstile"><div ref={turnstileRef}/>{turnstileStatus==="loading"&&<p>Bot確認を行っています。</p>}{turnstileStatus==="error"&&<p role="alert">Bot確認を表示できませんでした。ページを再読み込みしてください。</p>}</div>
-    {status==="error"&&<p className="form-notice" role="alert">{message}</p>}
-    <div className="hearing-actions">
-      {step==="confirm"&&<button className="hearing-back" type="button" onClick={()=>{setStep("input");setStatus("idle");setMessage("");scrollToTop();}}>入力内容を修正する</button>}
-      <button className="button button--primary" type="submit" disabled={status==="sending"||(step==="confirm"&&turnstileStatus!=="ready")}>{status==="sending"?"送信中…":step==="input"?"入力内容を確認する":"この内容で送信する"} <b>→</b></button>
-    </div>
+    <label className="form-consent"><input type="checkbox" name="consent" value="agreed" required/><span><a href="/about#privacy" target="_blank">個人情報の取り扱い</a>に同意する <b>必須</b></span></label><div className="form-trap" aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off"/></div><div className="form-turnstile"><div ref={turnstileRef}/>{turnstileStatus==="loading"&&<p>Bot確認を行っています。</p>}{turnstileStatus==="error"&&<p role="alert">Bot確認を表示できませんでした。ページを再読み込みしてください。</p>}</div>{status==="error"&&<p className="form-notice" role="alert">{message}</p>}<div className="hearing-actions">{step==="confirm"&&<button className="hearing-back" type="button" onClick={()=>{setStep("input");setStatus("idle");setMessage("");scrollTop();}}>入力内容を修正する</button>}<button className="button button--primary" type="submit" disabled={status==="sending"||(step==="confirm"&&turnstileStatus!=="ready")}>{status==="sending"?"送信中…":step==="input"?"入力内容を確認する":"この内容で送信する"} <b>→</b></button></div>
   </form>;
 }
 
-declare global {
-  interface Window {
-    turnstile?: {
-      render:(container:HTMLElement,options:{sitekey:string;action:string;theme:"light"|"dark"|"auto";callback:()=>void;"expired-callback":()=>void;"error-callback":()=>void})=>string;
-      reset:(widgetId:string)=>void;
-    };
-  }
-}
+declare global{interface Window{turnstile?:{render:(container:HTMLElement,options:{sitekey:string;action:string;theme:"light"|"dark"|"auto";callback:()=>void;"expired-callback":()=>void;"error-callback":()=>void})=>string;reset:(widgetId:string)=>void;};}}

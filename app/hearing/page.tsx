@@ -1,4 +1,6 @@
 import type { Metadata } from "../astro-compat";
+import "../hearing.css";
+import "../hearing-fix.css";
 import HearingForm from "./HearingForm";
 
 export const metadata: Metadata = {

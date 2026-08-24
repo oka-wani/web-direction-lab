@@ -149,7 +149,7 @@ async function generateProposal(hearingId: string, accessId: string, hearing: an
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "gpt-5.6-sol",
+      model: "gpt-5.6",
       input: prompt,
     }),
   });
@@ -333,12 +333,6 @@ export const POST: APIRoute = async ({ request }) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error(JSON.stringify({ event: "proposal_generation_error", hearingId, message: errorMessage }));
-    await sendMail({
-      from: env.CONTACT_FROM_EMAIL,
-      to: [ADMIN_EMAIL],
-      subject: `【WSW】提案書自動生成エラー / ${hearing.company}`,
-      text: `ヒアリング回答は正常に受信しましたが、提案書の自動生成でエラーが発生しました。\n\n${errorMessage}\n\n${adminText}`,
-    }, "生成エラー通知").catch(() => undefined);
   }
 
   await runtime.SESSION.delete(`hearing:${token}`);

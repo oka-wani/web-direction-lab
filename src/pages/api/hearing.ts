@@ -27,7 +27,18 @@ export const POST:APIRoute=async({request})=>{
   const input={
     name:get(data,"name"),email:get(data,"email"),company:get(data,"company"),industry:get(data,"industry"),location:get(data,"location"),currentUrl:get(data,"currentUrl"),sns:get(data,"sns"),launch:get(data,"launch"),background:get(data,"background"),purpose:getAll(data,"purpose"),problem:get(data,"problem"),target:get(data,"target"),strengths:[get(data,"strength1"),get(data,"strength2"),get(data,"strength3")].filter(Boolean),content:getAll(data,"content"),cta:get(data,"cta"),mood:getAll(data,"mood"),colors:get(data,"colors"),references:[{url:get(data,"reference1"),note:get(data,"referenceNote1")},{url:get(data,"reference2"),note:get(data,"referenceNote2")}].filter((item)=>item.url||item.note),materials:getAll(data,"materials"),functions:getAll(data,"functions"),updates:getAll(data,"updates"),other:get(data,"other")
   };
-  if(!input.name||!input.email||!input.company||!input.industry||!input.target||!input.cta||input.purpose.length===0||get(data,"consent")!=="agreed")return json(400,"必須項目を入力してください。");
+
+  const missing:string[]=[];
+  if(!input.name)missing.push("お名前");
+  if(!input.email)missing.push("メールアドレス");
+  if(!input.company)missing.push("会社名・店舗名・サービス名");
+  if(!input.industry)missing.push("業種");
+  if(input.purpose.length===0)missing.push("Webサイトの目的");
+  if(!input.target)missing.push("見てほしい人");
+  if(!input.cta)missing.push("最終的にしてほしい行動");
+  if(get(data,"consent")!=="agreed")missing.push("個人情報の取り扱いへの同意");
+  if(missing.length)return json(400,`必須項目を確認してください：${missing.join("、")}`);
+
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email))return json(400,"メールアドレスの形式を確認してください。");
   for(const url of [input.currentUrl,...input.references.map((item)=>item.url)].filter(Boolean)){try{const parsed=new URL(url);if(!["http:","https:"].includes(parsed.protocol))throw new Error();}catch{return json(400,"URLの形式を確認してください。");}}
   const scalarValues=[input.name,input.email,input.company,input.industry,input.location,input.currentUrl,input.sns,input.launch,input.background,input.problem,input.target,input.cta,input.colors,input.other,...input.strengths,...input.references.flatMap((item)=>[item.url,item.note])];

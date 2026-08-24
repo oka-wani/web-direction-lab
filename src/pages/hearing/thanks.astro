@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { SiteFooter, SiteHeader } from "../../../app/components/SiteChrome";
+import "../../../app/hearing.css";
+---
+<BaseLayout title="ヒアリング送信完了｜Wani san Web" description="制作ヒアリングを受け付けました。" noindex={true}>
+  <main class="order-page">
+    <SiteHeader client:load />
+    <section class="order-page-hero">
+      <span>THANK YOU</span>
+      <div class="hearing-thanks">
+        <h1>ヒアリングへのご回答、ありがとうございます。</h1>
+        <p>回答内容を受け付けました。いただいた内容をもとに、サイトの目的・ターゲット・構成・ラフ案を整理します。確認が必要な点がある場合は、メールまたは打ち合わせでご連絡します。</p>
+        <div class="order-actions">
+          <a class="order-primary-link" href="/">TOPへ戻る <b>→</b></a>
+          <a class="order-secondary-link" href="/flow">制作の流れを見る <b>→</b></a>
+        </div>
+      </div>
+    </section>
+    <SiteFooter client:load />
+  </main>
+</BaseLayout>

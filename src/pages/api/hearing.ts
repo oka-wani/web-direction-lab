@@ -3,136 +3,100 @@ import { env } from "cloudflare:workers";
 
 export const prerender = false;
 
-type RuntimeEnv = typeof env & {
-  SESSION?: KVNamespace;
-  PROPOSALS?: R2Bucket;
-  OPENAI_API_KEY?: string;
-};
+type RuntimeEnv = typeof env & { SESSION?: KVNamespace; PROPOSALS?: R2Bucket; OPENAI_API_KEY?: string };
 type TurnstileResult = { success: boolean; action?: string };
 type HearingSession = { name: string; email: string; company?: string; contactUrl?: string; service?: string };
+type Row = [string, string];
 
 const runtime = env as RuntimeEnv;
 const ADMIN_EMAIL = "contact@wani-san.com";
 const SITE_URL = "https://www.wani-san.com";
-const json = (status: number, message: string) => Response.json({ message }, { status });
-const get = (data: FormData, key: string) => typeof data.get(key) === "string" ? String(data.get(key)).trim() : "";
-const getAll = (data: FormData, key: string) => data.getAll(key).map(String).map((v) => v.trim()).filter(Boolean);
-const configured = (value?: string) => Boolean(value && !value.startsWith("SET_IN_"));
-const esc = (input: string) => input.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[c]!);
+const json = (status:number,message:string)=>Response.json({message},{status});
+const get=(d:FormData,k:string)=>typeof d.get(k)==="string"?String(d.get(k)).trim():"";
+const getAll=(d:FormData,k:string)=>d.getAll(k).map(String).map(v=>v.trim()).filter(Boolean);
+const configured=(v?:string)=>Boolean(v&&!v.startsWith("SET_IN_"));
+const esc=(s:string)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]!);
+const nl=(s:string)=>esc(s).replace(/\n/g,"<br>");
+const safeSlug=(s:string)=>String(s||"page").toLowerCase().replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"")||"page";
 
-const known = new Set([
-  "token","company","productionType","budget","launch","industry","business","strength","area","primaryCustomer","customerNeeds","primaryGoal","otherGoal","mustHave","structureReference","impression","useColor","avoidColor","designReference","material","cms","function","analytics","domain","server","operation","note","consent","website","cf-turnstile-response",
-]);
+const known=new Set(["token","company","productionType","budget","launch","industry","business","strength","area","primaryCustomer","customerNeeds","primaryGoal","otherGoal","mustHave","structureReference","impression","useColor","avoidColor","designReference","material","cms","function","analytics","domain","server","operation","note","consent","website","cf-turnstile-response"]);
 
-async function sendMail(payload: Record<string, unknown>) {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() },
-    body: JSON.stringify(payload),
-  });
-  if (!response.ok) throw new Error(`Resend ${response.status}: ${await response.text()}`);
+async function sendMail(payload:Record<string,unknown>){
+  const r=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${env.RESEND_API_KEY}`,"Content-Type":"application/json","Idempotency-Key":crypto.randomUUID()},body:JSON.stringify(payload)});
+  if(!r.ok)throw new Error(`Resend ${r.status}: ${await r.text()}`);
+}
+function outputText(result:any){if(typeof result.output_text==="string"&&result.output_text)return result.output_text;for(const item of result.output??[])for(const content of item.content??[])if(content.type==="output_text"&&typeof content.text==="string")return content.text;return "";}
+
+const BASE_CSS=`*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",YuGothic,"Hiragino Kaku Gothic ProN",sans-serif;color:#12201a;background:#f2f3ef;line-height:1.75}a{color:inherit}.doc{max-width:1180px;margin:0 auto;padding:34px 22px 80px}.topbar{position:sticky;top:0;z-index:20;background:#252822;color:#fff;border-bottom:1px solid #3c4039}.topbar__in{max-width:1180px;margin:auto;padding:12px 22px;display:flex;justify-content:space-between;gap:16px;align-items:center}.topbar a{text-decoration:none}.eyebrow{font-size:11px;letter-spacing:.18em;font-weight:800;color:#08704a}.sheet{background:#fff;border:1px solid #d8ddd8;margin-bottom:16px;padding:32px}.sheet h1{font-size:38px;line-height:1.3;margin:8px 0 12px}.sheet h2{font-size:25px;margin:0 0 22px;padding-bottom:12px;border-bottom:1px solid #d9ddd8}.sheet h3{font-size:17px;margin:0 0 8px}.muted{color:#64716b}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#dce1dd;border:1px solid #dce1dd}.summary>div{background:#fff;padding:16px;min-height:92px}.summary span{display:block;font-size:10px;color:#68746e;margin-bottom:5px}.summary b{font-size:14px}.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{border:1px solid #d8dfda;background:#fbfcfa;padding:18px}.card p{margin:0}.num{display:inline-grid;place-items:center;width:27px;height:27px;background:#252822;color:#fff;font-size:10px;margin-bottom:12px}.tag{display:inline-block;padding:3px 8px;background:#e8f3ed;color:#076844;font-size:10px;font-weight:800;margin:0 4px 4px 0}.flow{display:flex;gap:0;overflow:auto}.flow>div{min-width:180px;flex:1;border:1px solid #d8dfda;background:#fff;padding:18px;position:relative}.flow>div:not(:last-child):after{content:'→';position:absolute;right:-9px;top:50%;z-index:2;background:#f2f3ef;padding:2px}.tree{padding:22px;border:1px solid #d9dfda;background:#f9faf8;overflow:auto}.tree-root{text-align:center;margin-bottom:24px}.tree-root>a{display:inline-block;background:#252822;color:#fff;padding:12px 34px;text-decoration:none;font-weight:800}.tree-children{display:flex;justify-content:center;align-items:flex-start;gap:12px;position:relative;min-width:720px}.tree-children:before{content:'';position:absolute;left:8%;right:8%;top:-12px;border-top:1px solid #929d97}.tree-node{width:180px;position:relative}.tree-node:before{content:'';position:absolute;left:50%;top:-12px;height:12px;border-left:1px solid #929d97}.tree-node>a{display:block;background:#fff;border:1px solid #aeb8b2;text-decoration:none;padding:12px;text-align:center}.tree-node b,.tree-node span{display:block}.tree-node span{font-size:10px;color:#69756f;margin-top:4px}.design-list{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.design-list>div{border-left:4px solid #08704a;background:#f5f8f5;padding:15px}.page-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.page-links a{border:1px solid #ccd5cf;background:#fff;text-decoration:none;padding:16px}.page-links b,.page-links span{display:block}.page-links span{font-size:11px;color:#69756f;margin-top:4px}@media(max-width:760px){.summary,.grid2,.grid3,.design-list,.page-links{grid-template-columns:1fr}.sheet{padding:22px}.sheet h1{font-size:30px}.doc{padding:18px 12px 50px}.flow>div{min-width:150px}}`;
+
+function renderTree(proposal:any,accessId:string){
+  const pages=(proposal.sitemap??[]).filter((p:any)=>safeSlug(p.slug)!=="top");
+  return `<div class="tree"><div class="tree-root"><a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/rough/top/">TOP</a></div><div class="tree-children">${pages.map((p:any)=>`<div class="tree-node"><a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/rough/${encodeURIComponent(safeSlug(p.slug))}/"><b>${esc(p.label||p.slug)}</b><span>${esc(p.role||"")}</span></a></div>`).join("")}</div></div>`;
 }
 
-function outputText(result: any) {
-  if (typeof result.output_text === "string" && result.output_text) return result.output_text;
-  for (const item of result.output ?? []) for (const content of item.content ?? []) if (content.type === "output_text" && typeof content.text === "string") return content.text;
-  return "";
+function proposalHtml(proposal:any,hearing:any,accessId:string){
+  const target=proposal.targetAnalysis??{};
+  const priorities=(proposal.priorities??[]).map((x:any,i:number)=>`<article class="card"><span class="num">${String(i+1).padStart(2,"0")}</span><h3>${esc(x.title)}</h3><p>${esc(x.reason)}</p></article>`).join("");
+  const issues=(proposal.issues??[]).map((x:any)=>`<article class="card"><h3>${esc(x.title)}</h3><p>${esc(x.body)}</p></article>`).join("");
+  const flow=(proposal.userFlow??[]).map((x:any,i:number)=>`<div><span class="eyebrow">STEP ${i+1}</span><h3>${esc(x.title)}</h3><p class="muted">${esc(x.body)}</p></div>`).join("");
+  const pages=(proposal.roughPages??[]).map((p:any)=>`<a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/rough/${encodeURIComponent(safeSlug(p.slug))}/"><b>${esc(p.title||p.slug)}</b><span>${esc(p.role||"")}</span></a>`).join("");
+  const design=proposal.designDirection??{};
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${esc(hearing.company)}｜サイト構成・提案書</title><style>${BASE_CSS}</style></head><body><header class="topbar"><div class="topbar__in"><b>WSW / SITE PROPOSAL</b><a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/rough/">サイトラフを見る →</a></div></header><main class="doc">
+  <section class="sheet"><span class="eyebrow">01 / HEARING SUMMARY</span><h1>${esc(proposal.title||`${hearing.company} Webサイト制作提案`)}</h1><p>${esc(proposal.concept||"")}</p><div class="summary"><div><span>業種</span><b>${esc(hearing.industry)}</b></div><div><span>エリア</span><b>${esc((hearing.area??[]).join(" / "))}</b></div><div><span>公開希望</span><b>${esc(hearing.launch||"未定")}</b></div><div><span>制作内容</span><b>${esc(hearing.productionType)}</b></div><div><span>主な目的</span><b>${esc(hearing.primaryGoal)}</b></div><div><span>ターゲット</span><b>${esc(hearing.primaryCustomer)}</b></div><div><span>メインCTA</span><b>${esc(proposal.cta||"")}</b></div><div><span>更新・運用</span><b>${esc((hearing.operation??[]).join(" / ")||"未定")}</b></div></div></section>
+  <section class="sheet"><span class="eyebrow">02 / TARGET & STRATEGY</span><h2>ターゲットとサイト方針</h2><div class="grid3"><article class="card"><h3>ターゲットの特徴</h3><p>${esc(target.profile||hearing.primaryCustomer)}</p></article><article class="card"><h3>悩み・期待</h3><p>${esc(target.needs||hearing.customerNeeds||"")}</p></article><article class="card"><h3>サイト上で重視すること</h3><p>${esc(target.behavior||"")}</p></article></div><h3 style="margin-top:28px">解決すべき課題</h3><div class="grid2">${issues}</div><h3 style="margin-top:28px">優先して伝える内容</h3><div class="grid3">${priorities}</div></section>
+  <section class="sheet"><span class="eyebrow">03 / USER FLOW</span><h2>想定する閲覧・行動フロー</h2><div class="flow">${flow}</div></section>
+  <section class="sheet"><span class="eyebrow">04 / SITE MAP</span><h2>サイトマップ</h2><p class="muted">各ページをクリックすると、そのページのラフへ移動します。</p>${renderTree(proposal,accessId)}</section>
+  <section class="sheet"><span class="eyebrow">05 / PAGE ROUGH</span><h2>全ページの構成ラフ</h2><p class="muted">各ページでPC / SPを切り替えられます。各エリアに「掲載する内容」「このエリアの目的」「確認いただきたいこと」を記載しています。</p><div class="page-links">${pages}</div></section>
+  <section class="sheet"><span class="eyebrow">06 / DESIGN DIRECTION</span><h2>デザイン方向性</h2><div class="design-list"><div><span class="eyebrow">TONE</span><b>${esc(design.tone||"")}</b></div><div><span class="eyebrow">COLOR</span><b>${esc(design.colors||"")}</b></div><div><span class="eyebrow">VISUAL</span><b>${esc(design.visual||"")}</b></div><div><span class="eyebrow">REFERENCE</span><b>${esc(design.referenceReflection||"")}</b></div></div><p class="muted" style="margin-top:18px">${esc(design.note||"")}</p></section>
+</main></body></html>`;
 }
 
-function proposalHtml(proposal: any, hearing: any) {
-  const strategy = (proposal.strategy ?? []).map((item: any) => `<article><h3>${esc(item.title ?? "")}</h3><p>${esc(item.body ?? "")}</p></article>`).join("");
-  const sitemap = (proposal.sitemap ?? []).map((page: any) => `<li><b>${esc(page.label ?? page.slug ?? "")}</b><span>${esc(page.role ?? "")}</span></li>`).join("");
-  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>提案書｜${esc(hearing.company)}</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif;margin:0;background:#f3f5f2;color:#14201b;line-height:1.75}.wrap{max-width:1100px;margin:auto;padding:48px 24px}.hero,.box{background:#fff;border:1px solid #d8e0db;border-radius:16px;padding:34px;margin-bottom:22px}.hero small{color:#08704a;font-weight:800}.hero h1{font-size:38px;margin:8px 0}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary div{background:#f1f7f3;padding:16px;border-radius:10px}.summary span,.summary b{display:block}.summary span{font-size:12px;color:#68736e}.strategy{display:grid;grid-template-columns:1fr 1fr;gap:14px}.strategy article,.sitemap li{border:1px solid #d8e0db;padding:18px;border-radius:10px}.sitemap{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.sitemap span{display:block;font-size:12px;color:#68736e;margin-top:5px}@media(max-width:700px){.summary,.strategy,.sitemap{grid-template-columns:1fr}}</style></head><body><main class="wrap"><section class="hero"><small>WSW / PROPOSAL</small><h1>${esc(proposal.title ?? `${hearing.company} Webサイト提案`)}</h1><p>${esc(proposal.concept ?? "")}</p></section><section class="box"><h2>ヒアリングサマリー</h2><div class="summary"><div><span>業種</span><b>${esc(hearing.industry)}</b></div><div><span>対応エリア</span><b>${esc(hearing.area.join(" / "))}</b></div><div><span>主目的</span><b>${esc(hearing.primaryGoal)}</b></div><div><span>予算</span><b>${esc(hearing.budget)}</b></div><div><span>ターゲット</span><b>${esc(hearing.primaryCustomer)}</b></div><div><span>強み</span><b>${esc(hearing.strength.join(" / "))}</b></div><div><span>CTA</span><b>${esc(proposal.cta ?? "")}</b></div><div><span>公開希望</span><b>${esc(hearing.launch || "未定")}</b></div></div></section><section class="box"><h2>提案方針</h2><div class="strategy">${strategy}</div></section><section class="box"><h2>サイトマップ</h2><ul class="sitemap">${sitemap}</ul></section></main></body></html>`;
+function wireBody(section:any){
+  const items=(section.items??[]).map((x:any)=>`<li>${esc(x)}</li>`).join("");
+  const visual=String(section.type||"").toLowerCase().includes("hero")?`<div class="wire-hero"><div><span>EYEBROW</span><h2>${esc(section.heading||section.title||"")}</h2><p>${esc(section.body||"")}</p>${section.ctaLabel?`<button>${esc(section.ctaLabel)}</button>`:""}</div><div class="ph">IMAGE / VISUAL</div></div>`:`<div class="wire-normal"><h2>${esc(section.heading||section.title||"")}</h2>${section.body?`<p>${esc(section.body)}</p>`:""}${items?`<ul>${items}</ul>`:""}${section.ctaLabel?`<button>${esc(section.ctaLabel)}</button>`:""}</div>`;
+  return visual;
+}
+function roughPageHtml(page:any,accessId:string){
+  const sections=(page.sections??[]).map((s:any,i:number)=>`<section class="wire-section"><div class="wire-main"><span class="section-no">${String(i+1).padStart(2,"0")}</span>${wireBody(s)}</div><aside class="memo"><div><b>掲載する内容</b><p>${nl(s.content||"")}</p></div><div><b>このエリアの目的</b><p>${nl(s.purpose||"")}</p></div><div><b>確認いただきたいこと</b><p>${nl(s.confirm||"")}</p></div></aside></section>`).join("");
+  const css=`*{box-sizing:border-box}body{margin:0;background:#e9eae7;color:#18201d;font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif}.bar{position:sticky;top:0;z-index:20;background:#252822;color:#fff;padding:11px 18px;display:flex;justify-content:space-between;align-items:center}.bar a{color:#fff;text-decoration:none}.bar button{background:#fff;border:0;padding:8px 13px;margin-left:5px;cursor:pointer}.stage{max-width:1180px;margin:24px auto;padding:0 14px}.frame{background:#fff;border:1px solid #cfd2ce;transition:max-width .25s;margin:auto}.frame.sp{max-width:390px}.fake-head{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #ddd;font-size:12px}.frame.sp .fake-head span{display:none}.wire-section{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);border-bottom:1px solid #ddd}.wire-main{position:relative;padding:34px;min-height:190px}.section-no{position:absolute;left:9px;top:9px;background:#252822;color:#fff;font-size:9px;padding:4px 6px}.memo{background:#f4f5f2;border-left:1px solid #ddd;padding:16px}.memo>div+div{border-top:1px solid #d8dcd8;margin-top:12px;padding-top:12px}.memo b{font-size:11px}.memo p{font-size:11px;line-height:1.65;margin:5px 0 0;color:#58645e}.wire-hero{display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:center;min-height:280px}.wire-hero h2,.wire-normal h2{font-size:28px;margin:7px 0 12px}.wire-hero p,.wire-normal p{max-width:620px;color:#5c6661}.ph{background:#e6e7e4;display:grid;place-items:center;min-height:220px;color:#888;font-size:11px}.wire-main button{border:0;background:#252822;color:#fff;padding:12px 22px}.wire-normal ul{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0;list-style:none}.wire-normal li{background:#f2f3f0;border:1px solid #ddd;padding:12px}.frame.sp .wire-section{display:block}.frame.sp .memo{border-left:0;border-top:1px dashed #bbb}.frame.sp .wire-hero{grid-template-columns:1fr}.frame.sp .wire-main{padding:28px 18px}.frame.sp .wire-normal ul{grid-template-columns:1fr}.frame.sp .wire-hero h2,.frame.sp .wire-normal h2{font-size:22px}@media(max-width:760px){.wire-section{display:block}.memo{border-left:0;border-top:1px dashed #bbb}.wire-hero{grid-template-columns:1fr}}`;
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${esc(page.title)}｜ページラフ</title><style>${css}</style></head><body><header class="bar"><div><a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/rough/">← サイトマップ</a>　<b>${esc(page.title)}</b></div><div><button onclick="document.getElementById('frame').className='frame'">PC</button><button onclick="document.getElementById('frame').className='frame sp'">SP</button></div></header><main class="stage"><div id="frame" class="frame"><div class="fake-head"><b>SITE LOGO</b><span>GLOBAL NAVIGATION　　[ ${esc(page.primaryCta||"CTA")} ]</span></div>${sections}<footer style="padding:28px;background:#292c28;color:#fff">FOOTER / NAVIGATION / COMPANY INFO</footer></div></main></body></html>`;
+}
+function roughIndexHtml(proposal:any,accessId:string){
+  const cards=(proposal.roughPages??[]).map((p:any)=>`<a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/rough/${encodeURIComponent(safeSlug(p.slug))}/"><b>${esc(p.title)}</b><span>${esc(p.role||"")}</span></a>`).join("");
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>サイト構成・全ページラフ</title><style>${BASE_CSS}</style></head><body><header class="topbar"><div class="topbar__in"><b>WSW / SITE ROUGH</b><a href="${SITE_URL}/proposals/${encodeURIComponent(accessId)}/proposal/">提案書へ戻る →</a></div></header><main class="doc"><section class="sheet"><span class="eyebrow">SITE MAP</span><h1>サイト構成・全ページラフ</h1><p class="muted">サイトマップのページ名を押すと対象ページのラフへ移動します。</p>${renderTree(proposal,accessId)}</section><section class="sheet"><span class="eyebrow">ALL PAGES</span><h2>ページ一覧</h2><div class="page-links">${cards}</div></section></main></body></html>`;
 }
 
-function roughIndexHtml(proposal: any, accessId: string) {
-  const pages = (proposal.roughPages ?? []).map((page: any) => `<a href="/proposals/${encodeURIComponent(accessId)}/rough/${encodeURIComponent(page.slug)}/"><b>${esc(page.title ?? page.slug ?? "")}</b><span>${esc(page.role ?? "")}</span></a>`).join("");
-  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>サイト構成・ラフ</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif;background:#f3f5f2;color:#14201b;margin:0}.wrap{max-width:1100px;margin:auto;padding:48px 24px}.map{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.map a{background:#fff;border:1px solid #d8e0db;border-radius:12px;padding:22px;color:inherit;text-decoration:none}.map span{display:block;font-size:12px;color:#68736e;margin-top:8px}@media(max-width:700px){.map{grid-template-columns:1fr}}</style></head><body><main class="wrap"><small>ROUGH / SITE MAP</small><h1>サイト構成・ページラフ</h1><p>ページを選択するとPC/SPラフを確認できます。</p><div class="map">${pages}</div></main></body></html>`;
+async function generateProposal(hearingId:string,accessId:string,hearing:any,rows:Row[]){
+  try{
+    if(!runtime.PROPOSALS)throw new Error("R2 binding PROPOSALS が設定されていません。");
+    if(!configured(runtime.OPENAI_API_KEY))throw new Error("OPENAI_API_KEY が設定されていません。");
+    await runtime.PROPOSALS.put(`proposals/${accessId}/hearing.json`,JSON.stringify(hearing,null,2),{httpMetadata:{contentType:"application/json; charset=utf-8"}});
+    const schema=`{"title":"","concept":"","cta":"","targetAnalysis":{"profile":"","needs":"","behavior":""},"issues":[{"title":"","body":""}],"priorities":[{"title":"","reason":""}],"userFlow":[{"title":"","body":""}],"sitemap":[{"slug":"top","label":"TOP","role":""}],"designDirection":{"tone":"","colors":"","visual":"","referenceReflection":"","note":""},"roughPages":[{"slug":"top","title":"TOP","role":"","primaryCta":"お問い合わせ","sections":[{"type":"HERO","title":"ファーストビュー","heading":"","body":"","items":[],"ctaLabel":"","content":"このエリアに掲載する具体的な情報","purpose":"なぜこのエリアを配置するか","confirm":"クライアントに何を確認してほしいか"}]}]}`;
+    const prompt=`あなたはWSWのシニアWebディレクターです。ヒアリング回答から、クライアント説明用のサイト提案データを作成してください。出力はJSONのみ。\n\n重要: これは簡易要約ではなく、実際にクライアントへ提出する提案書と全ページWFの設計データです。\n必須要件:\n1. ターゲットの特徴、悩み、閲覧時に重視することを具体化する。\n2. サイト課題を2〜4点、優先訴求を3〜5点出す。\n3. 認知→理解→比較・納得→CTAまでのユーザー行動を3〜5ステップで出す。\n4. sitemapは回答と予算に応じた全ページを出す。TOPは必須。不要にページ数を増やさない。\n5. roughPagesはsitemapの全ページを漏れなく作る。\n6. 各ページは、ヘッダー/フッターを除き4〜8セクション程度。実際のWebページとして自然な順番にする。\n7. 各セクションには必ず content（掲載する内容）、purpose（このエリアの目的）、confirm（確認いただきたいこと）を書く。\n8. heading/body/items/ctaLabelには、単なる「テキスト」ではなくヒアリング内容を反映したラフコピーを入れる。\n9. デザイン方向性はトーン、色、写真・ビジュアル、参考サイトの反映方針を具体的にする。\n10. ヒアリングにない事実・実績・数値を勝手に作らない。不明なものは確認事項として扱う。\n\nJSON形式:${schema}\n\nヒアリング:${JSON.stringify(hearing)}`;
+    const ai=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{Authorization:`Bearer ${runtime.OPENAI_API_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({model:"gpt-5.6",input:prompt})});
+    if(!ai.ok)throw new Error(`OpenAI API ${ai.status}: ${await ai.text()}`);
+    const result=await ai.json() as any;const raw=outputText(result).trim().replace(/^```json\s*/i,"").replace(/```$/,"").trim();if(!raw)throw new Error("OpenAI APIから提案データが返りませんでした。");
+    const proposal=JSON.parse(raw);
+    if(!(proposal.roughPages?.length)&&!(proposal.sitemap?.length))throw new Error("提案データにページ情報がありません。");
+    await runtime.PROPOSALS.put(`proposals/${accessId}/proposal.json`,JSON.stringify(proposal,null,2),{httpMetadata:{contentType:"application/json; charset=utf-8"}});
+    await runtime.PROPOSALS.put(`proposals/${accessId}/proposal.html`,proposalHtml(proposal,hearing,accessId),{httpMetadata:{contentType:"text/html; charset=utf-8"}});
+    await runtime.PROPOSALS.put(`proposals/${accessId}/rough/index.html`,roughIndexHtml(proposal,accessId),{httpMetadata:{contentType:"text/html; charset=utf-8"}});
+    for(const page of proposal.roughPages??[]){const slug=safeSlug(page.slug);await runtime.PROPOSALS.put(`proposals/${accessId}/rough/${slug}.html`,roughPageHtml(page,accessId),{httpMetadata:{contentType:"text/html; charset=utf-8"}});}
+    const proposalUrl=`${SITE_URL}/proposals/${accessId}/proposal/`;const roughUrl=`${SITE_URL}/proposals/${accessId}/rough/`;const answersHtml=rows.map(([l,v])=>`<p><strong>${esc(l)}</strong><br>${nl(v)}</p>`).join("");const answersText=rows.map(([l,v])=>`${l}: ${v}`).join("\n\n");
+    await sendMail({from:env.CONTACT_FROM_EMAIL,to:[ADMIN_EMAIL],subject:`【WSW 提案書生成完了】${hearing.company}`,text:`${answersText}\n\n提案書：${proposalUrl}\nサイト構成・全ページラフ：${roughUrl}`,html:`<h2>提案書・サイトラフを生成しました</h2><p>ヒアリング回答をもとに自動生成が完了しました。</p>${answersHtml}<hr><p><a href="${proposalUrl}" style="display:inline-block;padding:12px 18px;background:#066a45;color:#fff;text-decoration:none">提案書を確認する</a></p><p><a href="${roughUrl}" style="display:inline-block;padding:12px 18px;border:1px solid #066a45;color:#066a45;text-decoration:none">サイト構成・全ページラフを確認する</a></p>`});
+  }catch(error){console.error(JSON.stringify({event:"proposal_generation_error",hearingId,message:error instanceof Error?error.message:String(error)}));}
 }
 
-function roughPageHtml(page: any) {
-  const sections = (page.sections ?? []).map((section: any, index: number) => `<section><i>${String(index + 1).padStart(2, "0")}</i><small>${esc(section.type ?? "SECTION")}</small><h2>${esc(section.title ?? "")}</h2><p>${esc(section.content ?? "")}</p><aside><b>目的</b>${esc(section.purpose ?? "")}<br><b>確認</b>${esc(section.confirm ?? "")}</aside></section>`).join("");
-  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${esc(page.title ?? "ページラフ")}</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Yu Gothic",sans-serif;margin:0;background:#eee;color:#222}.top{position:sticky;top:0;background:#202522;color:#fff;padding:14px 22px;display:flex;justify-content:space-between;z-index:2}.top button{padding:7px 14px}.frame{max-width:1000px;margin:28px auto;background:#fff}.frame.sp{max-width:390px}.sitehead{height:58px;border-bottom:1px solid #ddd;padding:0 20px;display:flex;align-items:center;justify-content:space-between;font-size:12px}.frame.sp .sitehead span:last-child{display:none}section{position:relative;padding:42px 34px;border-bottom:1px solid #ddd;min-height:150px}section>i{position:absolute;left:10px;top:10px;font-style:normal;font-size:10px;background:#222;color:#fff;padding:4px 6px}section h2{font-size:25px;margin:8px 0}aside{margin-top:22px;background:#f3f5f2;padding:14px;font-size:12px}.frame.sp section{padding:30px 20px}.frame.sp section h2{font-size:21px}</style></head><body><div class="top"><b>${esc(page.title ?? "")}</b><div><button onclick="document.getElementById('frame').className='frame'">PC</button><button onclick="document.getElementById('frame').className='frame sp'">SP</button></div></div><main id="frame" class="frame"><div class="sitehead"><b>SITE LOGO</b><span>NAVIGATION　[ CTA ]</span></div>${sections}</main></body></html>`;
-}
-
-async function generateProposal(hearingId: string, accessId: string, hearing: any, rows: [string,string][]) {
-  try {
-    if (!runtime.PROPOSALS) throw new Error("R2 binding PROPOSALS が設定されていません。");
-    if (!configured(runtime.OPENAI_API_KEY)) throw new Error("OPENAI_API_KEY が設定されていません。");
-
-    await runtime.PROPOSALS.put(`proposals/${accessId}/hearing.json`, JSON.stringify(hearing, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
-
-    const prompt = `あなたはWeb制作会社WSWのWebディレクターです。以下のヒアリング回答から、クライアント確認用の提案書と全ページのワイヤーラフ設計をJSONで作成してください。JSON以外は返さないでください。形式:{"title":"","concept":"","cta":"","strategy":[{"title":"","body":""}],"sitemap":[{"slug":"top","label":"TOP","role":""}],"roughPages":[{"slug":"top","title":"TOP","role":"","sections":[{"type":"HERO","title":"","content":"掲載する内容","purpose":"このエリアの目的","confirm":"クライアントに確認したいこと"}]}]}。TOPは必須。sitemapとroughPagesは一致。各ページ3〜7セクション。ヒアリング:${JSON.stringify(hearing)}`;
-    const ai = await fetch("https://api.openai.com/v1/responses", { method: "POST", headers: { Authorization: `Bearer ${runtime.OPENAI_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "gpt-5.6", input: prompt }) });
-    if (!ai.ok) throw new Error(`OpenAI API ${ai.status}: ${await ai.text()}`);
-    const result = await ai.json() as any;
-    const raw = outputText(result).trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
-    if (!raw) throw new Error("OpenAI APIから提案書データが返りませんでした。");
-    const proposal = JSON.parse(raw);
-
-    await runtime.PROPOSALS.put(`proposals/${accessId}/proposal.json`, JSON.stringify(proposal, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
-    await runtime.PROPOSALS.put(`proposals/${accessId}/proposal.html`, proposalHtml(proposal, hearing), { httpMetadata: { contentType: "text/html; charset=utf-8" } });
-    await runtime.PROPOSALS.put(`proposals/${accessId}/rough/index.html`, roughIndexHtml(proposal, accessId), { httpMetadata: { contentType: "text/html; charset=utf-8" } });
-    for (const page of proposal.roughPages ?? []) {
-      const slug = String(page.slug || "page").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
-      await runtime.PROPOSALS.put(`proposals/${accessId}/rough/${slug}.html`, roughPageHtml(page), { httpMetadata: { contentType: "text/html; charset=utf-8" } });
-    }
-
-    const proposalUrl = `${SITE_URL}/proposals/${accessId}/proposal/`;
-    const roughUrl = `${SITE_URL}/proposals/${accessId}/rough/`;
-    const answersHtml = rows.map(([label,value]) => `<p><strong>${esc(label)}</strong><br>${esc(value).replace(/\n/g,"<br>")}</p>`).join("");
-    const answersText = rows.map(([label,value]) => `${label}: ${value}`).join("\n\n");
-    await sendMail({ from: env.CONTACT_FROM_EMAIL, to: [ADMIN_EMAIL], subject: `【WSW 提案書生成完了】${hearing.company}`, text: `${answersText}\n\n提案書：${proposalUrl}\nサイト構成・ラフ：${roughUrl}`, html: `<h2>提案書・サイトラフを生成しました</h2>${answersHtml}<p><a href="${proposalUrl}">提案書を確認する</a></p><p><a href="${roughUrl}">サイト構成・全ページラフを確認する</a></p>` });
-  } catch (error) {
-    console.error(JSON.stringify({ event: "proposal_generation_error", hearingId, message: error instanceof Error ? error.message : String(error) }));
-  }
-}
-
-export const POST: APIRoute = async ({ request, locals }) => {
-  const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("multipart/form-data") && !contentType.includes("application/x-www-form-urlencoded")) return json(415, "送信形式が正しくありません。");
-  let data: FormData;
-  try { data = await request.formData(); } catch { return json(400, "入力内容を読み取れませんでした。"); }
-  if ([...data.keys()].some((key) => !known.has(key))) return json(400, "想定外の入力項目が含まれています。");
-  if (get(data, "website")) return json(200, "受付しました。");
-
-  const token = get(data, "token");
-  if (!token || !runtime.SESSION) return json(400, "ヒアリングURLを確認してください。お問い合わせメールに記載されたURLからアクセスしてください。");
-  const sessionRaw = await runtime.SESSION.get(`hearing:${token}`);
-  if (!sessionRaw) return json(400, "ヒアリングURLの有効期限が切れているか、URLが正しくありません。");
-  const session = JSON.parse(sessionRaw) as HearingSession;
-
-  const hearing = {
-    company:get(data,"company"), productionType:get(data,"productionType"), budget:get(data,"budget"), launch:get(data,"launch"), industry:get(data,"industry"), business:get(data,"business"), strength:getAll(data,"strength"), area:getAll(data,"area"), primaryCustomer:get(data,"primaryCustomer"), customerNeeds:get(data,"customerNeeds"), primaryGoal:get(data,"primaryGoal"), otherGoal:getAll(data,"otherGoal"), mustHave:get(data,"mustHave"), structureReference:get(data,"structureReference"), impression:getAll(data,"impression"), useColor:get(data,"useColor"), avoidColor:get(data,"avoidColor"), designReference:get(data,"designReference"), material:getAll(data,"material"), cms:get(data,"cms"), function:getAll(data,"function"), analytics:getAll(data,"analytics"), domain:get(data,"domain"), server:get(data,"server"), operation:getAll(data,"operation"), note:get(data,"note"), contact:{name:session.name,email:session.email,initialCompany:session.company||"",initialUrl:session.contactUrl||"",service:session.service||""},
-  };
-
-  const missing:string[]=[];
-  if(!hearing.company)missing.push("会社・店舗・組織名"); if(!hearing.productionType)missing.push("今回の制作内容"); if(!hearing.budget)missing.push("想定予算"); if(!hearing.industry)missing.push("業種"); if(!hearing.business)missing.push("事業・サービス内容"); if(hearing.strength.length===0)missing.push("特に伝えたい強み"); if(hearing.area.length===0)missing.push("対応エリア"); if(!hearing.primaryCustomer)missing.push("最も来てほしいお客様"); if(!hearing.primaryGoal)missing.push("サイトの一番の目的"); if(hearing.impression.length===0)missing.push("希望するサイトの印象"); if(!hearing.cms)missing.push("CMS"); if(!hearing.domain)missing.push("ドメインの状況"); if(get(data,"consent")!=="agreed")missing.push("個人情報の取り扱いへの同意");
-  if(missing.length)return json(400,`必須項目を確認してください：${missing.join("、")}`);
-
-  const turnstileToken=get(data,"cf-turnstile-response");
-  if(!turnstileToken||!env.TURNSTILE_SECRET_KEY)return json(400,"Bot確認を完了してください。");
-  const verification=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({secret:env.TURNSTILE_SECRET_KEY,response:turnstileToken,remoteip:request.headers.get("CF-Connecting-IP"),idempotency_key:crypto.randomUUID()})});
-  const turnstile=await verification.json() as TurnstileResult;
-  if(!verification.ok||!turnstile.success||turnstile.action!=="hearing")return json(400,"Bot確認に失敗しました。もう一度お試しください。");
-  if(!configured(env.RESEND_API_KEY)||!configured(env.CONTACT_FROM_EMAIL))return json(503,"現在送信を受け付けられません。");
-
-  const hearingId=`H-${new Date().toISOString().slice(0,10).replace(/-/g,"")}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
-  const accessId=`${hearingId}-${crypto.randomUUID().slice(0,12)}`;
-  const rows:[string,string][]=[
-    ["受付ID",hearingId],["会社・店舗・組織名",hearing.company],["今回の制作内容",hearing.productionType],["想定予算",hearing.budget],["公開希望時期",hearing.launch||"未入力"],["業種",hearing.industry],["事業・サービス内容",hearing.business],["強み",hearing.strength.join(" / ")],["対応エリア",hearing.area.join(" / ")],["最も来てほしいお客様",hearing.primaryCustomer],["お客様の悩み・期待",hearing.customerNeeds||"未入力"],["主目的",hearing.primaryGoal],["その他の目的",hearing.otherGoal.join(" / ")||"未選択"],["必ず掲載したい情報",hearing.mustHave||"未入力"],["構成参考",hearing.structureReference||"未入力"],["サイトの印象",hearing.impression.join(" / ")],["使いたい色",hearing.useColor||"未入力"],["避けたい色",hearing.avoidColor||"未入力"],["デザイン参考",hearing.designReference||"未入力"],["素材",hearing.material.join(" / ")||"未選択"],["CMS",hearing.cms],["必要機能",hearing.function.join(" / ")||"未選択"],["解析・計測",hearing.analytics.join(" / ")||"未選択"],["ドメイン",hearing.domain],["サーバー・公開環境",hearing.server||"未選択"],["公開後の運用",hearing.operation.join(" / ")||"未選択"],["補足",hearing.note||"未入力"],
-  ];
-
-  try {
-    await sendMail({ from:env.CONTACT_FROM_EMAIL, to:[session.email], reply_to:ADMIN_EMAIL, subject:"【Wani san Web】制作ヒアリングを受け付けました", text:`${session.name}様\n\n制作ヒアリングへのご回答ありがとうございます。\n受付ID：${hearingId}\n\n回答内容を受け付けました。`, html:`<p>${esc(session.name)}様</p><p>制作ヒアリングへのご回答ありがとうございます。</p><p>受付ID：<strong>${esc(hearingId)}</strong></p><p>回答内容を受け付けました。</p>` });
-  } catch { return json(502,"サンクスメールを送信できませんでした。"); }
-
-  await runtime.SESSION.delete(`hearing:${token}`);
-  const task=generateProposal(hearingId,accessId,hearing,rows);
-  const cfContext=(locals as any).cfContext;
-  if(cfContext?.waitUntil)cfContext.waitUntil(task); else console.error(JSON.stringify({event:"proposal_background_context_missing",hearingId}));
-
-  return Response.json({message:"受付しました。",hearingId},{status:200});
+export const POST:APIRoute=async({request,locals})=>{
+  const ct=request.headers.get("content-type")??"";if(!ct.includes("multipart/form-data")&&!ct.includes("application/x-www-form-urlencoded"))return json(415,"送信形式が正しくありません。");
+  let data:FormData;try{data=await request.formData();}catch{return json(400,"入力内容を読み取れませんでした。");}
+  if([...data.keys()].some(k=>!known.has(k)))return json(400,"想定外の入力項目が含まれています。");if(get(data,"website"))return json(200,"受付しました。");
+  const token=get(data,"token");if(!token||!runtime.SESSION)return json(400,"ヒアリングURLを確認してください。お問い合わせメールに記載されたURLからアクセスしてください。");const sessionRaw=await runtime.SESSION.get(`hearing:${token}`);if(!sessionRaw)return json(400,"ヒアリングURLの有効期限が切れているか、URLが正しくありません。");const session=JSON.parse(sessionRaw) as HearingSession;
+  const hearing={company:get(data,"company"),productionType:get(data,"productionType"),budget:get(data,"budget"),launch:get(data,"launch"),industry:get(data,"industry"),business:get(data,"business"),strength:getAll(data,"strength"),area:getAll(data,"area"),primaryCustomer:get(data,"primaryCustomer"),customerNeeds:get(data,"customerNeeds"),primaryGoal:get(data,"primaryGoal"),otherGoal:getAll(data,"otherGoal"),mustHave:get(data,"mustHave"),structureReference:get(data,"structureReference"),impression:getAll(data,"impression"),useColor:get(data,"useColor"),avoidColor:get(data,"avoidColor"),designReference:get(data,"designReference"),material:getAll(data,"material"),cms:get(data,"cms"),function:getAll(data,"function"),analytics:getAll(data,"analytics"),domain:get(data,"domain"),server:get(data,"server"),operation:getAll(data,"operation"),note:get(data,"note"),contact:{name:session.name,email:session.email,initialCompany:session.company||"",initialUrl:session.contactUrl||"",service:session.service||""}};
+  const missing:string[]=[];if(!hearing.company)missing.push("会社・店舗・組織名");if(!hearing.productionType)missing.push("今回の制作内容");if(!hearing.budget)missing.push("想定予算");if(!hearing.industry)missing.push("業種");if(!hearing.business)missing.push("事業・サービス内容");if(!hearing.strength.length)missing.push("特に伝えたい強み");if(!hearing.area.length)missing.push("対応エリア");if(!hearing.primaryCustomer)missing.push("最も来てほしいお客様");if(!hearing.primaryGoal)missing.push("サイトの一番の目的");if(!hearing.impression.length)missing.push("希望するサイトの印象");if(!hearing.cms)missing.push("CMS");if(!hearing.domain)missing.push("ドメインの状況");if(get(data,"consent")!=="agreed")missing.push("個人情報の取り扱いへの同意");if(missing.length)return json(400,`必須項目を確認してください：${missing.join("、")}`);
+  const turnstileToken=get(data,"cf-turnstile-response");if(!turnstileToken||!env.TURNSTILE_SECRET_KEY)return json(400,"Bot確認を完了してください。");const vr=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({secret:env.TURNSTILE_SECRET_KEY,response:turnstileToken,remoteip:request.headers.get("CF-Connecting-IP"),idempotency_key:crypto.randomUUID()})});const turnstile=await vr.json() as TurnstileResult;if(!vr.ok||!turnstile.success||turnstile.action!=="hearing")return json(400,"Bot確認に失敗しました。もう一度お試しください。");if(!configured(env.RESEND_API_KEY)||!configured(env.CONTACT_FROM_EMAIL))return json(503,"現在送信を受け付けられません。");
+  const hearingId=`H-${new Date().toISOString().slice(0,10).replace(/-/g,"")}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;const accessId=`${hearingId}-${crypto.randomUUID().slice(0,12)}`;const rows:Row[]=[["受付ID",hearingId],["会社・店舗・組織名",hearing.company],["今回の制作内容",hearing.productionType],["想定予算",hearing.budget],["公開希望時期",hearing.launch||"未入力"],["業種",hearing.industry],["事業・サービス内容",hearing.business],["強み",hearing.strength.join(" / ")],["対応エリア",hearing.area.join(" / ")],["最も来てほしいお客様",hearing.primaryCustomer],["お客様の悩み・期待",hearing.customerNeeds||"未入力"],["主目的",hearing.primaryGoal],["その他の目的",hearing.otherGoal.join(" / ")||"未選択"],["必ず掲載したい情報",hearing.mustHave||"未入力"],["構成参考",hearing.structureReference||"未入力"],["サイトの印象",hearing.impression.join(" / ")],["使いたい色",hearing.useColor||"未入力"],["避けたい色",hearing.avoidColor||"未入力"],["デザイン参考",hearing.designReference||"未入力"],["素材",hearing.material.join(" / ")||"未選択"],["CMS",hearing.cms],["必要機能",hearing.function.join(" / ")||"未選択"],["解析・計測",hearing.analytics.join(" / ")||"未選択"],["ドメイン",hearing.domain],["サーバー・公開環境",hearing.server||"未選択"],["公開後の運用",hearing.operation.join(" / ")||"未選択"],["補足",hearing.note||"未入力"]];
+  try{await sendMail({from:env.CONTACT_FROM_EMAIL,to:[session.email],reply_to:ADMIN_EMAIL,subject:"【Wani san Web】制作ヒアリングを受け付けました",text:`${session.name}様\n\n制作ヒアリングへのご回答ありがとうございます。\n受付ID：${hearingId}\n\n回答内容を受け付けました。`,html:`<p>${esc(session.name)}様</p><p>制作ヒアリングへのご回答ありがとうございます。</p><p>受付ID：<strong>${esc(hearingId)}</strong></p><p>回答内容を受け付けました。</p>`});}catch{return json(502,"サンクスメールを送信できませんでした。");}
+  await runtime.SESSION.delete(`hearing:${token}`);const task=generateProposal(hearingId,accessId,hearing,rows);const cfContext=(locals as any).cfContext;if(cfContext?.waitUntil)cfContext.waitUntil(task);else console.error(JSON.stringify({event:"proposal_background_context_missing",hearingId}));return Response.json({message:"受付しました。",hearingId},{status:200});
 };
-
-export const ALL: APIRoute = () => json(405,"POSTメソッドのみ利用できます。");
+export const ALL:APIRoute=()=>json(405,"POSTメソッドのみ利用できます。");

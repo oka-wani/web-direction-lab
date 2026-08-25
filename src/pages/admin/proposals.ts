@@ -45,6 +45,7 @@ type Job = {
   error: string;
   updatedAt: string;
   proposalReady: boolean;
+  pdfReady: boolean;
   roughReady: boolean;
 };
 
@@ -82,6 +83,7 @@ async function loadJobs(bucket: R2Bucket): Promise<Job[]> {
     const hasHearing = group.keys.has("hearing.json");
     const hasProposalJson = group.keys.has("proposal.json");
     const proposalReady = group.keys.has("proposal.html");
+    const pdfReady = group.keys.has("proposal.pdf");
     const roughReady = group.keys.has("rough/index.html");
     const status = statusData?.status ?? "unknown";
 
@@ -102,6 +104,7 @@ async function loadJobs(bucket: R2Bucket): Promise<Job[]> {
       error: statusData?.error ?? "",
       updatedAt: statusData?.updatedAt ?? group.latest.toISOString(),
       proposalReady,
+      pdfReady,
       roughReady,
     } satisfies Job;
   }));
@@ -118,11 +121,12 @@ export const GET: APIRoute = async ({ request }) => {
   const rows = jobs.map((job) => {
     const badgeClass = job.stage === "エラー" ? "bad" : job.stage === "管理メール送信済み" ? "done" : "run";
     const proposalUrl = `/proposals/${encodeURIComponent(job.accessId)}/proposal/`;
+    const pdfUrl = `/proposals/${encodeURIComponent(job.accessId)}/proposal.pdf`;
     const roughUrl = `/proposals/${encodeURIComponent(job.accessId)}/rough/`;
     return `<tr>
       <td><b>${esc(job.company || "名称未取得")}</b><small>${esc(job.hearingId)}</small></td>
       <td><span class="badge ${badgeClass}">${esc(job.stage)}</span><small>${esc(job.updatedAt)}</small></td>
-      <td>${job.proposalReady ? `<a href="${proposalUrl}" target="_blank">提案書</a>` : "—"}</td>
+      <td>${job.pdfReady ? `<a href="${pdfUrl}" target="_blank">PDF</a>` : "—"}${job.proposalReady ? ` / <a href="${proposalUrl}" target="_blank">Web版</a>` : ""}</td>
       <td>${job.roughReady ? `<a href="${roughUrl}" target="_blank">ラフ</a>` : "—"}</td>
       <td>${job.error ? `<details><summary>エラーを見る</summary><pre>${esc(job.error)}</pre></details>` : esc(job.message || "—")}</td>
     </tr>`;

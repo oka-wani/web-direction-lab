@@ -30,7 +30,7 @@ export class ProposalWorkflowV2 extends ProposalWorkflow {
         accessId,
         company: hearing?.company ?? "",
         status: "completed",
-        message: "提案書・ラフ生成と管理メール送信が完了しました。",
+        message: "提案書PDF・Web版ラフ生成と管理メール送信が完了しました。",
         completedAt: new Date().toISOString(),
       });
       return result;

@@ -1,5 +1,6 @@
 import { WorkflowEntrypoint, WorkflowStep } from "cloudflare:workers";
 import type { WorkflowEvent } from "cloudflare:workers";
+import { generateProposalPdf } from "./proposal-pdf";
 
 type Row = [string, string];
 type ProposalParams = {
@@ -88,7 +89,7 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
     });
 
     const proposal = await step.do("generate proposal with OpenAI", { retries: { limit: 2, delay: "10 seconds", backoff: "linear" } }, async () => {
-      const prompt = `あなたはWeb制作会社WSWのシニアWebディレクターです。以下のヒアリング回答から、クライアント確認用の提案書と全ページワイヤー設計を作成してください。必ずJSONのみを返してください。\n\n必要なJSON形式:\n{\n  "title":"",\n  "concept":"",\n  "cta":"",\n  "targetAnalysis":{"profile":"","needs":"","behavior":""},\n  "issues":[{"title":"","body":""}],\n  "priorities":[{"title":"","reason":""}],\n  "userFlow":[{"title":"認知","body":""},{"title":"理解","body":""},{"title":"比較・納得","body":""},{"title":"行動","body":""}],\n  "sitemap":[{"slug":"top","label":"TOP","role":""}],\n  "roughPages":[{"slug":"top","title":"TOP","role":"","sections":[{"type":"HERO","title":"","heading":"","body":"","items":[],"ctaLabel":"","content":"掲載する内容","purpose":"このエリアの目的","confirm":"確認いただきたいこと"}]}],\n  "designDirection":{"tone":"","colors":"","visual":"","referenceReflection":"","note":""}\n}\n\n条件:\n- TOPを必ず含める。\n- sitemapとroughPagesは完全一致。\n- ページ数は予算・目的・必要情報から現実的に決める。\n- 各ページ3〜8セクション。\n- ラフは単なる説明ではなく、実際のWebページの情報設計として見出し、本文、リスト、CTAまで具体化する。\n- 各セクションに掲載内容・目的・確認事項を必ず入れる。\n- ヒアリングにない事実は断定せず、確認事項として扱う。\n- デザイン方向性は希望印象、色、参考サイトを反映する。\n\nヒアリングJSON:${JSON.stringify(hearing)}`;
+      const prompt = `あなたはWeb制作会社WSWのシニアWebディレクターです。以下のヒアリング回答から、クライアント確認用の提案書と全ページワイヤー設計を作成してください。必ずJSONのみを返してください。\n\n必要なJSON形式:\n{\n  "title":"",\n  "concept":"",\n  "cta":"",\n  "targetAnalysis":{"profile":"","needs":"","behavior":""},\n  "issues":[{"title":"","body":""}],\n  "priorities":[{"title":"","reason":""}],\n  "userFlow":[{"title":"認知","body":""},{"title":"理解","body":""},{"title":"比較・納得","body":""},{"title":"行動","body":""}],\n  "sitemap":[{"slug":"top","label":"TOP","role":""}],\n  "roughPages":[{"slug":"top","title":"TOP","role":"ページの役割","purpose":"ページの目的","contentFlow":"導入 → 理解 → 比較 → 行動","sections":[{"type":"HERO または 3-COLUMN または LIST または FAQ または FORM","title":"","heading":"","body":"","items":[],"ctaLabel":"","content":"掲載する内容","purpose":"このエリアの目的","confirm":"確認いただきたいこと"}]}],\n  "designDirection":{"tone":"","colors":"","palette":["#0D473A","#177B63","#EAF4EF","#D84A1B","#F5F6F3"],"informationRank":3,"motionRank":2,"visual":"","referenceReflection":"","note":""}\n}\n\n条件:\n- TOPを必ず含める。\n- sitemapとroughPagesは完全一致。\n- ページ数は予算・目的・必要情報から現実的に決める。\n- 各ページにrole（役割）、purpose（目的）、contentFlow（閲覧順に矢印でつないだ流れ）を入れる。\n- 各ページ3〜8セクション。TOPは主要4エリアを優先し、詳細は下に続く前提でよい。\n- ラフは単なる箱ではなく、HERO、3-COLUMN、LIST、FAQ、FORMなど具体的な表示形式をtypeで指定し、見出し、本文、リスト、CTAまで具体化する。\n- 各セクションに掲載内容・目的・確認事項を必ず入れる。\n- ヒアリングにない事実は断定せず、確認事項として扱う。\n- デザイン方向性は2軸のみ。informationRankは1=情報量・説明重視、5=視覚・印象重視。motionRankは1=シンプル・静的、5=アクティブ・動的。各1〜5の整数にする。\n- paletteは希望色・避けたい色・コントラストを考慮した#RRGGBBを5色。\n\nヒアリングJSON:${JSON.stringify(hearing)}`;
       const response = await fetch("https://api.openai.com/v1/responses", {
         method: "POST",
         headers: { Authorization: `Bearer ${this.env.OPENAI_API_KEY}`, "Content-Type": "application/json" },
@@ -102,8 +103,10 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
     });
 
     await step.do("save proposal files", async () => {
+      const pdf = await generateProposalPdf(proposal, hearing);
       await this.env.PROPOSALS.put(`proposals/${accessId}/proposal.json`, JSON.stringify(proposal, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
       await this.env.PROPOSALS.put(`proposals/${accessId}/proposal.html`, proposalHtml(proposal, hearing, accessId), { httpMetadata: { contentType: "text/html; charset=utf-8" } });
+      await this.env.PROPOSALS.put(`proposals/${accessId}/proposal.pdf`, pdf, { httpMetadata: { contentType: "application/pdf", contentDisposition: `inline; filename="WSW-${hearingId}.pdf"` } });
       await this.env.PROPOSALS.put(`proposals/${accessId}/rough/index.html`, roughIndexHtml(proposal, accessId), { httpMetadata: { contentType: "text/html; charset=utf-8" } });
       for (const page of proposal.roughPages ?? []) {
         const slug = safeSlug(page.slug);
@@ -113,7 +116,8 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
     });
 
     await step.do("send admin completion mail", { retries: { limit: 3, delay: "5 seconds", backoff: "linear" } }, async () => {
-      const proposalUrl = `${SITE_URL}/proposals/${accessId}/proposal/`;
+      const proposalUrl = `${SITE_URL}/proposals/${accessId}/proposal.pdf`;
+      const webProposalUrl = `${SITE_URL}/proposals/${accessId}/proposal/`;
       const roughUrl = `${SITE_URL}/proposals/${accessId}/rough/`;
       const answersText = rows.map(([label, value]) => `${label}: ${value}`).join("\n\n");
       const answersHtml = rows.map(([label, value]) => `<p><strong>${esc(label)}</strong><br>${esc(value).replace(/\n/g, "<br>")}</p>`).join("");
@@ -121,8 +125,8 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
         from: this.env.CONTACT_FROM_EMAIL,
         to: [ADMIN_EMAIL],
         subject: `【WSW 提案書生成完了】${hearing.company}`,
-        text: `${answersText}\n\n提案書：${proposalUrl}\nサイト構成・ラフ：${roughUrl}`,
-        html: `<h2>提案書・サイトラフを生成しました</h2>${answersHtml}<p><a href="${proposalUrl}">提案書を確認する</a></p><p><a href="${roughUrl}">サイト構成・全ページラフを確認する</a></p>`,
+        text: `${answersText}\n\n提案書PDF：${proposalUrl}\nWeb版提案書：${webProposalUrl}\nサイト構成・ラフ：${roughUrl}`,
+        html: `<h2>提案書PDF・サイトラフを生成しました</h2>${answersHtml}<p><a href="${proposalUrl}">提案書PDFを確認する</a></p><p><a href="${webProposalUrl}">Web版提案書を確認する</a></p><p><a href="${roughUrl}">サイト構成・全ページラフを確認する</a></p>`,
       });
       return { ok: true };
     });

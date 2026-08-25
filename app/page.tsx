@@ -14,16 +14,11 @@ const qualityAxes = [
 ];
 
 const processSteps = [
-  ["01", "問い合わせ", "サイトから相談"],
-  ["02", "初回ミーティング", "内容・進め方をご説明"],
-  ["03", "ヒアリング", "必要事項をご回答"],
-  ["04", "要件整理", "構成・機能・技術を整理"],
-  ["05", "ラフ案", "構成＋デザインを提示"],
-  ["06", "フィードバック", "2〜3回程度を想定"],
-  ["07", "サイト実装", "承認案を制作"],
-  ["08", "デモ確認", "公開前環境で確認"],
-  ["09", "公開", "最終承認後に本番反映"],
-  ["10", "運用・改善", "必要に応じて継続支援"],
+  ["01", "お問い合わせ", "ご相談内容を送信"],
+  ["02", "方針整理", "ヒアリング＋打ち合わせ"],
+  ["03", "構成・デザイン", "サイト構成と見た目を確認"],
+  ["04", "サイト制作", "承認内容をもとに実装"],
+  ["05", "公開", "最終確認後に本番反映"],
 ] as const;
 
 export default function Home() {
@@ -53,7 +48,7 @@ export default function Home() {
     </section>
 
     <section className="order-section order-section--tint">
-      <div className="order-section-heading"><div><span>HOW WE WORK</span><h2>相談から公開後まで、流れを見える化。</h2></div><p>最初に一度打ち合わせを行い、その後はヒアリングシートと資料を中心に効率よく進めます。必要な場面だけミーティングを追加します。</p></div>
+      <div className="order-section-heading"><div><span>HOW WE WORK</span><h2>お問い合わせから公開まで、5つの工程で進めます。</h2></div><p>お問い合わせ後、まずヒアリングフォームへご回答いただきます。その内容をもとに打ち合わせを行い、サイトの方針を確定してから構成・デザインへ進みます。</p></div>
       <ol className="order-process">{processSteps.map(([number, title, text]) => <li key={number}><span>STEP {number}</span><b>{title}</b><p>{text}</p></li>)}</ol>
       <div className="order-actions"><a className="order-secondary-link" href="/flow">詳しい制作フローを見る <b>→</b></a></div>
     </section>
@@ -74,7 +69,7 @@ export default function Home() {
       <div className="faq-list">{faqs.slice(0, 5).map((faq, index) => <details key={faq.question} open={index === 0}><summary><span>Q</span>{faq.question}<i aria-hidden="true">＋</i></summary><div><span>A</span><p>{faq.answer}</p></div></details>)}</div>
     </section>
 
-    <section className="order-final-cta"><span>CONTACT</span><h2>作りたいものが固まっていなくても、相談できます。</h2><p>初回ミーティングで、目的・予算・希望時期・必要な機能を一緒に整理します。</p><div className="order-actions"><a className="order-primary-link" href="/contact">無料で相談する <b>→</b></a><a className="order-secondary-link" href="/examples">制作イメージを見る <b>→</b></a></div></section>
+    <section className="order-final-cta"><span>CONTACT</span><h2>作りたいものが固まっていなくても、相談できます。</h2><p>ヒアリングフォームと打ち合わせを通じて、目的・予算・希望時期・必要な機能・デザインの方向性を一緒に整理します。</p><div className="order-actions"><a className="order-primary-link" href="/contact">無料で相談する <b>→</b></a><a className="order-secondary-link" href="/examples">制作イメージを見る <b>→</b></a></div></section>
 
     <SiteFooter />
   </main>;

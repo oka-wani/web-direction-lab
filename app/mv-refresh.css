@@ -5,11 +5,11 @@
 }
 
 /* Official brand lockup */
-.brand-logo{--brand-logo-cutout:#fff;display:inline-flex;align-items:center;gap:11px;color:var(--wsw-brand);line-height:1}
-.brand-logo-mark{display:block;width:66px;height:auto;flex:0 0 auto}
-.brand-logo-lockup{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
-.brand-logo-lockup strong{font-size:31px;line-height:.82;font-weight:900;letter-spacing:.08em}
-.brand-logo-lockup small{font-size:9px;line-height:1;font-weight:800;letter-spacing:.035em}
+.brand-logo{--brand-logo-cutout:#fff;display:inline-flex;align-items:center;gap:12px;color:var(--wsw-brand);line-height:1}
+.brand-logo-mark{display:block;width:62px;height:auto;flex:0 0 auto}
+.brand-logo-lockup{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.brand-logo-lockup strong{font-size:28px;line-height:.9;font-weight:900;letter-spacing:.035em}
+.brand-logo-lockup small{font-size:9px;line-height:1;font-weight:800;letter-spacing:.08em}
 .brand-logo--compact .brand-logo-mark{width:50px}
 .site-header .logo span:after{display:none!important}
 .site-header .logo{font-size:inherit;letter-spacing:normal}
@@ -57,7 +57,7 @@
 }
 
 @media(max-width:720px){
-  .brand-logo{gap:8px}.brand-logo-mark{width:50px}.brand-logo-lockup strong{font-size:23px}.brand-logo-lockup small{font-size:7px}
+  .brand-logo{gap:8px}.brand-logo-mark{width:48px}.brand-logo-lockup strong{font-size:22px}.brand-logo-lockup small{font-size:7px}
   .wsw-mv__inner{width:calc(100% - 40px);min-height:0;padding:52px 0 36px}
   .wsw-mv__eyebrow{margin-bottom:20px;font-size:9px}
   .wsw-mv h1{font-size:clamp(34px,10.1vw,43px);line-height:1.45;letter-spacing:-.06em}

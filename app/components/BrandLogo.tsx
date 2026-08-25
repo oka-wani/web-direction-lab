@@ -4,18 +4,18 @@ type BrandLogoProps = {
 };
 
 export function WaniMark({ className = "" }: { className?: string }) {
-  return <svg className={className} viewBox="0 0 240 112" role="img" aria-label="横向きのワニとWを組み合わせたWSWのシンボル">
-    <path d="M18 36c0-8 6-14 14-14h55L116 4c5-3 10-4 16-4h18c8 0 14 4 18 11l20 35 18-20c5-6 11-9 18-9 9 0 16 5 19 13 3 7 1 15-4 21l-28 35c-5 7-12 10-21 10h-10c-9 0-16-4-20-12l-15-25-16 27c-5 8-12 12-21 12h-9c-8 0-15-3-20-9L62 72H32c-8 0-14-6-14-14V36Z" fill="currentColor" />
-    <circle cx="34" cy="38" r="6" fill="var(--brand-logo-cutout, #fff)" />
-    <path d="M18 58h48" stroke="var(--brand-logo-cutout, #fff)" strokeWidth="6" strokeLinecap="round" />
-    <path d="M116 33V23c0-9 7-16 16-16s16 7 16 16v10h-32Z" fill="var(--brand-logo-cutout, #fff)" />
-    <circle cx="133" cy="23" r="8" fill="currentColor" />
+  return <svg className={className} viewBox="0 0 190 88" role="img" aria-label="横向きのワニとWを組み合わせたWANI SAN WEBのシンボル">
+    <path d="M7 34c0-8 6-14 14-14h51c8 0 13-4 17-11C93 3 99 0 108 0h7c10 0 17 5 21 14l13 28 14-16c5-6 13-7 19-3 7 5 8 14 3 21l-22 27c-6 7-17 8-24 1l-17-18-13 18c-6 8-18 9-25 2L66 57H21C13 57 7 51 7 43v-9Z" fill="currentColor" />
+    <circle cx="109" cy="18" r="10" fill="var(--brand-logo-cutout, #fff)" />
+    <circle cx="112" cy="18" r="4" fill="currentColor" />
+    <path d="M7 42h48" stroke="var(--brand-logo-cutout, #fff)" strokeWidth="5" strokeLinecap="round" />
+    <circle cx="20" cy="31" r="3" fill="var(--brand-logo-cutout, #fff)" />
   </svg>;
 }
 
 export function BrandLogo({ compact = false, className = "" }: BrandLogoProps) {
   return <span className={`brand-logo ${compact ? "brand-logo--compact" : ""} ${className}`.trim()}>
     <WaniMark className="brand-logo-mark" />
-    {!compact && <span className="brand-logo-lockup"><strong>WSW</strong><small>Web. Simple. Work.</small></span>}
+    {!compact && <span className="brand-logo-lockup"><strong>WSW</strong><small>WANI SAN WEB</small></span>}
   </span>;
 }

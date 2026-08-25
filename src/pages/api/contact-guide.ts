@@ -8,31 +8,34 @@ type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
 
 const ADMIN_EMAIL = "contact@wani-san.com";
 const json = (status: number, message: string) => Response.json({ message }, { status });
-const get = (data: FormData, key: string) => typeof data.get(key) === "string" ? String(data.get(key)).trim() : "";
 const escapeHtml = (input: string) => input.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const configured = (input: string | undefined) => Boolean(input && !input.startsWith("SET_IN_"));
 
 export const POST: APIRoute = async ({ request }) => {
   const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/x-www-form-urlencoded") && !contentType.includes("multipart/form-data")) return json(415, "送信形式が正しくありません。");
+  if (!contentType.includes("application/json")) return json(415, "送信形式が正しくありません。");
 
   const origin = request.headers.get("origin");
   if (!origin || new URL(origin).host !== new URL(request.url).host) return json(403, "送信元を確認できませんでした。");
 
-  let data: FormData;
+  let body: unknown;
   try {
-    data = await request.formData();
+    body = await request.json();
   } catch {
     return json(400, "入力内容を読み取れませんでした。");
   }
 
-  const known = new Set(["token", "candidate"]);
-  if ([...data.keys()].some((key) => !known.has(key))) return json(400, "想定外の入力項目が含まれています。");
+  if (!body || typeof body !== "object" || Array.isArray(body)) return json(400, "入力内容が正しくありません。");
+  const submission = body as Record<string, unknown>;
+  const known = new Set(["token", "candidates"]);
+  if (Object.keys(submission).some((key) => !known.has(key))) return json(400, "想定外の入力項目が含まれています。");
 
-  const token = get(data, "token");
+  const token = typeof submission.token === "string" ? submission.token.trim() : "";
   if (!/^[a-f0-9]{32}$/.test(token)) return json(400, "確認URLが正しくありません。");
 
-  const candidates = data.getAll("candidate").map(String).map((value) => value.trim()).filter(Boolean);
+  const candidates = Array.isArray(submission.candidates)
+    ? submission.candidates.filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean)
+    : [];
   if (candidates.length < 1 || candidates.length > 5 || candidates.some((candidate) => candidate.length > 100)) {
     return json(400, "候補日程を1〜5件、各100文字以内で入力してください。");
   }

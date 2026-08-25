@@ -71,7 +71,7 @@ const editMode = Astro.url.searchParams.get("mode") === "edit";
             <ol>{draft.candidates.map((candidate) => <li>{candidate}</li>)}</ol>
             {!editMode && (
               <div class="actions">
-                <form method="post" action="/api/contact-guide">
+                <form method="post" action="/api/contact-guide" data-contact-guide-form>
                   <input type="hidden" name="token" value={token} />
                   {draft.candidates.map((candidate) => <input type="hidden" name="candidate" value={candidate} />)}
                   <button type="submit">そのまま送る</button>
@@ -80,7 +80,7 @@ const editMode = Astro.url.searchParams.get("mode") === "edit";
               </div>
             )}
             {editMode && (
-              <form id="edit" method="post" action="/api/contact-guide">
+              <form id="edit" method="post" action="/api/contact-guide" data-contact-guide-form>
                 <h2>候補日程を変更</h2>
                 <p>文面を直接修正してから送信できます。</p>
                 <input type="hidden" name="token" value={token} />
@@ -93,6 +93,7 @@ const editMode = Astro.url.searchParams.get("mode") === "edit";
                 </div>
               </form>
             )}
+            <p id="submit-error" class="notice error" role="alert" hidden></p>
           </>
         ) : (
           <>
@@ -102,5 +103,45 @@ const editMode = Astro.url.searchParams.get("mode") === "edit";
         )}
       </section>
     </main>
+    <script>
+      const errorMessage = document.querySelector<HTMLElement>("#submit-error");
+
+      document.querySelectorAll<HTMLFormElement>("[data-contact-guide-form]").forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+          const data = new FormData(form);
+          const payload = {
+            token: String(data.get("token") ?? ""),
+            candidates: data.getAll("candidate").map(String),
+          };
+
+          if (submitButton) submitButton.disabled = true;
+          if (errorMessage) errorMessage.hidden = true;
+
+          try {
+            const response = await fetch(form.action, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            if (response.redirected) {
+              window.location.assign(response.url);
+              return;
+            }
+
+            const result = await response.json().catch(() => null) as { message?: string } | null;
+            if (!response.ok) throw new Error(result?.message || "案内メールを送信できませんでした。");
+          } catch (error) {
+            if (errorMessage) {
+              errorMessage.textContent = error instanceof Error ? error.message : "案内メールを送信できませんでした。";
+              errorMessage.hidden = false;
+            }
+            if (submitButton) submitButton.disabled = false;
+          }
+        });
+      });
+    </script>
   </body>
 </html>

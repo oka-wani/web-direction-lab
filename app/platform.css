@@ -839,7 +839,7 @@ footer.site-footer{background:var(--charcoal)}
   border-radius:999px;
 }
 
-/* Unlinked shared-module catalogue. */
+/* Standard module catalogue. */
 .module-catalog-page{background:#fff}
 .module-catalog-hero{
   padding:96px max(30px,calc((100vw - 1200px)/2)) 72px;

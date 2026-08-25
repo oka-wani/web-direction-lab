@@ -2,13 +2,14 @@ import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 const includedItems = [
   ["5ページまでの制作", "トップページを含む5ページまで。6ページ目以降は、1ページにつき2,000円で追加できます。"],
-  ["標準モジュール", "見出し、画像、カード、リスト、表、Q&Aなどを組み合わせ、内容に合ったページを制作します。"],
+  ["標準モジュール・標準テンプレート", "見出し、画像、カード、リスト、表、Q&Aなどの標準パーツとページ構成を組み合わせ、内容に合ったサイトを制作します。"],
   ["画像調整（10点まで）", "支給画像のトリミング、明るさ・サイズ・形式の調整を10点まで行います。"],
   ["レスポンシブ対応", "スマートフォン、タブレット、PCの画面幅に合わせて、読みやすく使いやすい表示へ調整します。"],
   ["SEO基本設定", "title、description、OGP、見出し構造、サイトマップなど、検索の土台となる設定を行います。"],
-  ["アクセシビリティ", "見出し構造、代替テキスト、キーボード操作、コントラストなどに配慮して制作します。"],
+  ["アクセシビリティ", "WCAG 2.2の適合レベルA（シングルA）に準拠し、見出し構造、代替テキスト、キーボード操作、コントラストなどに配慮して制作します。"],
   ["表示速度・品質確認", "画像の最適化、基本的な軽量化、主要ブラウザでの表示、リンク切れなどを確認します。"],
-  ["セキュリティ・公開", "HTTPS、Cloudflare、基本的なセキュリティ設定を行い、本番環境へ公開します。"],
+  ["ドメイン・サーバー（CDN）の初期設定", "独自ドメインの取得案内、DNS設定、Cloudflare CDNを利用した公開環境の設定を行います。"],
+  ["セキュリティ・公開", "SSL証明書の設定とHTTPS化、Cloudflareの基本的なセキュリティ設定を行い、本番環境へ公開します。"],
   ["デザイン調整・修正", "標準デザインをもとに配色・文字・画像を調整し、方針確定後の修正2回まで対応します。"],
 ] as const;
 
@@ -16,13 +17,16 @@ const functionOptions = [
   ["ページ追加", "6ページ目以降のページ制作。", "2,000円／1ページ"],
   ["お問い合わせフォーム", "送信、管理者通知、自動返信、Bot対策を含むフォーム。", "20,000円／1フォーム"],
   ["CMS・更新機能", "お知らせ、実績、商品、FAQなどをお客様側で更新できる仕組み。microCMSのAPI作成、AIによるフィールド設計、一覧・詳細ページの実装を含みます。", "30,000円／1コンテンツ種別"],
+  ["独自モジュール・動き", "標準にないレイアウト、アニメーション、JavaScriptを使った機能。", "個別見積"],
+  ["外部サービスの簡易連携", "地図、SNS、予約サービスなどの埋め込み・リンク設定。", "3,000円〜／1サービス"],
+  ["API・決済・予約などの機能", "認証、データ連携、決済など開発が必要な機能。", "個別見積"],
+] as const;
+
+const analyticsOptions = [
   ["Google Tag Manager", "GTMアカウントの初期設定とサイトへの設置。必要な基本イベントの設定を含みます。", "3,000円／1サイト"],
   ["Google Analytics 4", "GA4プロパティの初期設定とサイトへの設置・動作確認。必要な基本イベントの設定を含みます。", "3,000円／1サイト"],
   ["Google Search Console", "プロパティ作成、所有権確認、サイトマップ送信などの初期設定。", "2,000円／1サイト"],
   ["Microsoft Clarity", "プロジェクト作成、サイトへの設置、録画・ヒートマップの動作確認。", "2,000円／1サイト"],
-  ["独自モジュール・動き", "標準にないレイアウト、アニメーション、JavaScriptを使った機能。", "個別見積"],
-  ["外部サービスの簡易連携", "地図、SNS、予約サービスなどの埋め込み・リンク設定。", "3,000円〜／1サービス"],
-  ["API・決済・予約などの機能", "認証、データ連携、決済など開発が必要な機能。", "個別見積"],
 ] as const;
 
 const contentOptions = [
@@ -64,9 +68,10 @@ export default function PricingPage() {
       <div className="package-included-list">{includedItems.map(([title, text], index) => <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{title}</h3><p>{text}</p></div></article>)}</div>
     </section>
 
-    <section className="order-section order-section--tint"><div className="order-section-heading"><div><span>STANDARD MODULES</span><h2>組み合わせて使える標準モジュール</h2></div><p>掲載内容に合ったパーツを選び、配色・文字・画像を調整します。同じモジュールを複数回使っても追加料金はかかりません。</p></div>
+    <section className="order-section order-section--tint"><div className="order-section-heading"><div><span>STANDARD MODULES &amp; TEMPLATES</span><h2>標準モジュール・標準テンプレート</h2></div><p>掲載内容に合ったパーツとページ構成を選び、配色・文字・画像を調整します。同じモジュールを複数回使っても追加料金はかかりません。</p></div>
       <div className="package-module-groups">{moduleGroups.map(([title, items]) => <section key={title}><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></section>)}</div>
       <p className="package-note"><strong>標準対応の考え方</strong><span>既存モジュールの組み合わせ、テキスト・画像の差し替え、配色・余白・カラムの調整は基本料金に含まれます。</span></p>
+      <div className="order-actions"><a className="order-secondary-link" href="/modules">標準モジュールの表示例を見る <b>→</b></a><a className="order-secondary-link" href="/examples">標準テンプレートの制作イメージを見る <b>→</b></a></div>
     </section>
 
     <section className="order-section"><div className="order-section-heading"><div><span>EXAMPLE</span><h2>5ページの構成例</h2></div><p>業種や目的に合わせて、必要なページをヒアリング後に整理します。</p></div>
@@ -76,9 +81,10 @@ export default function PricingPage() {
 
     <section className="order-section order-section--tint" id="options"><div className="order-section-heading"><div><span>OPTIONS</span><h2>追加オプション</h2></div><p>基本パッケージに必要な機能や素材制作だけを追加できます。個別見積の項目も、発注前に対応範囲と料金をご案内します。</p></div>
       <div className="pricing-option-group"><h3>機能・ページの追加</h3><dl className="pricing-option-table">{functionOptions.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl></div>
+      <div className="pricing-option-group"><h3>アクセス解析・計測</h3><dl className="pricing-option-table">{analyticsOptions.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl></div>
       <div className="pricing-option-group"><h3>原稿・画像・ロゴ制作</h3><dl className="pricing-option-table">{contentOptions.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl></div>
       <p className="package-note"><strong>追加料金の判断基準</strong><span>新しいHTML構造、CSS、JavaScript、外部サービス連携、素材制作が必要になるものを、原則としてオプション扱いとします。</span></p>
-      <p className="package-page-rule">ドメイン、有料素材、外部サービスなどの利用料は別途実費となります。</p>
+      <p className="package-page-rule">ドメイン取得、サーバー・CDN、有料素材、外部サービスなどの契約・継続利用料は別途実費となります。</p>
     </section>
 
     <section className="order-section" id="support"><div className="order-section-heading"><div><span>AFTER LAUNCH</span><h2>公開後の保守・更新</h2></div><p>必要な作業だけを、月額または件数単位で依頼できます。スポット対応の最低料金は2,000円です。</p></div>

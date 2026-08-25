@@ -2,9 +2,8 @@ import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
 export const metadata: Metadata = {
-  title: "共通モジュール一覧｜Wani san Web",
-  description: "Wani san Webで使用する共通UIモジュールの確認ページです。",
-  robots: { index: false, follow: false },
+  title: "標準モジュール例｜Wani san Web",
+  description: "基本制作パッケージで使用できる、見出し、ボタン、カード、記事内パーツ、Q&Aなどの標準モジュール例です。",
 };
 
 const moduleSections = [
@@ -21,9 +20,10 @@ export default function ModulesPage() {
   return <main className="module-catalog-page">
     <SiteHeader />
     <header className="module-catalog-hero">
-      <p>UI MODULES</p>
-      <h1>共通モジュール一覧</h1>
-      <span>サイトで使用している見出し、カード、ボタンなどの表示確認用ページです。</span>
+      <p>STANDARD MODULES</p>
+      <h1>標準モジュール例</h1>
+      <span>基本制作パッケージで組み合わせて使える、見出し、カード、ボタン、Q&amp;Aなどの一例です。配色・文字・画像はサイトに合わせて調整します。</span>
+      <div className="order-actions"><a className="order-secondary-link" href="/pricing">料金・プランへ戻る <b>→</b></a><a className="order-secondary-link" href="/examples">標準テンプレートの制作イメージを見る <b>→</b></a></div>
     </header>
 
     <div className="module-catalog">
@@ -78,6 +78,7 @@ export default function ModulesPage() {
         </div>
       </section>
     </div>
+    <section className="order-final-cta"><span>CONTACT</span><h2>モジュールの組み合わせから、必要なページを設計します。</h2><p>掲載したい内容を伺い、標準対応で制作できる範囲と追加対応が必要な箇所を事前にご案内します。</p><div className="order-actions"><a className="order-primary-link" href="/contact">無料で相談する <b>→</b></a><a className="order-secondary-link" href="/pricing">料金・プランを見る <b>→</b></a></div></section>
     <SiteFooter />
   </main>;
 }

@@ -47,10 +47,12 @@
 .package-option-list li { padding: 20px 4px; border-bottom: 1px solid var(--wsw-line); line-height: 1.6; }
 .package-option-list li::before { content: "＋"; margin-right: 10px; color: var(--wsw-accent); font-weight: 900; }
 .pricing-option-table { margin: 0; border-top: 1px solid var(--wsw-line); }
-.pricing-option-table > div { display: grid; grid-template-columns: minmax(190px, .75fr) minmax(0, 1.6fr) 160px; gap: 28px; align-items: center; padding: 24px 4px; border-bottom: 1px solid var(--wsw-line); }
+.pricing-option-table > div { display: grid; grid-template-columns: minmax(190px, .75fr) minmax(0, 1.6fr) 220px; gap: 28px; align-items: center; padding: 24px 4px; border-bottom: 1px solid var(--wsw-line); }
 .pricing-option-table dt { font-size: 18px; font-weight: 800; }
 .pricing-option-table dd { margin: 0; color: var(--wsw-muted); line-height: 1.75; }
 .pricing-option-table strong { justify-self: end; color: var(--wsw-accent-dark); font-size: 15px; white-space: nowrap; }
+.pricing-option-group + .pricing-option-group { margin-top: 52px; }
+.pricing-option-group > h3 { margin: 0 0 16px; font-size: 22px; }
 
 @media (max-width: 900px) {
   .package-hero { grid-template-columns: 1fr; gap: 36px; }

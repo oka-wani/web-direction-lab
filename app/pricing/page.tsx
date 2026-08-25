@@ -11,15 +11,34 @@ const includedItems = [
   ["デザイン調整・修正", "標準デザインをもとに配色・文字・画像を調整し、方針確定後の修正2回まで対応します。"],
 ] as const;
 
-const options = [
+const functionOptions = [
   ["ページ追加", "6ページ目以降のページ制作。", "2,000円／1ページ"],
-  ["お問い合わせフォーム", "送信、管理者通知、自動返信、Bot対策を含むフォーム。", "個別見積"],
-  ["CMS・更新機能", "お知らせ、実績、商品、FAQなどをお客様側で更新できる仕組み。", "個別見積"],
+  ["お問い合わせフォーム", "送信、管理者通知、自動返信、Bot対策を含むフォーム。", "20,000円／1フォーム"],
+  ["CMS・更新機能", "お知らせ、実績、商品、FAQなどをお客様側で更新できる仕組み。microCMSのAPI作成、AIによるフィールド設計、一覧・詳細ページの実装を含みます。", "30,000円／1コンテンツ種別"],
+  ["アクセス解析初期設定", "GTM、GA4、Search Console、Clarityの設定・連携と、基本的なコンバージョン設定1件。", "10,000円／1サイト"],
+  ["追加イベント設定", "ボタンクリック、フォーム完了など、追加で計測するイベントの設定。", "2,000円／1件"],
   ["独自モジュール・動き", "標準にないレイアウト、アニメーション、JavaScriptを使った機能。", "個別見積"],
-  ["アクセス解析", "GTM、GA4、Search Console、Clarityなどの初期設定。", "個別見積"],
-  ["原稿・画像・ロゴ制作", "原稿作成、図版や画像の加工、ロゴ制作などの素材準備。", "個別見積"],
-  ["外部サービス連携", "予約、決済、地図、SNS、多言語など外部サービスとの連携。", "個別見積"],
-  ["公開後の保守・更新", "公開後の軽微な修正、情報更新、技術メンテナンス。", "個別見積"],
+  ["外部サービスの簡易連携", "地図、SNS、予約サービスなどの埋め込み・リンク設定。", "3,000円〜／1サービス"],
+  ["API・決済・予約などの機能", "認証、データ連携、決済など開発が必要な機能。", "個別見積"],
+] as const;
+
+const contentOptions = [
+  ["原稿作成", "ヒアリング内容をもとにWeb掲載用の文章を作成します。", "3,000円／1ページ"],
+  ["原稿の調整・リライト", "支給原稿を読みやすく整理し、見出しや表現を調整します。", "1,500円／1ページ"],
+  ["画像加工", "トリミング、色調整、文字入れなどを行います。", "1,000円／1点"],
+  ["図版・バナー制作", "説明図、メイン画像、告知バナーなどを制作します。", "3,000円／1点"],
+  ["ロゴ制作", "方向性2案、修正2回、SVG・PDF・PNGデータの納品を含みます。", "20,000円／1式"],
+] as const;
+
+const supportOptions = [
+  ["自動解析レポート", "定型レポートを自動生成して共有します。", "2,000円／月"],
+  ["解析レポート＋簡単なコメント", "数値を確認し、変化や注意点を簡潔にお伝えします。", "3,000円／月"],
+  ["解析＋改善提案", "課題を整理し、改善案と優先順位をご提案します。", "5,000円／月"],
+  ["CMS更新代行", "支給された文章・画像をCMSへ登録します。", "1,000円／1件"],
+  ["CMS更新5件パック", "CMSへの登録・更新を月5件まで対応します。", "4,000円／月"],
+  ["CMS更新10件パック", "CMSへの登録・更新を月10件まで対応します。", "7,000円／月"],
+  ["サイト保守", "稼働、SSL・ドメイン、ビルドエラーの確認と、軽微な文言・画像修正を月1件含みます。", "3,000円／月"],
+  ["通常ページの軽微な修正", "公開後の文章や画像の差し替えなどに対応します。", "2,000円〜／1回"],
 ] as const;
 
 const moduleGroups = [
@@ -38,9 +57,15 @@ export default function PricingPage() {
       <dl className="package-price-panel"><div><dt>基本制作パッケージ</dt><dd><strong>30,000</strong><span>円</span></dd></div><div><dt>制作ページ数</dt><dd><strong>5</strong><span>ページまで</span></dd></div><div><dt>ページ追加</dt><dd><strong>2,000</strong><span>円／ページ</span></dd></div></dl>
     </section>
 
-    <section className="order-section order-section--tint" id="options"><div className="order-section-heading"><div><span>OPTIONS</span><h2>追加オプション</h2></div><p>基本パッケージに必要なものだけを追加できます。金額が未確定の項目は、内容を確認して発注前にお見積もりします。</p></div>
-      <dl className="pricing-option-table">{options.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl>
+    <section className="order-section order-section--tint" id="options"><div className="order-section-heading"><div><span>OPTIONS</span><h2>追加オプション</h2></div><p>基本パッケージに必要な機能や素材制作だけを追加できます。個別見積の項目も、発注前に対応範囲と料金をご案内します。</p></div>
+      <div className="pricing-option-group"><h3>機能・ページの追加</h3><dl className="pricing-option-table">{functionOptions.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl></div>
+      <div className="pricing-option-group"><h3>原稿・画像・ロゴ制作</h3><dl className="pricing-option-table">{contentOptions.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl></div>
       <p className="package-note"><strong>追加料金の判断基準</strong><span>新しいHTML構造、CSS、JavaScript、外部サービス連携、素材制作が必要になるものを、原則としてオプション扱いとします。</span></p>
+      <p className="package-page-rule">ドメイン、有料素材、外部サービスなどの利用料は別途実費となります。</p>
+    </section>
+
+    <section className="order-section" id="support"><div className="order-section-heading"><div><span>AFTER LAUNCH</span><h2>公開後の保守・更新</h2></div><p>必要な作業だけを、月額または件数単位で依頼できます。スポット対応の最低料金は2,000円です。</p></div>
+      <dl className="pricing-option-table">{supportOptions.map(([title, text, price]) => <div key={title}><dt>{title}</dt><dd>{text}</dd><strong>{price}</strong></div>)}</dl>
     </section>
 
     <section className="order-section" id="included"><div className="order-section-heading"><div><span>WHAT&apos;S INCLUDED</span><h2>基本料金に含まれること</h2></div><p>低価格を理由に、公開に必要な品質を省略しません。標準化した設計とモジュールを活用して、制作工数を抑えます。</p></div>

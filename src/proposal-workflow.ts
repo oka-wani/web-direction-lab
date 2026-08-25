@@ -9,15 +9,15 @@ type ProposalParams = {
   hearing: Record<string, any>;
   rows: Row[];
 };
-type WorkflowEnv = {
+export type WorkflowEnv = {
   PROPOSALS: R2Bucket;
   OPENAI_API_KEY: string;
   CONTACT_FROM_EMAIL: string;
   RESEND_API_KEY: string;
 };
 
-const SITE_URL = "https://www.wani-san.com";
-const ADMIN_EMAIL = "contact@wani-san.com";
+export const SITE_URL = "https://www.wani-san.com";
+export const ADMIN_EMAIL = "contact@wani-san.com";
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[c]!);
 const safeSlug = (s: unknown) => String(s || "page").toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || "page";
 
@@ -31,13 +31,13 @@ function outputText(result: any) {
   return "";
 }
 
-async function sendMail(env: WorkflowEnv, payload: Record<string, unknown>) {
+export async function sendMail(env: WorkflowEnv, payload: Record<string, unknown>, idempotencyKey: string = crypto.randomUUID()) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
-      "Idempotency-Key": crypto.randomUUID(),
+      "Idempotency-Key": idempotencyKey,
     },
     body: JSON.stringify(payload),
   });
@@ -127,7 +127,7 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
         subject: `【WSW 提案書生成完了】${hearing.company}`,
         text: `${answersText}\n\n提案書PDF：${proposalUrl}\nWeb版提案書：${webProposalUrl}\nサイト構成・ラフ：${roughUrl}`,
         html: `<h2>提案書PDF・サイトラフを生成しました</h2>${answersHtml}<p><a href="${proposalUrl}">提案書PDFを確認する</a></p><p><a href="${webProposalUrl}">Web版提案書を確認する</a></p><p><a href="${roughUrl}">サイト構成・全ページラフを確認する</a></p>`,
-      });
+      }, `proposal-completed-${hearingId}`);
       return { ok: true };
     });
 

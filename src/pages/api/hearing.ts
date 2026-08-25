@@ -32,13 +32,13 @@ const known = new Set([
   "token","company","productionType","budget","launch","industry","business","strength","area","primaryCustomer","customerNeeds","primaryGoal","otherGoal","mustHave","structureReference","impression","useColor","avoidColor","designReference","material","cms","function","analytics","domain","server","operation","note","consent","website","cf-turnstile-response",
 ]);
 
-async function sendMail(payload: Record<string, unknown>) {
+async function sendMail(payload: Record<string, unknown>, idempotencyKey: string = crypto.randomUUID()) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
-      "Idempotency-Key": crypto.randomUUID(),
+      "Idempotency-Key": idempotencyKey,
     },
     body: JSON.stringify(payload),
   });
@@ -177,7 +177,7 @@ export const POST: APIRoute = async ({ request }) => {
       subject: "【Wani san Web】制作ヒアリングを受け付けました",
       text: `${session.name}様\n\n制作ヒアリングへのご回答ありがとうございます。\n受付ID：${hearingId}\n\n回答内容を受け付けました。`,
       html: `<p>${esc(session.name)}様</p><p>制作ヒアリングへのご回答ありがとうございます。</p><p>受付ID：<strong>${esc(hearingId)}</strong></p><p>回答内容を受け付けました。</p>`,
-    });
+    }, `hearing-thanks-${hearingId}`);
   } catch {
     return json(502, "サンクスメールを送信できませんでした。");
   }
@@ -199,6 +199,30 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!runtime.PROPOSAL_WORKFLOW) {
     console.error(JSON.stringify({ event: "proposal_workflow_binding_missing", hearingId }));
+    if (runtime.PROPOSALS) {
+      await runtime.PROPOSALS.put(
+        `proposals/${accessId}/status.json`,
+        JSON.stringify({
+          hearingId,
+          accessId,
+          company: hearing.company,
+          status: "error",
+          message: "Workflowの設定が見つかりませんでした。",
+          error: "PROPOSAL_WORKFLOW binding is missing.",
+          updatedAt: new Date().toISOString(),
+        }, null, 2),
+        { httpMetadata: { contentType: "application/json; charset=utf-8" } },
+      ).catch(() => undefined);
+    }
+    await sendMail({
+      from: env.CONTACT_FROM_EMAIL,
+      to: [ADMIN_EMAIL],
+      subject: `【WSW 提案書生成失敗】${hearing.company} / ${hearingId}`,
+      text: `受付ID：${hearingId}\n会社・組織名：${hearing.company}\n\nPROPOSAL_WORKFLOWの設定が見つからないため、提案書生成を開始できませんでした。CloudflareのWorkflow bindingを確認してください。`,
+      html: `<h2>提案書生成を開始できませんでした</h2><p><strong>受付ID</strong><br>${esc(hearingId)}</p><p><strong>会社・組織名</strong><br>${esc(hearing.company)}</p><p>PROPOSAL_WORKFLOWの設定が見つかりません。CloudflareのWorkflow bindingを確認してください。</p>`,
+    }, `proposal-failed-${hearingId}`).catch((error) => {
+      console.error(JSON.stringify({ event: "proposal_failure_mail_error", hearingId, message: error instanceof Error ? error.message : String(error) }));
+    });
   } else {
     try {
       const instance = await runtime.PROPOSAL_WORKFLOW.create({
@@ -228,7 +252,9 @@ export const POST: APIRoute = async ({ request }) => {
         to: [ADMIN_EMAIL],
         subject: `【WSW】提案書生成ジョブの起動に失敗しました / ${hearing.company}`,
         text: `受付ID：${hearingId}\nWorkflowを起動できませんでした。Cloudflare Workflowsの状態を確認してください。`,
-      }).catch(() => undefined);
+      }, `proposal-failed-${hearingId}`).catch((notificationError) => {
+        console.error(JSON.stringify({ event: "proposal_failure_mail_error", hearingId, message: notificationError instanceof Error ? notificationError.message : String(notificationError) }));
+      });
     }
   }
 

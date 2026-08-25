@@ -11,6 +11,10 @@
     {
       "pattern": "www.wani-san.com",
       "custom_domain": true
+    },
+    {
+      "pattern": "wani-san.com/*",
+      "zone_name": "wani-san.com"
     }
   ],
   "assets": {

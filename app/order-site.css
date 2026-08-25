@@ -46,6 +46,11 @@
 .package-option-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 28px; margin: 0; padding: 0; border-top: 1px solid var(--wsw-line); list-style: none; }
 .package-option-list li { padding: 20px 4px; border-bottom: 1px solid var(--wsw-line); line-height: 1.6; }
 .package-option-list li::before { content: "＋"; margin-right: 10px; color: var(--wsw-accent); font-weight: 900; }
+.pricing-option-table { margin: 0; border-top: 1px solid var(--wsw-line); }
+.pricing-option-table > div { display: grid; grid-template-columns: minmax(190px, .75fr) minmax(0, 1.6fr) 160px; gap: 28px; align-items: center; padding: 24px 4px; border-bottom: 1px solid var(--wsw-line); }
+.pricing-option-table dt { font-size: 18px; font-weight: 800; }
+.pricing-option-table dd { margin: 0; color: var(--wsw-muted); line-height: 1.75; }
+.pricing-option-table strong { justify-self: end; color: var(--wsw-accent-dark); font-size: 15px; white-space: nowrap; }
 
 @media (max-width: 900px) {
   .package-hero { grid-template-columns: 1fr; gap: 36px; }
@@ -63,6 +68,8 @@
   .package-page-example b { margin-top: 12px; }
   .package-note { grid-template-columns: 1fr; gap: 7px; }
   .package-included-list article { grid-template-columns: 48px 1fr; gap: 12px; }
+  .pricing-option-table > div { grid-template-columns: 1fr; gap: 8px; padding: 22px 2px; }
+  .pricing-option-table strong { justify-self: start; }
 }
 
 .order-home,

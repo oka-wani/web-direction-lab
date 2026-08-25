@@ -28,6 +28,7 @@ export default defineConfig({
     }),
   ],
   redirects: {
+    "/services/basic-package": "/pricing",
     "/services/small-site-production": "/services/web-production",
     "/services/editable-site-production": "/services/web-production",
     "/services/website-improvement": "/services/web-improvement",
@@ -40,7 +41,6 @@ export default defineConfig({
     "/services/ai-business-improvement": "/services",
     "/services/web-operation": "/services/web-production",
     "/guide": "/knowledge",
-    "/pricing": "/services",
     "/roadmap": "/knowledge",
     "/articles": "/knowledge",
   },

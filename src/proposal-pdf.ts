@@ -171,53 +171,87 @@ function drawStrategy(ctx: DrawCtx, proposal: any, hearing: any) {
 }
 
 function drawSitemap(ctx: DrawCtx, proposal: any) {
-  header(ctx, "SITE STRUCTURE", "サイトマップ", "各ページの役割を整理し、主要情報へ迷わず移動できる構成にします。");
-  const pages = (proposal.sitemap ?? []).slice(0, 12);
-  box(ctx, 210, 635, 175, 54, C.ink, C.ink);
-  text(ctx, "TOP", 225, 604, { size: 14, width: 145, color: C.white, maxLines: 1 });
-  ctx.page.drawLine({ start: { x: 297.5, y: 581 }, end: { x: 297.5, y: 553 }, thickness: 1, color: C.green });
-  const children = pages.filter((p: any) => s(p.slug).toLowerCase() !== "top");
-  const cols = 3;
-  children.forEach((p: any, i: number) => {
+  header(ctx, "SITE STRUCTURE", "サイトマップ", "主要ページと共通・補助ページを分け、サイト全体の情報設計を示します。");
+  const pages = array(proposal.sitemap).slice(0, 12);
+  const main = pages.filter((p: any) => s(p.slug).toLowerCase() !== "top" && p.pageType !== "utility").slice(0, 7);
+  const utilities = pages.filter((p: any) => p.pageType === "utility").slice(0, 3);
+  box(ctx, 205, 645, 185, 56, C.ink, C.ink);
+  text(ctx, "TOP", 224, 611, { size: 14, width: 147, color: C.white, maxLines: 1 });
+  text(ctx, "サイト全体の入口・主要導線の起点", 224, 591, { size: 6.5, width: 147, color: C.white, maxLines: 1 });
+  ctx.page.drawLine({ start: { x: 297.5, y: 589 }, end: { x: 297.5, y: 542 }, thickness: 1.4, color: C.green });
+  text(ctx, "主要ページ", 34, 552, { size: 8, width: 100, color: C.green, maxLines: 1 });
+  ctx.page.drawLine({ start: { x: 34, y: 542 }, end: { x: 558, y: 542 }, thickness: 1.4, color: C.green });
+
+  const cols = main.length <= 4 ? 2 : 3;
+  const gap = 10;
+  const cardW = (524 - gap * (cols - 1)) / cols;
+  main.forEach((p: any, i: number) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
-    const x = 34 + col * 177;
-    const y = 540 - row * 118;
-    box(ctx, x, y, 167, 92, C.soft);
-    ctx.page.drawText(String(i + 1).padStart(2, "0"), { x: x + 11, y: y - 19, size: 7, font: ctx.font, color: C.orange });
-    text(ctx, short(p.label || p.slug, 28), x + 11, y - 40, { size: 11, width: 145, maxLines: 2 });
-    text(ctx, short(p.role, 48), x + 11, y - 67, { size: 7, width: 145, color: C.muted, maxLines: 2 });
+    const x = 34 + col * (cardW + gap);
+    const y = 516 - row * 114;
+    box(ctx, x, y, cardW, 98, row === 0 ? C.white : C.soft);
+    ctx.page.drawText(String(i + 1).padStart(2, "0"), { x: x + 12, y: y - 19, size: 7, font: ctx.font, color: C.orange });
+    text(ctx, short(p.label || p.slug, 28), x + 12, y - 43, { size: 10.5, width: cardW - 24, line: 14, maxLines: 2 });
+    text(ctx, short(p.role, 52), x + 12, y - 72, { size: 7, width: cardW - 24, line: 10.5, color: C.muted, maxLines: 2 });
   });
+
+  const utilityTop = 516 - Math.ceil(main.length / cols) * 114 - 6;
+  box(ctx, 34, utilityTop, 524, 74, C.mint, C.green);
+  text(ctx, "共通・補助ページ", 47, utilityTop - 20, { size: 8, width: 120, color: C.green, maxLines: 1 });
+  utilities.forEach((page: any, i: number) => {
+    const x = 165 + i * 124;
+    ctx.page.drawRectangle({ x, y: utilityTop - 52, width: 114, height: 30, color: C.white, borderColor: C.line, borderWidth: 0.7 });
+    text(ctx, short(page.label || page.slug, 18), x + 8, utilityTop - 41, { size: 7.5, width: 98, maxLines: 1 });
+  });
+  text(ctx, `${main.length + 1}主要ページ ＋ ${utilities.length}補助ページ`, 34, 72, { size: 8, width: 524, color: C.muted, maxLines: 1 });
   footer(ctx);
+}
+
+function drawSectionPattern(ctx: DrawCtx, section: any, x: number, y: number, w: number, h: number) {
+  const type = s(section.type).toUpperCase();
+  ctx.page.drawRectangle({ x, y: y - h, width: w, height: h, color: C.white, borderColor: C.line, borderWidth: 0.6 });
+  if (/HERO/.test(type)) {
+    [0, 1, 2].forEach((i) => ctx.page.drawLine({ start: { x: x + 8, y: y - 14 - i * 10 }, end: { x: x + w * (i === 1 ? 0.55 : 0.7), y: y - 14 - i * 10 }, thickness: 2, color: C.line }));
+    ctx.page.drawRectangle({ x: x + 8, y: y - h + 9, width: 34, height: 13, color: C.green });
+    ctx.page.drawRectangle({ x: x + w * 0.72, y: y - h + 7, width: w * 0.22, height: h - 14, color: C.mint });
+  } else if (/FORM/.test(type)) {
+    [0, 1, 2].forEach((i) => ctx.page.drawRectangle({ x: x + 7, y: y - 16 - i * 16, width: w - 14, height: 10, color: C.soft, borderColor: C.line, borderWidth: 0.4 }));
+    ctx.page.drawRectangle({ x: x + 7, y: y - h + 7, width: w * 0.52, height: 11, color: C.green });
+  } else if (/FAQ|LIST/.test(type)) {
+    [0, 1, 2].forEach((i) => {
+      ctx.page.drawCircle({ x: x + 10, y: y - 14 - i * 17, size: 2.5, color: C.green });
+      ctx.page.drawLine({ start: { x: x + 17, y: y - 14 - i * 17 }, end: { x: x + w - 8, y: y - 14 - i * 17 }, thickness: 1.2, color: C.line });
+    });
+  } else if (/STEP/.test(type)) {
+    [0, 1, 2].forEach((i) => {
+      const bx = x + 6 + i * ((w - 12) / 3);
+      ctx.page.drawCircle({ x: bx + 10, y: y - 16, size: 7, color: C.green });
+      ctx.page.drawRectangle({ x: bx + 3, y: y - h + 8, width: (w - 26) / 3, height: h - 31, color: C.soft });
+    });
+  } else {
+    [0, 1, 2].forEach((i) => ctx.page.drawRectangle({ x: x + 6 + i * ((w - 12) / 3), y: y - h + 7, width: (w - 24) / 3, height: h - 14, color: i === 0 ? C.mint : C.soft, borderColor: C.line, borderWidth: 0.4 }));
+  }
 }
 
 function sectionVisual(ctx: DrawCtx, section: any, x: number, y: number, w: number, h: number, index: number) {
   box(ctx, x, y, w, h, index % 2 ? C.soft : C.white);
-  const type = s(section.type).toUpperCase();
+  const memoX = x + 330;
+  ctx.page.drawRectangle({ x: memoX, y: y - h, width: w - 330, height: h, color: C.mint });
   ctx.page.drawText(String(index + 1).padStart(2, "0"), { x: x + 10, y: y - 18, size: 6.5, font: ctx.font, color: C.orange });
-  text(ctx, type || "SECTION", x + 34, y - 18, { size: 6.5, width: w - 44, color: C.green, maxLines: 1 });
-  text(ctx, short(section.heading || section.title, 44), x + 10, y - 42, { size: 10, width: w * 0.56, line: 14, maxLines: 2 });
-  text(ctx, short(section.body || section.content, 75), x + 10, y - 75, { size: 7, width: w * 0.56, line: 11, maxLines: 3, color: C.muted });
-  const vx = x + w * 0.62;
-  const vw = w * 0.34;
-  if (/FORM|CONTACT|問い合わせ/.test(type)) {
-    [0, 1, 2].forEach((i) => ctx.page.drawRectangle({ x: vx, y: y - 27 - i * 24, width: vw, height: 16, color: C.white, borderColor: C.line, borderWidth: 0.6 }));
-    ctx.page.drawRectangle({ x: vx, y: y - 107, width: vw * 0.62, height: 18, color: C.green });
-  } else if (/FAQ|LIST|FLOW|STEP/.test(type)) {
-    [0, 1, 2].forEach((i) => {
-      ctx.page.drawCircle({ x: vx + 5, y: y - 24 - i * 25, size: 3, color: C.green });
-      ctx.page.drawLine({ start: { x: vx + 13, y: y - 24 - i * 25 }, end: { x: vx + vw, y: y - 24 - i * 25 }, thickness: 1.2, color: C.line });
-    });
-  } else {
-    [0, 1, 2].forEach((i) => ctx.page.drawRectangle({ x: vx + i * (vw / 3), y: y - 71, width: vw / 3 - 4, height: 52, color: i === 0 ? C.mint : C.soft, borderColor: C.line, borderWidth: 0.5 }));
-  }
-  const items = list(section.items).slice(0, 3).join(" / ");
-  if (items) text(ctx, short(items, 48), vx, y - h + 15, { size: 6.5, width: vw, color: C.muted, maxLines: 1 });
+  text(ctx, s(section.type).toUpperCase(), x + 34, y - 18, { size: 6.5, width: 150, color: C.green, maxLines: 1 });
+  text(ctx, short(section.heading || section.title, 38), x + 10, y - 42, { size: 9.5, width: 185, line: 13, maxLines: 2 });
+  text(ctx, short(section.content || section.body, 62), x + 10, y - 76, { size: 6.8, width: 185, line: 10, maxLines: 3, color: C.muted });
+  drawSectionPattern(ctx, section, x + 205, y - 27, 112, 70);
+  text(ctx, "この表現の意図", memoX + 11, y - 17, { size: 6.5, width: 170, color: C.green, maxLines: 1 });
+  text(ctx, short(section.purpose, 58), memoX + 11, y - 34, { size: 6.8, width: 170, line: 10, maxLines: 3 });
+  text(ctx, "確認事項", memoX + 11, y - 72, { size: 6.5, width: 170, color: C.green, maxLines: 1 });
+  text(ctx, short(section.confirm, 42), memoX + 11, y - 88, { size: 6.5, width: 170, line: 9, maxLines: 2, color: C.muted });
 }
 
 function drawRough(ctx: DrawCtx, pageData: any) {
   header(ctx, "PAGE ROUGH", pageData.title || pageData.slug || "ページラフ", "ページの役割・目的・情報の流れを先に定義し、その下に主要エリアを具体化します。");
-  box(ctx, 34, 644, 524, 100, C.mint, C.green);
+  box(ctx, 34, 644, 524, 120, C.mint, C.green);
   const role = pageData.role || "このページで伝える内容を整理します。";
   const purpose = pageData.purpose || pageData.pagePurpose || role;
   const flow = pageData.contentFlow || array(pageData.sections).map((section: any) => section.title || section.heading).filter(Boolean).slice(0, 5).join(" → ");
@@ -225,13 +259,13 @@ function drawRough(ctx: DrawCtx, pageData: any) {
   text(ctx, short(role, 62), 95, 622, { size: 8.5, width: 445, maxLines: 2 });
   text(ctx, "目的", 47, 586, { size: 7, width: 60, color: C.green, maxLines: 1 });
   text(ctx, short(purpose, 62), 95, 586, { size: 8.5, width: 445, maxLines: 2 });
-  text(ctx, "流れ", 47, 550, { size: 7, width: 60, color: C.green, maxLines: 1 });
-  text(ctx, short(flow, 75), 95, 550, { size: 8.5, width: 445, maxLines: 2 });
+  text(ctx, "流れ", 47, 548, { size: 7, width: 60, color: C.green, maxLines: 1 });
+  text(ctx, short(flow, 75), 95, 548, { size: 8.5, width: 445, line: 13, maxLines: 2 });
   const sections = array(pageData.sections);
   const shown = sections.slice(0, 4);
-  const h = 108;
-  shown.forEach((section: any, i: number) => sectionVisual(ctx, section, 34, 520 - i * (h + 9), 524, h, i));
-  if (sections.length > shown.length) text(ctx, `※ この下に詳細エリアが続きます（全${sections.length}エリア）`, 34, 64, { size: 7, width: 524, color: C.muted, maxLines: 1 });
+  const h = 104;
+  shown.forEach((section: any, i: number) => sectionVisual(ctx, section, 34, 500 - i * (h + 8), 524, h, i));
+  if (sections.length > shown.length) text(ctx, `※ この下に詳細エリアが続きます（全${sections.length}エリア）`, 34, 46, { size: 7, width: 524, color: C.muted, maxLines: 1 });
   footer(ctx);
 }
 

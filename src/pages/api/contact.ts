@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
+import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "../../contact-guide";
 
 export const prerender = false;
 
@@ -105,20 +106,27 @@ export const POST: APIRoute = async ({ request }) => {
   const shouldGuideHearing = siteBuildServices.has(input.service);
 
   let hearingUrl = HEARING_URL;
+  let guideUrl = "";
   if (shouldGuideHearing) {
     const hearingToken = crypto.randomUUID().replace(/-/g, "");
     const session = (env as RuntimeEnv).SESSION;
-    if (session) {
-      await session.put(`hearing:${hearingToken}`, JSON.stringify({ name: input.name, email: input.email, company: input.company, contactUrl: input.url, service: input.service, createdAt: new Date().toISOString() }), { expirationTtl: 60 * 60 * 24 * 30 });
-      hearingUrl = `${HEARING_URL}?token=${encodeURIComponent(hearingToken)}`;
-    }
+    if (!session) return json(503, "現在送信を受け付けられません。時間を置いてもう一度お試しください。");
+    await session.put(`hearing:${hearingToken}`, JSON.stringify({ name: input.name, email: input.email, company: input.company, contactUrl: input.url, service: input.service, createdAt: new Date().toISOString() }), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
+    hearingUrl = `${HEARING_URL}?token=${encodeURIComponent(hearingToken)}`;
+
+    const guideToken = crypto.randomUUID().replace(/-/g, "");
+    const draft: ContactGuideDraft = { customerName: input.name, customerEmail: input.email, company: input.company, service: input.service, hearingUrl, candidates, createdAt: new Date().toISOString(), status: "pending" };
+    await session.put(contactGuideKey(guideToken), JSON.stringify(draft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
+    guideUrl = `https://www.wani-san.com/admin/contact/${guideToken}`;
   }
 
-  const customerText = shouldGuideHearing ? `${input.name}様\n\nお問い合わせありがとうございます。以下の内容で受け付けました。\n内容を確認のうえ、担当よりご連絡いたします。\n\nWebサイトの制作・リニューアルをご希望の場合は、以下のヒアリングフォームへ分かる範囲でご回答ください。\n\n${hearingUrl}\n\n--- お問い合わせ内容 ---\n${text}` : `${input.name}様\n\nお問い合わせありがとうございます。以下の内容で受け付けました。\n内容を確認のうえ、担当よりご連絡いたします。\n\n--- お問い合わせ内容 ---\n${text}`;
-  const customerHtml = shouldGuideHearing ? `<p>${escapeHtml(input.name)}様</p><p>お問い合わせありがとうございます。以下の内容で受け付けました。<br>内容を確認のうえ、担当よりご連絡いたします。</p><p><strong>制作ヒアリング</strong><br>以下のフォームへ分かる範囲でご回答ください。</p><p><a href="${hearingUrl}">${hearingUrl}</a></p><hr><h2 style="font-size:18px">お問い合わせ内容</h2>${html}` : `<p>${escapeHtml(input.name)}様</p><p>お問い合わせありがとうございます。以下の内容で受け付けました。<br>内容を確認のうえ、担当よりご連絡いたします。</p><hr><h2 style="font-size:18px">お問い合わせ内容</h2>${html}`;
+  const customerText = `${input.name}様\n\nお問い合わせありがとうございました。\n内容を確認のうえ、担当者から改めてご連絡いたします。\n\nWani san Web`;
+  const customerHtml = `<p>${escapeHtml(input.name)}様</p><p>お問い合わせありがとうございました。<br>内容を確認のうえ、担当者から改めてご連絡いたします。</p><p>Wani san Web</p>`;
+  const guideText = guideUrl ? `\n\nお客様への案内操作:\nそのまま送る: ${guideUrl}\n日程候補を変更する: ${guideUrl}?mode=edit` : "";
+  const guideHtml = guideUrl ? `<hr><p><strong>お客様への案内操作</strong></p><p><a href="${guideUrl}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#315b3a;color:#fff;text-decoration:none;font-weight:bold">そのまま送る</a></p><p><a href="${guideUrl}?mode=edit" style="display:inline-block;padding:12px 20px;border:1px solid #315b3a;border-radius:999px;color:#315b3a;text-decoration:none;font-weight:bold">日程候補を変更する</a></p><p style="color:#667066;font-size:13px">リンク先の確認ページで送信を確定します。</p>` : "";
 
   const response = await fetch("https://api.resend.com/emails/batch", { method: "POST", headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify([
-    { from: env.CONTACT_FROM_EMAIL, to: [ADMIN_EMAIL], reply_to: input.email, subject: `【Wani san Web】${input.name}様からのお問い合わせ`, text: `${text}\n\n送信日時: ${sentAt}\n\n初回打ち合わせ候補日:\n${candidateText}\n\nヒアリングURL: ${hearingUrl}`, html: `${html}<p><strong>送信日時</strong><br>${escapeHtml(sentAt)}</p><p><strong>初回打ち合わせ候補日</strong></p><ul>${candidateHtml}</ul><p><strong>ヒアリングURL</strong><br><a href="${hearingUrl}">${hearingUrl}</a></p>` },
+    { from: env.CONTACT_FROM_EMAIL, to: [ADMIN_EMAIL], reply_to: input.email, subject: `【Wani san Web】${input.name}様からのお問い合わせ`, text: `${text}\n\n送信日時: ${sentAt}\n\n初回打ち合わせ候補日:\n${candidateText}\n\nヒアリングURL: ${hearingUrl}${guideText}`, html: `${html}<p><strong>送信日時</strong><br>${escapeHtml(sentAt)}</p><p><strong>初回打ち合わせ候補日</strong></p><ul>${candidateHtml}</ul><p><strong>ヒアリングURL</strong><br><a href="${hearingUrl}">${hearingUrl}</a></p>${guideHtml}` },
     { from: env.CONTACT_FROM_EMAIL, to: [input.email], reply_to: ADMIN_EMAIL, subject: "【Wani san Web】お問い合わせを受け付けました", text: customerText, html: customerHtml },
   ]) });
   if (!response.ok) { console.error(JSON.stringify({ event: "resend_error", status: response.status, body: await response.text() })); return json(502, "メール送信に失敗しました。時間を置いてもう一度お試しください。"); }

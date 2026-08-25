@@ -1,0 +1,106 @@
+---
+import { env } from "cloudflare:workers";
+import { contactGuideKey, type ContactGuideDraft } from "../../../contact-guide";
+
+export const prerender = false;
+
+type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
+
+Astro.response.headers.set("Cache-Control", "no-store");
+Astro.response.headers.set("Referrer-Policy", "no-referrer");
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+
+const token = Astro.params.token ?? "";
+const validToken = /^[a-f0-9]{32}$/.test(token);
+const session = (env as RuntimeEnv).SESSION;
+const draft = validToken && session ? await session.get<ContactGuideDraft>(contactGuideKey(token), "json") : null;
+const sent = Boolean(draft && (Astro.url.searchParams.get("sent") === "1" || draft.status === "sent"));
+const editMode = Astro.url.searchParams.get("mode") === "edit";
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <title>問い合わせ案内の確認｜Wani san Web</title>
+    <style>
+      :root { color-scheme: light; font-family: "Noto Sans JP", system-ui, sans-serif; color: #172019; background: #f4f6f3; }
+      body { margin: 0; }
+      main { width: min(720px, calc(100% - 32px)); margin: 48px auto; }
+      .brand { margin-bottom: 20px; color: #315b3a; font-weight: 800; letter-spacing: .04em; }
+      .card { padding: clamp(24px, 5vw, 44px); border: 1px solid #dce3dc; border-radius: 20px; background: #fff; box-shadow: 0 12px 36px rgba(32, 57, 38, .08); }
+      h1 { margin: 0 0 12px; font-size: clamp(24px, 5vw, 34px); }
+      h2 { margin: 32px 0 12px; font-size: 18px; }
+      p { line-height: 1.8; }
+      dl { display: grid; grid-template-columns: 8em 1fr; gap: 10px 16px; margin: 28px 0; }
+      dt { color: #687269; }
+      dd { margin: 0; overflow-wrap: anywhere; }
+      ol { padding-left: 1.5em; line-height: 1.9; }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+      button, .button { display: inline-flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 22px; border: 1px solid #315b3a; border-radius: 999px; background: #315b3a; color: #fff; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+      .button.secondary { background: #fff; color: #315b3a; }
+      .candidate { display: block; width: 100%; box-sizing: border-box; margin: 10px 0; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; font: inherit; }
+      .notice { padding: 18px; border-radius: 12px; background: #e8f4ea; color: #234a2c; }
+      .error { background: #fff0ef; color: #8b2e28; }
+      @media (max-width: 560px) { main { margin: 24px auto; } dl { grid-template-columns: 1fr; gap: 4px; } dd { margin-bottom: 8px; } .actions > * { width: 100%; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand">Wani san Web</div>
+      <section class="card">
+        {sent ? (
+          <>
+            <h1>案内メールを送信しました</h1>
+            <p class="notice">ヒヤリングフォームURLと候補日程をお客様へ送信しました。このページでの再送信は行われません。</p>
+          </>
+        ) : draft ? (
+          <>
+            <h1>案内メールの確認</h1>
+            <p>送信先と候補日程を確認し、そのまま送るか、候補を変更して送信してください。</p>
+            <dl>
+              <dt>送信先</dt><dd>{draft.customerName}様（{draft.customerEmail}）</dd>
+              <dt>会社・屋号</dt><dd>{draft.company || "未入力"}</dd>
+              <dt>問い合わせ種別</dt><dd>{draft.service}</dd>
+              <dt>ヒヤリング</dt><dd><a href={draft.hearingUrl} target="_blank" rel="noreferrer">フォームを確認する</a></dd>
+            </dl>
+            <h2>現在の候補日程</h2>
+            <ol>{draft.candidates.map((candidate) => <li>{candidate}</li>)}</ol>
+            {!editMode && (
+              <div class="actions">
+                <form method="post" action="/api/contact-guide">
+                  <input type="hidden" name="token" value={token} />
+                  {draft.candidates.map((candidate) => <input type="hidden" name="candidate" value={candidate} />)}
+                  <button type="submit">そのまま送る</button>
+                </form>
+                <a class="button secondary" href={`?mode=edit#edit`}>日程候補を変更する</a>
+              </div>
+            )}
+            {editMode && (
+              <form id="edit" method="post" action="/api/contact-guide">
+                <h2>候補日程を変更</h2>
+                <p>文面を直接修正してから送信できます。</p>
+                <input type="hidden" name="token" value={token} />
+                {draft.candidates.map((candidate, index) => (
+                  <label>候補 {index + 1}<input class="candidate" type="text" name="candidate" value={candidate} maxlength="100" required /></label>
+                ))}
+                <div class="actions">
+                  <button type="submit">変更した内容で送る</button>
+                  <a class="button secondary" href={`/admin/contact/${token}`}>変更をやめる</a>
+                </div>
+              </form>
+            )}
+          </>
+        ) : (
+          <>
+            <h1>確認ページを開けません</h1>
+            <p class="notice error">URLの有効期限が切れているか、URLが正しくありません。管理者向け問い合わせ通知から、もう一度アクセスしてください。</p>
+          </>
+        )}
+      </section>
+    </main>
+  </body>
+</html>

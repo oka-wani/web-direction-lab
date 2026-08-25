@@ -10,6 +10,7 @@ type ProposalParams = {
   rows: Row[];
 };
 export type WorkflowEnv = {
+  ASSETS: Fetcher;
   PROPOSALS: R2Bucket;
   OPENAI_API_KEY: string;
   CONTACT_FROM_EMAIL: string;
@@ -103,7 +104,10 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
     });
 
     await step.do("save proposal files", async () => {
-      const pdf = await generateProposalPdf(proposal, hearing);
+      const fontResponse = await this.env.ASSETS.fetch(new Request(`${SITE_URL}/fonts/noto-sans-jp.ttf`));
+      if (!fontResponse.ok) throw new Error(`PDF用日本語フォントの取得に失敗しました: ${fontResponse.status}`);
+      const fontBytes = await fontResponse.arrayBuffer();
+      const pdf = await generateProposalPdf(proposal, hearing, fontBytes);
       await this.env.PROPOSALS.put(`proposals/${accessId}/proposal.json`, JSON.stringify(proposal, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
       await this.env.PROPOSALS.put(`proposals/${accessId}/proposal.html`, proposalHtml(proposal, hearing, accessId), { httpMetadata: { contentType: "text/html; charset=utf-8" } });
       await this.env.PROPOSALS.put(`proposals/${accessId}/proposal.pdf`, pdf, { httpMetadata: { contentType: "application/pdf", contentDisposition: `inline; filename="WSW-${hearingId}.pdf"` } });

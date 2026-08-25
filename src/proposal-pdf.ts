@@ -1,6 +1,5 @@
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, PDFPage, PDFFont, rgb } from "pdf-lib";
-import notoSansJp from "./assets/noto-sans-jp.ttf?inline";
 
 const A4: [number, number] = [595.28, 841.89];
 const C = {
@@ -357,11 +356,25 @@ function drawTasks(ctx: DrawCtx, hearing: any) {
   footer(ctx);
 }
 
-export async function generateProposalPdf(proposal: any, hearing: any) {
+function assertValidFont(fontBytes: ArrayBuffer) {
+  if (fontBytes.byteLength < 12) throw new Error("PDF用日本語フォントを読み込めませんでした。");
+  const view = new DataView(fontBytes);
+  const tableCount = view.getUint16(4, false);
+  const directoryEnd = 12 + tableCount * 16;
+  if (tableCount === 0 || directoryEnd > fontBytes.byteLength) throw new Error("PDF用日本語フォントが破損しています。");
+
+  for (let index = 0; index < tableCount; index++) {
+    const offset = 12 + index * 16;
+    const tableOffset = view.getUint32(offset + 8, false);
+    const tableLength = view.getUint32(offset + 12, false);
+    if (tableOffset + tableLength > fontBytes.byteLength) throw new Error("PDF用日本語フォントが途中で欠損しています。");
+  }
+}
+
+export async function generateProposalPdf(proposal: any, hearing: any, fontBytes: ArrayBuffer) {
+  assertValidFont(fontBytes);
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
-  const encodedFont = notoSansJp.slice(notoSansJp.indexOf(",") + 1);
-  const fontBytes = Uint8Array.from(atob(encodedFont), (character) => character.charCodeAt(0));
   const font = await doc.embedFont(fontBytes, { subset: true });
   const roughPages = Array.isArray(proposal.roughPages) && proposal.roughPages.length ? proposal.roughPages : [{ slug: "top", title: "TOP", role: "サイト全体の入口", sections: [] }];
   const total = 10 + roughPages.length;

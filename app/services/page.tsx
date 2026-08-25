@@ -1,7 +1,7 @@
 import type { Metadata } from "../astro-compat";
 import { SiteFooter, SiteHeader } from "../components/SiteChrome";
 
-export const metadata: Metadata = { title: "Webサイト制作・料金｜Wani san Web", description: "短期間・手頃な価格でも品質は妥協しないWebサイト制作。小規模サイト3万円〜。公開後の保守・解析・改善まで対応します。" };
+export const metadata: Metadata = { title: "Webサイト・ロゴ制作・料金｜Wani san Web", description: "短期間・手頃な価格でも品質は妥協しないWebサイト制作。小規模サイト3万円〜。ロゴ制作、公開後の保守・解析・改善まで対応します。" };
 
 const siteTypes = [
   ["店舗・飲食店", "メニュー、店舗情報、アクセス、予約導線を分かりやすく整理。"],
@@ -33,9 +33,11 @@ export default function ServicesPage() {
 
     <section className="order-section order-section--tint" id="pricing"><div className="order-section-heading"><div><span>PRICING</span><h2>料金の目安</h2></div><p>小規模な制作は3万円〜。ヒアリング後に、対応範囲・成果物・料金・スケジュールを明確にしてから着手します。</p></div><div className="order-price-feature"><div><small>SMALL WEBSITE</small><h3>小規模Webサイト制作</h3><p>必要なページと機能を絞った、初めてのホームページや小規模リニューアル向け。</p></div><strong>30,000<small>円〜</small></strong></div><div className="pricing-notes"><h3>料金が変わる主な条件</h3><ul><li>ページ数、情報量、デザインの作り込み</li><li>CMS、問い合わせフォーム、外部サービス連携</li><li>原稿・写真・ロゴなど素材準備の範囲</li><li>ドメイン、外部サービス等の実費</li></ul></div></section>
 
-    <section className="order-section"><div className="order-section-heading"><div><span>OPTIONS</span><h2>必要な機能だけ、追加できます。</h2></div><p>標準機能として詰め込みすぎず、更新頻度や運用体制を確認して必要なものだけをご提案します。</p></div><div className="order-option-list">{options.map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div></section>
+    <section className="order-section"><div className="order-detail-grid"><div><span className="order-kicker">LOGO DESIGN</span><h2>Webサイトと一緒に、ロゴも制作できます。</h2><p>AIをアイデア展開の補助として活用し、複数の方向性を検討します。選定した案は人の手で形状・文字・配色を調整し、実際に使いやすいロゴデータへ仕上げます。</p><div className="order-actions"><a className="order-secondary-link" href="/services/logo-design">ロゴ制作について詳しく見る <b>→</b></a></div></div><dl className="order-definition-list"><div><dt>複数案の作成</dt><dd>事業内容 / ターゲット / 希望する印象をもとに方向性を検討</dd></div><div><dt>人による仕上げ</dt><dd>形状 / 文字 / 配色 / バランスを調整してベクター化</dd></div><div><dt>納品データ</dt><dd>SVG / PDF / PNG / カラー・単色データ</dd></div><div><dt>権利確認</dt><dd>基本的な類似確認に対応。商標登録の可否は専門家への確認を推奨</dd></div></dl></div></section>
 
-    <section className="order-section order-section--tint" id="support"><div className="order-detail-grid"><div><span className="order-kicker">AFTER LAUNCH</span><h2>公開後の保守・改善まで、続けて相談できます。</h2><p>Webサイトは公開して終わりではありません。必要に応じて、日々の更新から数値分析、課題整理、実際の改修まで支援します。</p><div className="order-actions"><a className="order-secondary-link" href="/contact">保守・改善について相談する <b>→</b></a></div></div><dl className="order-definition-list"><div><dt>保守・更新</dt><dd>軽微な修正 / コンテンツ更新 / 技術メンテナンス</dd></div><div><dt>分析</dt><dd>GA4 / Search Console / Clarity / アクセスレポート</dd></div><div><dt>診断</dt><dd>SEO / アクセシビリティ / ユーザビリティ / 表示速度</dd></div><div><dt>改善</dt><dd>課題整理 / 優先順位づけ / 改善提案 / 改修</dd></div></dl></div></section>
+    <section className="order-section order-section--tint"><div className="order-section-heading"><div><span>OPTIONS</span><h2>必要な機能だけ、追加できます。</h2></div><p>標準機能として詰め込みすぎず、更新頻度や運用体制を確認して必要なものだけをご提案します。</p></div><div className="order-option-list">{options.map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div></section>
+
+    <section className="order-section" id="support"><div className="order-detail-grid"><div><span className="order-kicker">AFTER LAUNCH</span><h2>公開後の保守・改善まで、続けて相談できます。</h2><p>Webサイトは公開して終わりではありません。必要に応じて、日々の更新から数値分析、課題整理、実際の改修まで支援します。</p><div className="order-actions"><a className="order-secondary-link" href="/contact">保守・改善について相談する <b>→</b></a></div></div><dl className="order-definition-list"><div><dt>保守・更新</dt><dd>軽微な修正 / コンテンツ更新 / 技術メンテナンス</dd></div><div><dt>分析</dt><dd>GA4 / Search Console / Clarity / アクセスレポート</dd></div><div><dt>診断</dt><dd>SEO / アクセシビリティ / ユーザビリティ / 表示速度</dd></div><div><dt>改善</dt><dd>課題整理 / 優先順位づけ / 改善提案 / 改修</dd></div></dl></div></section>
 
     <section className="order-final-cta"><span>CONTACT</span><h2>作りたいサイトのイメージから、相談できます。</h2><p>要件が固まっていなくても大丈夫です。目的・予算・希望時期を伺い、必要なページと機能を整理します。</p><div className="order-actions"><a className="order-primary-link" href="/contact">無料で相談する <b>→</b></a><a className="order-secondary-link" href="/flow">制作の流れを見る <b>→</b></a></div></section><SiteFooter />
   </main>;

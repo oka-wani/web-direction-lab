@@ -20,10 +20,6 @@ export default function ProcessPage() {
       <ol className="process-timeline">{steps.map((step) => <li key={step.number}><span>{step.number}</span><div><small>STEP {step.number}</small><h2>{step.title}</h2><div className="process-roles"><section><b>お客様にお願いすること</b><p>{step.customer}</p></section><section><b>WSWが行うこと</b><p>{step.wsw}</p></section></div></div></li>)}</ol>
     </section>
 
-    <section className="order-section order-section--tint">
-      <div className="order-detail-grid"><div><span className="order-kicker">DIRECTION SETTING</span><h2>フォーム回答と打ち合わせで、サイト方針を確定します。</h2><p>最初にヒアリングフォームへご回答いただきます。その内容を整理したうえで打ち合わせを行い、目的、ターゲット、掲載内容、必要ページ、機能、デザイン、運用方法まで認識を合わせます。</p></div><dl className="order-definition-list"><div><dt>目的・ターゲット</dt><dd>目的 / 課題 / 商圏 / 見てほしい人 / 最終的な行動</dd></div><div><dt>掲載内容</dt><dd>必要ページ / 特に伝えたいこと / 素材 / 参考サイト</dd></div><div><dt>機能・基盤</dt><dd>CMS / フォーム / SNS連携 / ドメイン / その他必要機能</dd></div><div><dt>デザイン・運用</dt><dd>希望する印象 / 色 / 更新内容 / 更新方法 / 公開後の運用イメージ</dd></div></dl></div>
-    </section>
-
     <section className="order-final-cta"><span>CONTACT</span><h2>まだ要件が固まっていなくても、相談できます。</h2><p>ヒアリングフォームへの回答内容をもとに、打ち合わせでサイト方針を一緒に整理します。</p><div className="order-actions"><a className="order-primary-link" href="/contact">無料で相談する <b>→</b></a><a className="order-secondary-link" href="/examples">制作イメージを見る <b>→</b></a></div></section>
     <SiteFooter />
   </main>;

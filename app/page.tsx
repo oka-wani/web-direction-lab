@@ -48,7 +48,7 @@ export default function Home() {
     </section>
 
     <section className="order-section order-section--tint">
-      <div className="order-section-heading"><div><span>HOW WE WORK</span><h2>お問い合わせから公開まで、5つの工程で進めます。</h2></div><p>お問い合わせ後、まずヒアリングフォームへご回答いただきます。その内容をもとに打ち合わせを行い、サイトの方針を確定してから構成・デザインへ進みます。</p></div>
+      <div className="order-section-heading"><div><span>HOW WE WORK</span><h2 className="order-flow-heading"><span className="order-flow-heading-line"><span>お問い合わせから</span><span>公開まで、</span></span><span className="order-flow-heading-line">5つの工程で進めます。</span></h2></div><p>お問い合わせ後、まずヒアリングフォームへご回答いただきます。その内容をもとに打ち合わせを行い、サイトの方針を確定してから構成・デザインへ進みます。</p></div>
       <ol className="order-process">{processSteps.map(([number, title, text]) => <li key={number}><span>STEP {number}</span><b>{title}</b><p>{text}</p></li>)}</ol>
       <div className="order-actions"><a className="order-secondary-link" href="/flow">詳しい制作フローを見る <b>→</b></a></div>
     </section>

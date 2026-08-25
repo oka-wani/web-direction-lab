@@ -163,6 +163,14 @@
   letter-spacing: -.035em;
 }
 
+.order-section-heading .order-flow-heading {
+  font-size: clamp(38px, 3.15vw, 46px);
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.order-flow-heading-line { display: block; white-space: nowrap; }
+.order-flow-heading-line > span { display: inline; }
+
 .order-section-heading p,
 .order-page-hero p {
   margin: 0;
@@ -469,6 +477,9 @@
   .order-news-item { grid-template-columns: 1fr; gap: 7px; }
   .order-final-cta { width: calc(100% - 32px); margin-bottom: 70px; border-radius: 24px; }
   .order-page-hero { padding: 96px 20px 54px; }
+  .order-section-heading .order-flow-heading { font-size: clamp(32px, 9vw, 40px); }
+  .order-flow-heading-line:first-child { white-space: normal; }
+  .order-flow-heading-line:first-child > span { display: block; white-space: nowrap; }
   .order-demo-site-hero { min-height: 360px; padding: 34px 24px; }
   .order-demo-site-nav div { display: none; }
 }

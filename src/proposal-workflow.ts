@@ -1,6 +1,7 @@
 import { WorkflowEntrypoint, WorkflowStep } from "cloudflare:workers";
 import type { WorkflowEvent } from "cloudflare:workers";
 import { generateProposalPdf } from "./proposal-pdf";
+import { createProposalSlides, googleSlidesConfigured, type ProposalSlidesRecord } from "./google-slides";
 import { prepareProposal, PROPOSAL_QUALITY_RULES, validateProposal } from "./proposal-quality";
 
 type Row = [string, string];
@@ -16,6 +17,11 @@ export type WorkflowEnv = {
   OPENAI_API_KEY: string;
   CONTACT_FROM_EMAIL: string;
   RESEND_API_KEY: string;
+  GOOGLE_SERVICE_ACCOUNT_EMAIL?: string;
+  GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?: string;
+  GOOGLE_IMPERSONATED_USER?: string;
+  GOOGLE_DRIVE_FOLDER_ID?: string;
+  GOOGLE_SLIDES_TEMPLATE_ID?: string;
 };
 
 export const SITE_URL = "https://www.wani-san.com";
@@ -102,6 +108,7 @@ function roughIndexHtml(proposal: any, accessId: string) {
 export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalParams> {
   async run(event: WorkflowEvent<ProposalParams>, step: WorkflowStep) {
     const { hearingId, accessId, hearing, rows } = event.payload;
+    let slidesRecord: ProposalSlidesRecord | null = null;
 
     await step.do("save hearing", async () => {
       await this.env.PROPOSALS.put(`proposals/${accessId}/hearing.json`, JSON.stringify(hearing, null, 2), { httpMetadata: { contentType: "application/json; charset=utf-8" } });
@@ -109,7 +116,7 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
     });
 
     const proposal = await step.do("generate and quality-check proposal", { retries: { limit: 2, delay: "10 seconds", backoff: "linear" } }, async () => {
-      const schema = `必要なJSON形式:\n{\n  "title":"",\n  "concept":"",\n  "cta":"",\n  "targetAnalysis":{"profile":"","needs":"","behavior":""},\n  "issues":[{"title":"","body":""}],\n  "priorities":[{"title":"","reason":""}],\n  "userFlow":[{"title":"認知","body":""},{"title":"理解","body":""},{"title":"比較・納得","body":""},{"title":"行動","body":""}],\n  "sitemap":[{"slug":"top","label":"TOP","role":"","pageType":"main"}],\n  "roughPages":[{"slug":"top","title":"TOP","pageType":"main","role":"ページの役割","purpose":"ページの目的","contentFlow":"導入 → 理解 → 比較 → 行動","sections":[{"type":"HERO","title":"","heading":"","body":"","items":[],"ctaLabel":"","content":"掲載する内容","purpose":"このエリアの目的・意図","confirm":"確認事項"}]}],\n  "designDirection":{"tone":"","colors":"","palette":["#0D473A","#177B63","#EAF4EF","#D84A1B","#F5F6F3"],"informationRank":3,"motionRank":2,"visual":"","referenceReflection":"","note":""}\n}`;
+      const schema = `必要なJSON形式:\n{\n  "title":"",\n  "concept":"",\n  "cta":"",\n  "targetAnalysis":{"profile":"","needs":"","behavior":""},\n  "issues":[{"title":"","body":""}],\n  "priorities":[{"title":"","reason":""}],\n  "userFlow":[{"title":"認知","body":""},{"title":"理解","body":""},{"title":"比較・納得","body":""},{"title":"行動","body":""}],\n  "sitemap":[{"slug":"top","label":"TOP","role":"","pageType":"main","templateKey":"top"}],\n  "roughPages":[{"slug":"top","title":"TOP","pageType":"main","templateKey":"top","role":"ページの役割","purpose":"ページの目的","contentFlow":"導入 → 理解 → 比較 → 行動","sections":[{"type":"HERO","title":"","heading":"","body":"","items":[],"ctaLabel":"","content":"掲載する内容","purpose":"このエリアの目的・意図","confirm":"確認事項"}]}],\n  "designDirection":{"tone":"","colors":"","palette":["#0D473A","#177B63","#EAF4EF","#D84A1B","#F5F6F3"],"informationRank":3,"motionRank":2,"visual":"","referenceReflection":"","note":""}\n}`;
       const basePrompt = `あなたはWeb制作会社WSWのシニアWebディレクターです。ヒアリング回答から、クライアント確認用の提案書と全ページの構成ラフを作成してください。サイトマップは単なるページ一覧ではなく、目的達成に必要な推奨情報設計にしてください。必ずJSONのみを返してください。\n\n${schema}\n\n品質基準:${PROPOSAL_QUALITY_RULES}\nヒアリングJSON:${JSON.stringify(hearing)}`;
 
       const request = async (input: string) => {
@@ -152,18 +159,31 @@ export class ProposalWorkflow extends WorkflowEntrypoint<WorkflowEnv, ProposalPa
       return { ok: true, pages: (proposal.roughPages ?? []).length };
     });
 
+    if (googleSlidesConfigured(this.env)) {
+      slidesRecord = await step.do("create editable Google Slides", { retries: { limit: 2, delay: "10 seconds", backoff: "linear" } }, async () => {
+        const record = await createProposalSlides(this.env, proposal, hearing, hearingId);
+        await this.env.PROPOSALS.put(`proposals/${accessId}/slides.json`, JSON.stringify(record, null, 2), {
+          httpMetadata: { contentType: "application/json; charset=utf-8" },
+        });
+        return record;
+      });
+    }
+
     await step.do("send admin completion mail", { retries: { limit: 3, delay: "5 seconds", backoff: "linear" } }, async () => {
       const proposalUrl = `${SITE_URL}/proposals/${accessId}/proposal.pdf`;
       const webProposalUrl = `${SITE_URL}/proposals/${accessId}/proposal/`;
       const roughUrl = `${SITE_URL}/proposals/${accessId}/rough/`;
+      const adminUrl = `${SITE_URL}/admin/proposals`;
+      const slidesText = slidesRecord ? `\n編集用Googleスライド：${slidesRecord.editUrl}` : `\n編集用Googleスライド：Google連携設定後に管理画面から生成してください。`;
+      const slidesHtml = slidesRecord ? `<p><a href="${esc(slidesRecord.editUrl)}">Googleスライドを編集する</a></p>` : `<p>Googleスライドは、連携設定後に管理画面から生成できます。</p>`;
       const answersText = rows.map(([label, value]) => `${label}: ${value}`).join("\n\n");
       const answersHtml = rows.map(([label, value]) => `<p><strong>${esc(label)}</strong><br>${esc(value).replace(/\n/g, "<br>")}</p>`).join("");
       await sendMail(this.env, {
         from: this.env.CONTACT_FROM_EMAIL,
         to: [ADMIN_EMAIL],
         subject: `【WSW 提案書生成完了】${hearing.company}`,
-        text: `${answersText}\n\n提案書PDF：${proposalUrl}\nWeb版提案書：${webProposalUrl}\nサイト構成・ラフ：${roughUrl}`,
-        html: `<h2>提案書PDF・サイトラフを生成しました</h2>${answersHtml}<p><a href="${proposalUrl}">提案書PDFを確認する</a></p><p><a href="${webProposalUrl}">Web版提案書を確認する</a></p><p><a href="${roughUrl}">サイト構成・全ページラフを確認する</a></p>`,
+        text: `${answersText}\n\n自動生成PDF：${proposalUrl}\nWeb版提案書：${webProposalUrl}\nサイト構成・ラフ：${roughUrl}${slidesText}\n管理画面：${adminUrl}`,
+        html: `<h2>提案書・サイトラフを生成しました</h2>${answersHtml}${slidesHtml}<p><a href="${proposalUrl}">自動生成PDFを確認する</a></p><p><a href="${webProposalUrl}">Web版提案書を確認する</a></p><p><a href="${roughUrl}">サイト構成・全ページラフを確認する</a></p><p><a href="${adminUrl}">提案書の編集・確定管理を開く</a></p>`,
       }, `proposal-completed-${hearingId}`);
       return { ok: true };
     });

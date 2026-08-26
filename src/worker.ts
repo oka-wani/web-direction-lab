@@ -1,4 +1,5 @@
 import { handle } from "@astrojs/cloudflare/handler";
+import { handleBookingReply } from "./booking-reply";
 export { ProposalWorkflowV2 } from "./proposal-workflow-v2";
 
 export default {
@@ -11,5 +12,8 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
     return handle(request, env, ctx);
+  },
+  async email(message: ForwardableEmailMessage, env: any) {
+    await handleBookingReply(message, env);
   },
 } satisfies ExportedHandler<any>;

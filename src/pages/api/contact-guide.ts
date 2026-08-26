@@ -1,12 +1,13 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "../../contact-guide";
+import { candidateSlots } from "../../booking-reply";
 
 export const prerender = false;
 
 type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
 
-const ADMIN_EMAIL = "contact@wani-san.com";
+const REPLY_DOMAIN = "reply.wani-san.com";
 const json = (status: number, message: string) => Response.json({ message }, { status });
 const escapeHtml = (input: string) => input.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const configured = (input: string | undefined) => Boolean(input && !input.startsWith("SET_IN_"));
@@ -68,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
     body: JSON.stringify({
       from: env.CONTACT_FROM_EMAIL,
       to: [draft.customerEmail],
-      reply_to: ADMIN_EMAIL,
+      reply_to: `schedule+${token}@${REPLY_DOMAIN}`,
       subject: "【Wani san Web】制作ヒアリングと打ち合わせ候補日のご案内",
       text,
       html,
@@ -81,7 +82,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const sentAt = new Date().toISOString();
-  await session.put(key, JSON.stringify({ ...draft, candidates, status: "sent", sentAt } satisfies ContactGuideDraft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
+  await session.put(key, JSON.stringify({ ...draft, candidates, candidateSlots: candidateSlots(candidates, draft.createdAt), status: "sent", sentAt } satisfies ContactGuideDraft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
   console.log(JSON.stringify({ event: "contact_guide_sent", service: draft.service, sentAt }));
 
   redirectUrl.searchParams.set("sent", "1");

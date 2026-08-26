@@ -8,7 +8,12 @@ export type ContactGuideDraft = {
   service: string;
   hearingUrl: string;
   candidates: string[];
+  candidateSlots?: { label: string; start: string }[];
   createdAt: string;
-  status: "pending" | "sent";
+  status: "pending" | "sent" | "needs-review" | "booked";
   sentAt?: string;
+  bookedAt?: string;
+  bookedStart?: string;
+  calendarEventId?: string;
+  meetUrl?: string;
 };

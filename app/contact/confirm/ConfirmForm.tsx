@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { TURNSTILE_SITE_KEY } from "../../turnstile";
 
 const STORAGE_KEY = "wsw-contact-form";
 
@@ -38,7 +39,7 @@ export default function ConfirmForm() {
   }, []);
 
   useEffect(() => {
-    const sitekey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+    const sitekey = TURNSTILE_SITE_KEY;
     if (!sitekey) {
       setTurnstileStatus("error");
       return;

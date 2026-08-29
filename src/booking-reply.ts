@@ -4,6 +4,7 @@ import { createMeetingEvent, getGoogleAccessToken, getMeetingEvent, getMeetUrl, 
 type BookingEnv = CalendarEnv & { SESSION?: KVNamespace; RESEND_API_KEY: string; CONTACT_FROM_EMAIL: string; CONTACT_ADMIN_EMAIL?: string };
 type ParsedMail = { subject: string; text: string };
 const REPLY_DOMAIN = "reply.wani-san.com";
+export const SCHEDULE_REPLY_ADDRESS = `schedule@${REPLY_DOMAIN}`;
 const FALLBACK_ADMIN_EMAIL = "contact@wani-san.com";
 const configured = (value: string | undefined) => Boolean(value && !value.startsWith("SET_IN_"));
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
@@ -115,17 +116,27 @@ async function notifyReview(env: BookingEnv, token: string, draft: ContactGuideD
 
 export async function handleBookingReply(message: ForwardableEmailMessage, env: BookingEnv) {
   const recipient = message.to.toLowerCase();
-  const token = recipient.match(new RegExp(`^schedule\\+([a-f0-9]{32})@${REPLY_DOMAIN.replace(/\./g, "\\.")}$`))?.[1];
-  if (!token) { message.setReject("Unknown scheduling address"); return; }
+  const legacyToken = recipient.match(new RegExp(`^schedule\\+([a-f0-9]{32})@${REPLY_DOMAIN.replace(/\./g, "\\.")}$`))?.[1];
+  if (recipient !== SCHEDULE_REPLY_ADDRESS && !legacyToken) { message.setReject("Unknown scheduling address"); return; }
   if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking reply environment is not configured");
   if (message.rawSize > 1_000_000) { message.setReject("Message is too large"); return; }
+
+  const raw = new TextDecoder().decode(await new Response(message.raw).arrayBuffer());
+  const mail = parseMail(raw);
+  const scheduleId = legacyToken ?? `${mail.subject}\n${mail.text}`.match(/WSW-SCHEDULE-ID:\s*([a-f0-9]{12,32})/i)?.[1]?.toLowerCase();
+  if (!scheduleId) { message.setReject("Scheduling request ID was not found"); return; }
+
+  let token = scheduleId;
+  if (scheduleId.length < 32) {
+    const matches = await env.SESSION.list({ prefix: contactGuideKey(scheduleId), limit: 2 });
+    if (matches.keys.length !== 1) { message.setReject("Scheduling request ID is invalid or ambiguous"); return; }
+    token = matches.keys[0].name.slice(contactGuideKey("").length);
+  }
 
   const key = contactGuideKey(token);
   const draft = await env.SESSION.get<ContactGuideDraft>(key, "json");
   if (!draft) { message.setReject("Scheduling request has expired"); return; }
   if (draft.status === "booked") return;
-  const raw = new TextDecoder().decode(await new Response(message.raw).arrayBuffer());
-  const mail = parseMail(raw);
   const reply = visibleReply(mail.text);
   if (message.from.toLowerCase() !== draft.customerEmail.toLowerCase()) {
     await notifyReview(env, token, draft, "登録されたお客様と返信元アドレスが一致しません。", reply);

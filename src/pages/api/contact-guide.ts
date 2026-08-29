@@ -1,13 +1,12 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "../../contact-guide";
-import { candidateSlots } from "../../booking-reply";
+import { candidateSlots, SCHEDULE_REPLY_ADDRESS } from "../../booking-reply";
 
 export const prerender = false;
 
 type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
 
-const REPLY_DOMAIN = "reply.wani-san.com";
 const json = (status: number, message: string) => Response.json({ message }, { status });
 const escapeHtml = (input: string) => input.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const configured = (input: string | undefined) => Boolean(input && !input.startsWith("SET_IN_"));
@@ -56,8 +55,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   const candidateText = candidates.join("\n");
   const candidateHtml = candidates.map((candidate) => `<li>${escapeHtml(candidate)}</li>`).join("");
-  const text = `${draft.customerName}様\n\n先日はお問い合わせいただき、ありがとうございます。\nWebサイト制作について、以下のヒアリングフォームへ分かる範囲でご回答ください。\n\n${draft.hearingUrl}\n\n初回打ち合わせの候補日時は以下のとおりです。\n${candidateText}\n\nご都合のよい候補を、このメールへの返信でお知らせください。\n\nWani san Web`;
-  const html = `<p>${escapeHtml(draft.customerName)}様</p><p>先日はお問い合わせいただき、ありがとうございます。<br>Webサイト制作について、以下のヒアリングフォームへ分かる範囲でご回答ください。</p><p><a href="${escapeHtml(draft.hearingUrl)}">ヒアリングフォームを開く</a></p><p><strong>初回打ち合わせの候補日時</strong></p><ul>${candidateHtml}</ul><p>ご都合のよい候補を、このメールへの返信でお知らせください。</p><p>Wani san Web</p>`;
+  const scheduleId = token.slice(0, 12);
+  const text = `${draft.customerName}様\n\n先日はお問い合わせいただき、ありがとうございます。\nWebサイト制作について、以下のヒアリングフォームへ分かる範囲でご回答ください。\n\n${draft.hearingUrl}\n\n初回打ち合わせの候補日時は以下のとおりです。\n${candidateText}\n\nご都合のよい候補を、このメールへの返信でお知らせください。\n\nWani san Web\n\nWSW-SCHEDULE-ID: ${scheduleId}`;
+  const html = `<p>${escapeHtml(draft.customerName)}様</p><p>先日はお問い合わせいただき、ありがとうございます。<br>Webサイト制作について、以下のヒアリングフォームへ分かる範囲でご回答ください。</p><p><a href="${escapeHtml(draft.hearingUrl)}">ヒアリングフォームを開く</a></p><p><strong>初回打ち合わせの候補日時</strong></p><ul>${candidateHtml}</ul><p>ご都合のよい候補を、このメールへの返信でお知らせください。</p><p>Wani san Web</p><p style="color:#666;font-size:12px">WSW-SCHEDULE-ID: ${scheduleId}</p>`;
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -69,8 +69,8 @@ export const POST: APIRoute = async ({ request }) => {
     body: JSON.stringify({
       from: env.CONTACT_FROM_EMAIL,
       to: [draft.customerEmail],
-      reply_to: `schedule+${token}@${REPLY_DOMAIN}`,
-      subject: "【Wani san Web】制作ヒアリングと打ち合わせ候補日のご案内",
+      reply_to: SCHEDULE_REPLY_ADDRESS,
+      subject: `【Wani san Web】制作ヒアリングと打ち合わせ候補日のご案内 [WSW-SCHEDULE-ID: ${scheduleId}]`,
       text,
       html,
     }),

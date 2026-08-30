@@ -40,7 +40,7 @@ const answered = Boolean(draft && ["awaiting-approval", "needs-review", "booked"
       .choice { display: flex; align-items: flex-start; gap: 12px; margin: 10px 0; padding: 16px; border: 1px solid #cbd4cc; border-radius: 12px; cursor: pointer; }
       .choice:has(input:checked) { border-color: #315b3a; background: #f0f6f1; box-shadow: 0 0 0 1px #315b3a; }
       .choice input { margin-top: 4px; accent-color: #315b3a; }
-      select, input[type="text"] { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; background: #fff; font: inherit; }
+      select, input[type="text"], input[type="datetime-local"] { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; background: #fff; font: inherit; }
       .field { display: block; margin-top: 20px; font-weight: 700; }
       .hint { color: #687269; font-size: 14px; }
       button { display: inline-flex; justify-content: center; align-items: center; width: 100%; min-height: 52px; margin-top: 28px; padding: 0 24px; border: 1px solid #315b3a; border-radius: 999px; background: #315b3a; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
@@ -72,7 +72,12 @@ const answered = Boolean(draft && ["awaiting-approval", "needs-review", "booked"
                 {slots.map((slot, index) => (
                   <label class="choice"><input type="radio" name="selectedStart" value={slot.start} required checked={index === 0} /><span>{slot.label}</span></label>
                 ))}
+                <label class="choice"><input type="radio" name="selectedStart" value="__custom__" required /><span><strong>その他の日程を希望する</strong><br /><span class="hint">候補が合わない場合はこちら</span></span></label>
               </fieldset>
+              <label class="field" data-custom-date-field hidden>希望日時
+                <input type="datetime-local" name="customStart" step="1800" />
+                <span class="hint">9:00〜18:00開始の範囲で、30分単位で選択してください。</span>
+              </label>
               <label class="field">実施方法
                 <select name="meetingMode" data-meeting-mode required>
                   <option value="online">オンライン（Google Meet）</option>
@@ -102,6 +107,8 @@ const answered = Boolean(draft && ["awaiting-approval", "needs-review", "booked"
       const locationField = form?.querySelector<HTMLElement>("[data-location-field]");
       const locationInput = locationField?.querySelector<HTMLInputElement>('input[name="location"]');
       const errorMessage = document.querySelector<HTMLElement>("#submit-error");
+      const customDateField = form?.querySelector<HTMLElement>("[data-custom-date-field]");
+      const customDateInput = customDateField?.querySelector<HTMLInputElement>('input[name="customStart"]');
       const updateMode = () => {
         const inPerson = (mode as Element & { value?: string } | null)?.value === "in-person";
         if (locationField) locationField.hidden = !inPerson;
@@ -109,6 +116,14 @@ const answered = Boolean(draft && ["awaiting-approval", "needs-review", "booked"
       };
       mode?.addEventListener("change", updateMode);
       updateMode();
+      const updateCustomDate = () => {
+        const selected = form?.querySelector<HTMLInputElement>('input[name="selectedStart"]:checked');
+        const custom = selected?.value === "__custom__";
+        if (customDateField) customDateField.hidden = !custom;
+        if (customDateInput) customDateInput.required = custom;
+      };
+      form?.querySelectorAll('input[name="selectedStart"]').forEach((input) => input.addEventListener("change", updateCustomDate));
+      updateCustomDate();
       form?.addEventListener("submit", async (event) => {
         event.preventDefault();
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -116,7 +131,7 @@ const answered = Boolean(draft && ["awaiting-approval", "needs-review", "booked"
         if (button) button.disabled = true;
         if (errorMessage) errorMessage.hidden = true;
         try {
-          const response = await fetch(form.action, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ token: String(data.get("token") ?? ""), selectedStart: String(data.get("selectedStart") ?? ""), meetingMode: String(data.get("meetingMode") ?? ""), location: String(data.get("location") ?? "") }) });
+          const response = await fetch(form.action, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ token: String(data.get("token") ?? ""), selectedStart: String(data.get("selectedStart") ?? ""), customStart: String(data.get("customStart") ?? ""), meetingMode: String(data.get("meetingMode") ?? ""), location: String(data.get("location") ?? "") }) });
           if (response.redirected) { window.location.assign(response.url); return; }
           const result = await response.json().catch(() => null) as { message?: string } | null;
           if (!response.ok) throw new Error(result?.message || "回答を送信できませんでした。");

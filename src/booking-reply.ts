@@ -1,5 +1,5 @@
 import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "./contact-guide";
-import { createMeetingEvent, getGoogleAccessToken, getMeetingEvent, getMeetUrl, isCalendarSlotFree, type CalendarEnv } from "./google-calendar";
+import { createMeetingEvent, getGoogleAccessToken, getMeetUrl, isCalendarSlotFree, type CalendarEnv } from "./google-calendar";
 
 export type BookingEnv = CalendarEnv & { SESSION?: KVNamespace; RESEND_API_KEY: string; CONTACT_FROM_EMAIL: string; CONTACT_ADMIN_EMAIL?: string; PUBLIC_SITE_URL?: string };
 type ParsedMail = { subject: string; text: string; messageId: string };
@@ -82,6 +82,31 @@ export function candidateSlots(candidates: string[], createdAt: string) {
   });
 }
 
+export function availableBookingSlots(draft: ContactGuideDraft) {
+  const slots = draft.candidateSlots?.length ? [...draft.candidateSlots] : candidateSlots(draft.candidates, draft.createdAt);
+  if (draft.bookingSelectedStart && !slots.some((slot) => slot.start === draft.bookingSelectedStart)) {
+    slots.push({ label: draft.bookingSelectedLabel ?? formatCustomSlotLabel(draft.bookingSelectedStart), start: draft.bookingSelectedStart });
+  }
+  return slots;
+}
+
+function formatCustomSlotLabel(start: string) {
+  const date = new Date(start);
+  if (Number.isNaN(date.getTime())) return "その他の希望日時";
+  return `その他希望：${new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Tokyo" }).format(date)}〜`;
+}
+
+function customSlot(start: string) {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:(?:00|30):00\+09:00$/.test(start)) throw new Error("その他の日程は30分単位で選択してください。");
+  const date = new Date(start);
+  if (Number.isNaN(date.getTime()) || date.getTime() <= Date.now()) throw new Error("その他の日程は現在より後の日時を選択してください。");
+  const parts = new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Tokyo" }).formatToParts(date);
+  const hour = Number(parts.find((part) => part.type === "hour")?.value);
+  const minute = Number(parts.find((part) => part.type === "minute")?.value);
+  if (hour < 9 || hour > 18 || ![0, 30].includes(minute)) throw new Error("その他の日程は9:00〜19:00の範囲で選択してください。");
+  return { label: formatCustomSlotLabel(start), start };
+}
+
 function chooseSlot(text: string, slots: { label: string; start: string }[]) {
   const indexMatch = text.match(/(?:第\s*)?([1-5一二三四五])\s*(?:候補|番)/) ?? text.match(/[①②③④⑤]/);
   if (indexMatch) {
@@ -130,11 +155,11 @@ async function notifyBookingApproval(env: BookingEnv, token: string, draft: Cont
   await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], reply_to: draft.customerEmail, subject: `【日程確認】${draft.customerName}様から回答が届きました`, text, html }, `booking-review-${token}-${idempotencySuffix}`);
 }
 
-export async function recordBookingResponse(env: BookingEnv, token: string, draft: ContactGuideDraft, input: { selectedStart: string; mode: "online" | "in-person"; location: string }) {
+export async function recordBookingResponse(env: BookingEnv, token: string, draft: ContactGuideDraft, input: { selectedStart: string; custom: boolean; mode: "online" | "in-person"; location: string }) {
   if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking response environment is not configured");
   if (draft.status === "booked") throw new Error("この日程はすでに確定しています。");
   const slots = draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt);
-  const selected = slots.find((slot) => slot.start === input.selectedStart);
+  const selected = input.custom ? customSlot(input.selectedStart) : slots.find((slot) => slot.start === input.selectedStart);
   if (!selected) throw new Error("選択された候補日時が正しくありません。");
   const location = input.location.trim();
   if (input.mode === "in-person" && !location) throw new Error("対面をご希望の場合は場所を入力してください。");
@@ -179,7 +204,7 @@ export async function confirmBooking(env: BookingEnv, token: string, draft: Cont
   if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking environment is not configured");
   if (draft.status === "booked") return draft;
 
-  const slots = draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt);
+  const slots = availableBookingSlots(draft);
   const selected = slots.find((slot) => slot.start === input.selectedStart);
   if (!selected) throw new Error("選択された候補日時が正しくありません。");
   if (input.mode === "in-person" && !input.location.trim()) throw new Error("対面の場合は場所を入力してください。");
@@ -187,10 +212,9 @@ export async function confirmBooking(env: BookingEnv, token: string, draft: Cont
   const start = new Date(selected.start);
   const end = new Date(start.getTime() + 60 * 60 * 1000);
   const accessToken = await getGoogleAccessToken(env);
-  const existingEvent = await getMeetingEvent(env, accessToken, token);
-  if (!existingEvent && !await isCalendarSlotFree(env, accessToken, start, end)) throw new Error("選択された時間に別の予定があります。候補日時を確認してください。");
+  if (!await isCalendarSlotFree(env, accessToken, start, end)) throw new Error("選択された時間に別の予定があります。候補日時を確認してください。");
 
-  const event = existingEvent ?? await createMeetingEvent(env, accessToken, { token, customerName: draft.customerName, customerEmail: draft.customerEmail, company: draft.company, start, end, mode: input.mode, location: input.location.trim() });
+  const event = await createMeetingEvent(env, accessToken, { token, customerName: draft.customerName, customerEmail: draft.customerEmail, company: draft.company, start, end, mode: input.mode, location: input.location.trim() });
   const meetUrl = input.mode === "online" ? getMeetUrl(event) : undefined;
   if (input.mode === "online" && !meetUrl) throw new Error("Google Meet URLを発行できませんでした。");
 

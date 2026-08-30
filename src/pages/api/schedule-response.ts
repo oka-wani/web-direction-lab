@@ -16,10 +16,13 @@ export const POST: APIRoute = async ({ request }) => {
   try { body = await request.json(); } catch { return json(400, "入力内容を読み取れませんでした。"); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return json(400, "入力内容が正しくありません。");
   const input = body as Record<string, unknown>;
-  const known = new Set(["token", "selectedStart", "meetingMode", "location"]);
+  const known = new Set(["token", "selectedStart", "customStart", "meetingMode", "location"]);
   if (Object.keys(input).some((key) => !known.has(key))) return json(400, "想定外の入力項目が含まれています。");
   const token = typeof input.token === "string" ? input.token.trim() : "";
-  const selectedStart = typeof input.selectedStart === "string" ? input.selectedStart.trim() : "";
+  const selectedStartValue = typeof input.selectedStart === "string" ? input.selectedStart.trim() : "";
+  const customStartValue = typeof input.customStart === "string" ? input.customStart.trim() : "";
+  const custom = selectedStartValue === "__custom__";
+  const selectedStart = custom && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(customStartValue) ? `${customStartValue}:00+09:00` : selectedStartValue;
   const meetingMode = input.meetingMode === "online" ? "online" : input.meetingMode === "in-person" ? "in-person" : null;
   const location = typeof input.location === "string" ? input.location.trim() : "";
   if (!/^[a-f0-9]{32}$/.test(token)) return json(400, "回答URLが正しくありません。");
@@ -30,7 +33,7 @@ export const POST: APIRoute = async ({ request }) => {
   const draft = await runtimeEnv.SESSION.get<ContactGuideDraft>(contactGuideKey(token), "json");
   if (!draft) return json(404, "回答URLの有効期限が切れています。");
   try {
-    await recordBookingResponse(runtimeEnv, token, draft, { selectedStart, mode: meetingMode, location });
+    await recordBookingResponse(runtimeEnv, token, draft, { selectedStart, custom, mode: meetingMode, location });
   } catch (error) {
     console.error(JSON.stringify({ event: "contact_booking_web_response_error", token, message: error instanceof Error ? error.message : "unknown" }));
     return json(409, error instanceof Error ? error.message : "回答を送信できませんでした。");

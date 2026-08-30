@@ -1,6 +1,6 @@
 ---
 import { env } from "cloudflare:workers";
-import { candidateSlots } from "../../../booking-reply";
+import { availableBookingSlots } from "../../../booking-reply";
 import { contactGuideKey, type ContactGuideDraft } from "../../../contact-guide";
 
 export const prerender = false;
@@ -15,7 +15,7 @@ const token = Astro.params.token ?? "";
 const validToken = /^[a-f0-9]{32}$/.test(token);
 const session = (env as RuntimeEnv).SESSION;
 const draft = validToken && session ? await session.get<ContactGuideDraft>(contactGuideKey(token), "json") : null;
-const slots = draft ? (draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt)) : [];
+const slots = draft ? availableBookingSlots(draft) : [];
 const confirmed = Boolean(draft?.status === "booked" || Astro.url.searchParams.get("confirmed") === "1");
 ---
 

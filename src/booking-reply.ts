@@ -124,10 +124,44 @@ async function notifyBookingApproval(env: BookingEnv, token: string, draft: Cont
   const selected = draft.bookingSelectedLabel ?? "返信から候補日時を特定できませんでした。確認画面で選択してください。";
   const mode = draft.meetingMode === "in-person" ? `対面${draft.meetingLocation ? `（${draft.meetingLocation}）` : "（場所未確定）"}` : "オンライン（Google Meet）";
   const reasonText = reason ? `\n確認事項: ${reason}\n` : "";
-  const text = `お客様から日程の返信が届きました。\n\nお客様: ${draft.customerName}様 <${draft.customerEmail}>\n候補日時: ${selected}\n実施方法: ${mode}${reasonText}\n返信内容:\n${draft.bookingReply ?? ""}\n\n以下の確認画面で内容を確認し、問題なければ確定してください。\n${approvalUrl}`;
-  const html = `<p><strong>お客様から日程の返信が届きました。</strong></p><p>お客様: ${escapeHtml(draft.customerName)}様 &lt;${escapeHtml(draft.customerEmail)}&gt;<br>候補日時: ${escapeHtml(selected)}<br>実施方法: ${escapeHtml(mode)}</p>${reason ? `<p><strong>確認事項:</strong> ${escapeHtml(reason)}</p>` : ""}<p><strong>返信内容</strong><br>${escapeHtml(draft.bookingReply ?? "").replace(/\n/g, "<br>")}</p><p><a href="${escapeHtml(approvalUrl)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#315b3a;color:#fff;text-decoration:none;font-weight:bold">日程を確認して確定する</a></p>`;
+  const text = `お客様から日程の回答が届きました。\n\nお客様: ${draft.customerName}様 <${draft.customerEmail}>\n候補日時: ${selected}\n実施方法: ${mode}${reasonText}\n回答内容:\n${draft.bookingReply ?? ""}\n\n以下の確認画面で内容を確認し、問題なければ確定してください。\n${approvalUrl}`;
+  const html = `<p><strong>お客様から日程の回答が届きました。</strong></p><p>お客様: ${escapeHtml(draft.customerName)}様 &lt;${escapeHtml(draft.customerEmail)}&gt;<br>候補日時: ${escapeHtml(selected)}<br>実施方法: ${escapeHtml(mode)}</p>${reason ? `<p><strong>確認事項:</strong> ${escapeHtml(reason)}</p>` : ""}<p><strong>回答内容</strong><br>${escapeHtml(draft.bookingReply ?? "").replace(/\n/g, "<br>")}</p><p><a href="${escapeHtml(approvalUrl)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#315b3a;color:#fff;text-decoration:none;font-weight:bold">日程を確認して確定する</a></p>`;
   const idempotencySuffix = notificationId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64) || draft.bookingReplyReceivedAt?.replace(/[^0-9]/g, "") || "received";
-  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], reply_to: draft.customerEmail, subject: `【日程確認】${draft.customerName}様から返信が届きました`, text, html }, `booking-review-${token}-${idempotencySuffix}`);
+  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], reply_to: draft.customerEmail, subject: `【日程確認】${draft.customerName}様から回答が届きました`, text, html }, `booking-review-${token}-${idempotencySuffix}`);
+}
+
+export async function recordBookingResponse(env: BookingEnv, token: string, draft: ContactGuideDraft, input: { selectedStart: string; mode: "online" | "in-person"; location: string }) {
+  if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking response environment is not configured");
+  if (draft.status === "booked") throw new Error("この日程はすでに確定しています。");
+  const slots = draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt);
+  const selected = slots.find((slot) => slot.start === input.selectedStart);
+  if (!selected) throw new Error("選択された候補日時が正しくありません。");
+  const location = input.location.trim();
+  if (input.mode === "in-person" && !location) throw new Error("対面をご希望の場合は場所を入力してください。");
+
+  const replyReceivedAt = new Date().toISOString();
+  const bookingReply = input.mode === "in-person"
+    ? `日程回答画面から回答\n${selected.label}\n対面希望\n希望場所: ${location}`
+    : `日程回答画面から回答\n${selected.label}\nオンライン（Google Meet）`;
+  const updated = {
+    ...draft,
+    status: "awaiting-approval" as const,
+    bookingReply,
+    bookingReplyReceivedAt: replyReceivedAt,
+    bookingSelectedLabel: selected.label,
+    bookingSelectedStart: selected.start,
+    meetingMode: input.mode,
+    meetingLocation: input.mode === "in-person" ? location : undefined,
+  } satisfies ContactGuideDraft;
+  await env.SESSION.put(contactGuideKey(token), JSON.stringify(updated), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
+  try {
+    await notifyBookingApproval(env, token, updated, `web-${selected.start}-${input.mode}`);
+  } catch (error) {
+    await env.SESSION.put(contactGuideKey(token), JSON.stringify(draft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
+    throw error;
+  }
+  console.log(JSON.stringify({ event: "contact_booking_web_response_received", token, selected: selected.start, mode: input.mode }));
+  return updated;
 }
 
 export async function notifyBookingReplyFailure(message: ForwardableEmailMessage, env: BookingEnv, reason: string, reply = "") {

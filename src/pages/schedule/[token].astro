@@ -1,0 +1,130 @@
+---
+import { env } from "cloudflare:workers";
+import { candidateSlots } from "../../booking-reply";
+import { contactGuideKey, type ContactGuideDraft } from "../../contact-guide";
+
+export const prerender = false;
+
+type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
+
+Astro.response.headers.set("Cache-Control", "no-store");
+Astro.response.headers.set("Referrer-Policy", "no-referrer");
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+
+const token = Astro.params.token ?? "";
+const validToken = /^[a-f0-9]{32}$/.test(token);
+const session = (env as RuntimeEnv).SESSION;
+const draft = validToken && session ? await session.get<ContactGuideDraft>(contactGuideKey(token), "json") : null;
+const slots = draft ? (draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt)) : [];
+const answered = Boolean(draft && ["awaiting-approval", "needs-review", "booked"].includes(draft.status));
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <title>お打ち合わせ日程の回答｜Wani san Web</title>
+    <style>
+      :root { color-scheme: light; font-family: "Noto Sans JP", system-ui, sans-serif; color: #172019; background: #f4f6f3; }
+      body { margin: 0; }
+      main { width: min(680px, calc(100% - 32px)); margin: 48px auto; }
+      .brand { margin-bottom: 20px; color: #315b3a; font-weight: 800; letter-spacing: .04em; }
+      .card { padding: clamp(24px, 5vw, 44px); border: 1px solid #dce3dc; border-radius: 20px; background: #fff; box-shadow: 0 12px 36px rgba(32, 57, 38, .08); }
+      h1 { margin: 0 0 12px; font-size: clamp(24px, 5vw, 34px); }
+      p { line-height: 1.8; }
+      fieldset { margin: 28px 0 0; padding: 0; border: 0; }
+      legend { margin-bottom: 12px; font-size: 18px; font-weight: 800; }
+      .choice { display: flex; align-items: flex-start; gap: 12px; margin: 10px 0; padding: 16px; border: 1px solid #cbd4cc; border-radius: 12px; cursor: pointer; }
+      .choice:has(input:checked) { border-color: #315b3a; background: #f0f6f1; box-shadow: 0 0 0 1px #315b3a; }
+      .choice input { margin-top: 4px; accent-color: #315b3a; }
+      select, input[type="text"] { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; background: #fff; font: inherit; }
+      .field { display: block; margin-top: 20px; font-weight: 700; }
+      .hint { color: #687269; font-size: 14px; }
+      button { display: inline-flex; justify-content: center; align-items: center; width: 100%; min-height: 52px; margin-top: 28px; padding: 0 24px; border: 1px solid #315b3a; border-radius: 999px; background: #315b3a; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+      button:disabled { opacity: .55; cursor: wait; }
+      .notice { padding: 18px; border-radius: 12px; background: #e8f4ea; color: #234a2c; }
+      .error { background: #fff0ef; color: #8b2e28; }
+      a { color: #315b3a; }
+      @media (max-width: 560px) { main { margin: 24px auto; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand">Wani san Web</div>
+      <section class="card">
+        {answered && draft ? (
+          <>
+            <h1>ご回答ありがとうございます</h1>
+            <p class="notice">内容を確認のうえ、日程確定のご案内をメールでお送りします。</p>
+            <p>お打ち合わせの2日前までを目安に、<a href={draft.hearingUrl}>ヒアリングシート</a>へのご記入もお願いいたします。</p>
+          </>
+        ) : draft && draft.status === "sent" && slots.length ? (
+          <>
+            <h1>お打ち合わせ日程の回答</h1>
+            <p>{draft.customerName}様、ご都合のよい候補日時と実施方法を選択してください。</p>
+            <form method="post" action="/api/schedule-response" data-schedule-form>
+              <input type="hidden" name="token" value={token} />
+              <fieldset>
+                <legend>候補日時</legend>
+                {slots.map((slot, index) => (
+                  <label class="choice"><input type="radio" name="selectedStart" value={slot.start} required checked={index === 0} /><span>{slot.label}</span></label>
+                ))}
+              </fieldset>
+              <label class="field">実施方法
+                <select name="meetingMode" data-meeting-mode required>
+                  <option value="online">オンライン（Google Meet）</option>
+                  <option value="in-person">対面</option>
+                </select>
+              </label>
+              <label class="field" data-location-field hidden>ご希望の場所
+                <input type="text" name="location" maxlength="200" placeholder="例：貴社会議室、〇〇駅周辺" />
+              </label>
+              <p class="hint">オンラインの場合、会議URLは日程確定後にメールでお送りします。</p>
+              <button type="submit">この内容で回答する</button>
+            </form>
+            <p id="submit-error" class="notice error" role="alert" hidden></p>
+            <p>あわせて、お打ち合わせの2日前までを目安に、<a href={draft.hearingUrl}>ヒアリングシート</a>へご記入ください。</p>
+          </>
+        ) : (
+          <>
+            <h1>回答ページを開けません</h1>
+            <p class="notice error">URLの有効期限が切れているか、日程候補がまだ送信されていません。</p>
+          </>
+        )}
+      </section>
+    </main>
+    <script>
+      const form = document.querySelector<HTMLFormElement>("[data-schedule-form]");
+      const mode = form?.querySelector("[data-meeting-mode]");
+      const locationField = form?.querySelector<HTMLElement>("[data-location-field]");
+      const locationInput = locationField?.querySelector<HTMLInputElement>('input[name="location"]');
+      const errorMessage = document.querySelector<HTMLElement>("#submit-error");
+      const updateMode = () => {
+        const inPerson = (mode as Element & { value?: string } | null)?.value === "in-person";
+        if (locationField) locationField.hidden = !inPerson;
+        if (locationInput) locationInput.required = inPerson;
+      };
+      mode?.addEventListener("change", updateMode);
+      updateMode();
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const data = new FormData(form);
+        if (button) button.disabled = true;
+        if (errorMessage) errorMessage.hidden = true;
+        try {
+          const response = await fetch(form.action, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ token: String(data.get("token") ?? ""), selectedStart: String(data.get("selectedStart") ?? ""), meetingMode: String(data.get("meetingMode") ?? ""), location: String(data.get("location") ?? "") }) });
+          if (response.redirected) { window.location.assign(response.url); return; }
+          const result = await response.json().catch(() => null) as { message?: string } | null;
+          if (!response.ok) throw new Error(result?.message || "回答を送信できませんでした。");
+        } catch (error) {
+          if (errorMessage) { errorMessage.textContent = error instanceof Error ? error.message : "回答を送信できませんでした。"; errorMessage.hidden = false; }
+          if (button) button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

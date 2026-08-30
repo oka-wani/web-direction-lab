@@ -15,6 +15,7 @@ type CalendarListResult = {
 export type CalendarEvent = { id: string; htmlLink?: string; hangoutLink?: string; conferenceData?: { entryPoints?: { entryPointType?: string; uri?: string }[] } };
 
 const configured = (value: string | undefined) => Boolean(value && !value.startsWith("SET_IN_"));
+const targetCalendarId = (env: CalendarEnv) => configured(env.GOOGLE_CALENDAR_ID) && env.GOOGLE_CALENDAR_ID !== "GOOGLE_CALENDAR_ID" ? env.GOOGLE_CALENDAR_ID : "primary";
 
 export async function getGoogleAccessToken(env: CalendarEnv) {
   if (!configured(env.GOOGLE_CALENDAR_CLIENT_ID) || !configured(env.GOOGLE_CALENDAR_CLIENT_SECRET) || !configured(env.GOOGLE_CALENDAR_REFRESH_TOKEN)) {
@@ -34,7 +35,7 @@ export async function getGoogleAccessToken(env: CalendarEnv) {
 }
 
 async function getAvailabilityCalendarIds(env: CalendarEnv, accessToken: string) {
-  const configuredCalendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+  const configuredCalendarId = targetCalendarId(env);
   const ids = new Set<string>([configuredCalendarId]);
   let pageToken = "";
   do {
@@ -78,7 +79,7 @@ export async function isCalendarSlotFree(env: CalendarEnv, accessToken: string, 
 }
 
 export async function createMeetingEvent(env: CalendarEnv, accessToken: string, input: { token: string; customerName: string; customerEmail: string; company: string; start: Date; end: Date; mode: "online" | "in-person"; location?: string }) {
-  const calendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+  const calendarId = targetCalendarId(env);
   const eventId = `a${input.token}`;
   const endpoint = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
   const eventBody: Record<string, unknown> = {
@@ -115,7 +116,7 @@ export async function createMeetingEvent(env: CalendarEnv, accessToken: string, 
 }
 
 export async function getMeetingEvent(env: CalendarEnv, accessToken: string, token: string) {
-  const calendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+  const calendarId = targetCalendarId(env);
   const eventId = `a${token}`;
   const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${eventId}?conferenceDataVersion=1`, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (response.status === 404) return null;

@@ -46,6 +46,8 @@
     "head_sampling_rate": 1
   },
   "vars": {
-    "PUBLIC_SITE_URL": "https://www.wani-san.com"
+    "PUBLIC_SITE_URL": "https://www.wani-san.com",
+    "CONTACT_ADMIN_EMAIL": "contact@wani-san.com",
+    "GOOGLE_CALENDAR_ID": "primary"
   }
 }

@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "../../contact-guide";
-import { candidateSlots, SCHEDULE_REPLY_ADDRESS } from "../../booking-reply";
+import { candidateSlots } from "../../booking-reply";
 
 export const prerender = false;
 
@@ -76,8 +76,9 @@ export const POST: APIRoute = async ({ request }) => {
   const candidateText = candidates.join("\n");
   const candidateHtml = candidates.map((candidate) => `<li>${escapeHtml(candidate)}</li>`).join("");
   const scheduleId = token.slice(0, 12);
-  const text = `${draft.customerName}様\n\nこの度は、Wani san Webへお問い合わせいただき、誠にありがとうございます。\n\nお問い合わせ内容を拝見し、今後の進め方やご希望を具体的に伺うため、一度初回のお打ち合わせをさせていただければと考えております。\n\n候補日時をご用意しましたので、ご都合のよい日時をこのメールへの返信でお知らせください。\n\n${candidateText}\n\nお打ち合わせはGoogle Meetを利用する予定です。会議URLは日程確定後にお送りします。\n対面でのお打ち合わせをご希望の場合は、その旨とご希望の場所をあわせてご返信ください。\n\nまた、初回のお打ち合わせでWebサイトの方向性をある程度整理したいと考えております。お手数ですが、お打ち合わせの2日前までを目安に、以下のヒアリングシートへ分かる範囲でご記入をお願いいたします。\n\n${draft.hearingUrl}\n\nどうぞよろしくお願いいたします。\n\nWani san Web\n\nWSW-SCHEDULE-ID: ${scheduleId}`;
-  const html = `<p>${escapeHtml(draft.customerName)}様</p><p>この度は、Wani san Webへお問い合わせいただき、誠にありがとうございます。</p><p>お問い合わせ内容を拝見し、今後の進め方やご希望を具体的に伺うため、一度初回のお打ち合わせをさせていただければと考えております。</p><p>候補日時をご用意しましたので、ご都合のよい日時をこのメールへの返信でお知らせください。</p><ul>${candidateHtml}</ul><p>お打ち合わせはGoogle Meetを利用する予定です。会議URLは日程確定後にお送りします。<br>対面でのお打ち合わせをご希望の場合は、その旨とご希望の場所をあわせてご返信ください。</p><p>また、初回のお打ち合わせでWebサイトの方向性をある程度整理したいと考えております。お手数ですが、<strong>お打ち合わせの2日前まで</strong>を目安に、以下のヒアリングシートへ分かる範囲でご記入をお願いいたします。</p><p><a href="${escapeHtml(draft.hearingUrl)}">ヒアリングシートを開く</a></p><p>どうぞよろしくお願いいたします。</p><p>Wani san Web</p><p style="color:#666;font-size:12px">WSW-SCHEDULE-ID: ${scheduleId}</p>`;
+  const scheduleUrl = new URL(`/schedule/${token}`, request.url).toString();
+  const text = `${draft.customerName}様\n\nこの度は、Wani san Webへお問い合わせいただき、誠にありがとうございます。\n\nお問い合わせ内容を拝見し、今後の進め方やご希望を具体的に伺うため、一度初回のお打ち合わせをさせていただければと考えております。\n\n候補日時をご用意しました。以下のページから、ご都合のよい日時を選択してください。\n${scheduleUrl}\n\n${candidateText}\n\nお打ち合わせはGoogle Meetを利用する予定です。会議URLは日程確定後にお送りします。対面をご希望の場合は、回答画面で希望場所をご入力いただけます。\n\nまた、初回のお打ち合わせでWebサイトの方向性をある程度整理したいと考えております。お手数ですが、お打ち合わせの2日前までを目安に、以下のヒアリングシートへ分かる範囲でご記入をお願いいたします。\n\n${draft.hearingUrl}\n\nどうぞよろしくお願いいたします。\n\nWani san Web\n\nWSW-SCHEDULE-ID: ${scheduleId}`;
+  const html = `<p>${escapeHtml(draft.customerName)}様</p><p>この度は、Wani san Webへお問い合わせいただき、誠にありがとうございます。</p><p>お問い合わせ内容を拝見し、今後の進め方やご希望を具体的に伺うため、一度初回のお打ち合わせをさせていただければと考えております。</p><p>候補日時をご用意しました。以下のページから、ご都合のよい日時を選択してください。</p><p><a href="${escapeHtml(scheduleUrl)}" style="display:inline-block;padding:13px 22px;border-radius:999px;background:#315b3a;color:#fff;text-decoration:none;font-weight:bold">候補日時を選択する</a></p><ul>${candidateHtml}</ul><p>お打ち合わせはGoogle Meetを利用する予定です。会議URLは日程確定後にお送りします。<br>対面をご希望の場合は、回答画面で希望場所をご入力いただけます。</p><p>また、初回のお打ち合わせでWebサイトの方向性をある程度整理したいと考えております。お手数ですが、<strong>お打ち合わせの2日前まで</strong>を目安に、以下のヒアリングシートへ分かる範囲でご記入をお願いいたします。</p><p><a href="${escapeHtml(draft.hearingUrl)}">ヒアリングシートを開く</a></p><p>どうぞよろしくお願いいたします。</p><p>Wani san Web</p><p style="color:#666;font-size:12px">WSW-SCHEDULE-ID: ${scheduleId}</p>`;
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -89,7 +90,7 @@ export const POST: APIRoute = async ({ request }) => {
     body: JSON.stringify({
       from: env.CONTACT_FROM_EMAIL,
       to: [draft.customerEmail],
-      reply_to: SCHEDULE_REPLY_ADDRESS,
+      reply_to: configured(env.CONTACT_ADMIN_EMAIL) ? env.CONTACT_ADMIN_EMAIL : "contact@wani-san.com",
       subject: `【Wani san Web】制作ヒアリングと打ち合わせ候補日のご案内 [WSW-SCHEDULE-ID: ${scheduleId}]`,
       text,
       html,

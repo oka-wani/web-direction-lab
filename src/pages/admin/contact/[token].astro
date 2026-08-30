@@ -1,5 +1,6 @@
 ---
 import { env } from "cloudflare:workers";
+import { candidateSlots } from "../../../booking-reply";
 import { contactGuideKey, type ContactGuideDraft } from "../../../contact-guide";
 
 export const prerender = false;
@@ -17,6 +18,8 @@ const draft = validToken && session ? await session.get<ContactGuideDraft>(conta
 const sent = Boolean(draft && (Astro.url.searchParams.get("sent") === "1" || draft.status !== "pending"));
 const availabilityNeedsReview = Boolean(draft?.candidates.some((candidate) => candidate.startsWith("Googleカレンダーの空き時間を取得できませんでした。")));
 const editMode = Astro.url.searchParams.get("mode") === "edit" || availabilityNeedsReview;
+const parsedCandidateSlots = draft ? candidateSlots(draft.candidates, draft.createdAt) : [];
+const editableStarts = Array.from({ length: Math.max(3, parsedCandidateSlots.length) }, (_, index) => parsedCandidateSlots[index]?.start.slice(0, 16) ?? "");
 ---
 
 <!doctype html>
@@ -43,7 +46,8 @@ const editMode = Astro.url.searchParams.get("mode") === "edit" || availabilityNe
       .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
       button, .button { display: inline-flex; justify-content: center; align-items: center; min-height: 48px; padding: 0 22px; border: 1px solid #315b3a; border-radius: 999px; background: #315b3a; color: #fff; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
       .button.secondary { background: #fff; color: #315b3a; }
-      .candidate { display: block; width: 100%; box-sizing: border-box; margin: 10px 0; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; font: inherit; }
+      .candidate { display: block; width: 100%; box-sizing: border-box; margin: 10px 0 18px; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; background: #fff; font: inherit; }
+      .hint { color: #687269; font-size: 14px; }
       .notice { padding: 18px; border-radius: 12px; background: #e8f4ea; color: #234a2c; }
       .error { background: #fff0ef; color: #8b2e28; }
       @media (max-width: 560px) { main { margin: 24px auto; } dl { grid-template-columns: 1fr; gap: 4px; } dd { margin-bottom: 8px; } .actions > * { width: 100%; } }
@@ -84,10 +88,11 @@ const editMode = Astro.url.searchParams.get("mode") === "edit" || availabilityNe
             {editMode && (
               <form id="edit" method="post" action="/api/contact-guide" data-contact-guide-form>
                 <h2>候補日程を変更</h2>
-                <p>文面を直接修正してから送信できます。</p>
+                <p>カレンダーから候補日と時刻を選択してください。</p>
+                <p class="hint">選択可能な時間は9:00〜19:00内です。1時間のお打ち合わせとして、開始時刻は18:00まで選択できます。</p>
                 <input type="hidden" name="token" value={token} />
-                {draft.candidates.map((candidate, index) => (
-                  <label>候補 {index + 1}<input class="candidate" type="text" name="candidate" value={candidate} maxlength="100" required /></label>
+                {editableStarts.map((start, index) => (
+                  <label>候補 {index + 1}<input class="candidate" type="datetime-local" name="candidateStart" value={start} step="1800" required /></label>
                 ))}
                 <div class="actions">
                   <button type="submit">変更した内容で送る</button>
@@ -116,6 +121,7 @@ const editMode = Astro.url.searchParams.get("mode") === "edit" || availabilityNe
           const payload = {
             token: String(data.get("token") ?? ""),
             candidates: data.getAll("candidate").map(String),
+            candidateStarts: data.getAll("candidateStart").map(String),
           };
 
           if (submitButton) submitButton.disabled = true;

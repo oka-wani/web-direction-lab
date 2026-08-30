@@ -10,6 +10,19 @@ type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
 const json = (status: number, message: string) => Response.json({ message }, { status });
 const escapeHtml = (input: string) => input.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]!);
 const configured = (input: string | undefined) => Boolean(input && !input.startsWith("SET_IN_"));
+const candidateFormatter = new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Tokyo" });
+
+function candidatesFromStarts(values: unknown[]) {
+  return values.map((value, index) => {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) throw new Error("候補日時をカレンダーから選択してください。");
+    const start = new Date(`${value}:00+09:00`);
+    if (Number.isNaN(start.getTime()) || start.getTime() <= Date.now()) throw new Error("候補日時には現在より後の日時を選択してください。");
+    const [, time = ""] = value.split("T");
+    const [hour, minute] = time.split(":").map(Number);
+    if (hour < 9 || hour > 18 || (hour === 18 && minute > 0) || ![0, 30].includes(minute)) throw new Error("候補日時は9:00〜19:00の範囲で、30分単位で選択してください。");
+    return `第${index + 1}候補：${candidateFormatter.format(start)}〜`;
+  });
+}
 
 export const POST: APIRoute = async ({ request }) => {
   const contentType = request.headers.get("content-type") ?? "";
@@ -27,15 +40,22 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!body || typeof body !== "object" || Array.isArray(body)) return json(400, "入力内容が正しくありません。");
   const submission = body as Record<string, unknown>;
-  const known = new Set(["token", "candidates"]);
+  const known = new Set(["token", "candidates", "candidateStarts"]);
   if (Object.keys(submission).some((key) => !known.has(key))) return json(400, "想定外の入力項目が含まれています。");
 
   const token = typeof submission.token === "string" ? submission.token.trim() : "";
   if (!/^[a-f0-9]{32}$/.test(token)) return json(400, "確認URLが正しくありません。");
 
-  const candidates = Array.isArray(submission.candidates)
-    ? submission.candidates.filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean)
-    : [];
+  let candidates: string[];
+  try {
+    candidates = Array.isArray(submission.candidateStarts) && submission.candidateStarts.length
+      ? candidatesFromStarts(submission.candidateStarts)
+      : Array.isArray(submission.candidates)
+        ? submission.candidates.filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean)
+        : [];
+  } catch (error) {
+    return json(400, error instanceof Error ? error.message : "候補日時を確認してください。");
+  }
   if (candidates.length < 1 || candidates.length > 5 || candidates.some((candidate) => candidate.length > 100)) {
     return json(400, "候補日程を1〜5件、各100文字以内で入力してください。");
   }

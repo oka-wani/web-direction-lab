@@ -44,7 +44,10 @@ async function getAvailabilityCalendarIds(env: CalendarEnv, accessToken: string)
     url.searchParams.set("showHidden", "false");
     if (pageToken) url.searchParams.set("pageToken", pageToken);
     const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
-    if (!response.ok) throw new Error(`Google calendarList error: ${response.status}`);
+    if (!response.ok) {
+      console.warn(JSON.stringify({ event: "calendar_list_unavailable", status: response.status, fallbackCalendar: configuredCalendarId }));
+      return [configuredCalendarId];
+    }
     const result = await response.json() as CalendarListResult;
     for (const calendar of result.items ?? []) {
       if (calendar.id && calendar.selected && !calendar.hidden && !calendar.deleted) ids.add(calendar.id);

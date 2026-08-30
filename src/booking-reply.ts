@@ -75,10 +75,10 @@ export function candidateSlots(candidates: string[], createdAt: string) {
   const created = new Date(createdAt);
   const baseYear = Number.isNaN(created.getTime()) ? new Date().getFullYear() : Number(new Intl.DateTimeFormat("en", { year: "numeric", timeZone: "Asia/Tokyo" }).format(created));
   return candidates.flatMap((label) => {
-    const match = label.match(/(\d{1,2})[\/.月](\d{1,2})日?[^0-9]{0,12}(\d{1,2}):(\d{2})/);
+    const match = label.match(/(?:(\d{4})年)?(\d{1,2})[\/.月](\d{1,2})日?[^0-9]{0,12}(\d{1,2}):(\d{2})/);
     if (!match) return [];
-    const [, month, day, hour, minute] = match;
-    return [{ label, start: `${baseYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hour.padStart(2, "0")}:${minute}:00+09:00` }];
+    const [, explicitYear, month, day, hour, minute] = match;
+    return [{ label, start: `${explicitYear ?? baseYear}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hour.padStart(2, "0")}:${minute}:00+09:00` }];
   });
 }
 

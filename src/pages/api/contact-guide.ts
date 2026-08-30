@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!draft) return json(404, "確認URLの有効期限が切れているか、URLが正しくありません。");
 
   const redirectUrl = new URL(`/admin/contact/${token}`, request.url);
-  if (draft.status === "sent") {
+  if (draft.status !== "pending") {
     redirectUrl.searchParams.set("sent", "1");
     return Response.redirect(redirectUrl, 303);
   }
@@ -56,8 +56,8 @@ export const POST: APIRoute = async ({ request }) => {
   const candidateText = candidates.join("\n");
   const candidateHtml = candidates.map((candidate) => `<li>${escapeHtml(candidate)}</li>`).join("");
   const scheduleId = token.slice(0, 12);
-  const text = `${draft.customerName}様\n\n先日はお問い合わせいただき、ありがとうございます。\nWebサイト制作について、以下のヒアリングフォームへ分かる範囲でご回答ください。\n\n${draft.hearingUrl}\n\n初回打ち合わせの候補日時は以下のとおりです。\n${candidateText}\n\nご都合のよい候補を、このメールへの返信でお知らせください。\n\nWani san Web\n\nWSW-SCHEDULE-ID: ${scheduleId}`;
-  const html = `<p>${escapeHtml(draft.customerName)}様</p><p>先日はお問い合わせいただき、ありがとうございます。<br>Webサイト制作について、以下のヒアリングフォームへ分かる範囲でご回答ください。</p><p><a href="${escapeHtml(draft.hearingUrl)}">ヒアリングフォームを開く</a></p><p><strong>初回打ち合わせの候補日時</strong></p><ul>${candidateHtml}</ul><p>ご都合のよい候補を、このメールへの返信でお知らせください。</p><p>Wani san Web</p><p style="color:#666;font-size:12px">WSW-SCHEDULE-ID: ${scheduleId}</p>`;
+  const text = `${draft.customerName}様\n\nこの度は、Wani san Webへお問い合わせいただき、誠にありがとうございます。\n\nお問い合わせ内容を拝見し、今後の進め方やご希望を具体的に伺うため、一度初回のお打ち合わせをさせていただければと考えております。\n\n候補日時をご用意しましたので、ご都合のよい日時をこのメールへの返信でお知らせください。\n\n${candidateText}\n\nお打ち合わせはGoogle Meetを利用する予定です。会議URLは日程確定後にお送りします。\n対面でのお打ち合わせをご希望の場合は、その旨とご希望の場所をあわせてご返信ください。\n\nまた、初回のお打ち合わせでWebサイトの方向性をある程度整理したいと考えております。お手数ですが、お打ち合わせの2日前までを目安に、以下のヒアリングシートへ分かる範囲でご記入をお願いいたします。\n\n${draft.hearingUrl}\n\nどうぞよろしくお願いいたします。\n\nWani san Web\n\nWSW-SCHEDULE-ID: ${scheduleId}`;
+  const html = `<p>${escapeHtml(draft.customerName)}様</p><p>この度は、Wani san Webへお問い合わせいただき、誠にありがとうございます。</p><p>お問い合わせ内容を拝見し、今後の進め方やご希望を具体的に伺うため、一度初回のお打ち合わせをさせていただければと考えております。</p><p>候補日時をご用意しましたので、ご都合のよい日時をこのメールへの返信でお知らせください。</p><ul>${candidateHtml}</ul><p>お打ち合わせはGoogle Meetを利用する予定です。会議URLは日程確定後にお送りします。<br>対面でのお打ち合わせをご希望の場合は、その旨とご希望の場所をあわせてご返信ください。</p><p>また、初回のお打ち合わせでWebサイトの方向性をある程度整理したいと考えております。お手数ですが、<strong>お打ち合わせの2日前まで</strong>を目安に、以下のヒアリングシートへ分かる範囲でご記入をお願いいたします。</p><p><a href="${escapeHtml(draft.hearingUrl)}">ヒアリングシートを開く</a></p><p>どうぞよろしくお願いいたします。</p><p>Wani san Web</p><p style="color:#666;font-size:12px">WSW-SCHEDULE-ID: ${scheduleId}</p>`;
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",

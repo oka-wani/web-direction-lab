@@ -14,7 +14,7 @@ const token = Astro.params.token ?? "";
 const validToken = /^[a-f0-9]{32}$/.test(token);
 const session = (env as RuntimeEnv).SESSION;
 const draft = validToken && session ? await session.get<ContactGuideDraft>(contactGuideKey(token), "json") : null;
-const sent = Boolean(draft && (Astro.url.searchParams.get("sent") === "1" || draft.status === "sent"));
+const sent = Boolean(draft && (Astro.url.searchParams.get("sent") === "1" || draft.status !== "pending"));
 const editMode = Astro.url.searchParams.get("mode") === "edit";
 ---
 

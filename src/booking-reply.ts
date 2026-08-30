@@ -1,8 +1,8 @@
 import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "./contact-guide";
 import { createMeetingEvent, getGoogleAccessToken, getMeetingEvent, getMeetUrl, isCalendarSlotFree, type CalendarEnv } from "./google-calendar";
 
-type BookingEnv = CalendarEnv & { SESSION?: KVNamespace; RESEND_API_KEY: string; CONTACT_FROM_EMAIL: string; CONTACT_ADMIN_EMAIL?: string };
-type ParsedMail = { subject: string; text: string };
+export type BookingEnv = CalendarEnv & { SESSION?: KVNamespace; RESEND_API_KEY: string; CONTACT_FROM_EMAIL: string; CONTACT_ADMIN_EMAIL?: string; PUBLIC_SITE_URL?: string };
+type ParsedMail = { subject: string; text: string; messageId: string };
 const REPLY_DOMAIN = "reply.wani-san.com";
 export const SCHEDULE_REPLY_ADDRESS = `schedule@${REPLY_DOMAIN}`;
 const FALLBACK_ADMIN_EMAIL = "contact@wani-san.com";
@@ -58,7 +58,7 @@ function parseMail(raw: string): ParsedMail {
   const { headers } = splitHeaders(raw);
   const part = findTextPart(raw);
   const text = part?.html ? part.text.replace(/<br\s*\/?\s*>/gi, "\n").replace(/<[^>]+>/g, " ") : part?.text ?? "";
-  return { subject: headers.get("subject") ?? "", text };
+  return { subject: headers.get("subject") ?? "", text, messageId: headers.get("message-id") ?? "" };
 }
 
 function visibleReply(text: string) {
@@ -99,6 +99,15 @@ function chooseSlot(text: string, slots: { label: string; start: string }[]) {
   return matches.length === 1 ? matches[0] : null;
 }
 
+function meetingPreference(text: string) {
+  const locationMatch = text.match(/(?:希望(?:の)?場所|場所|会場|待ち合わせ場所)\s*[:：]?\s*([^\n。]{2,100})/i);
+  const inPerson = /対面|直接(?:お会い|会って)|訪問|来社/.test(text) || Boolean(locationMatch);
+  return {
+    mode: inPerson ? "in-person" as const : "online" as const,
+    location: locationMatch?.[1]?.trim() ?? "",
+  };
+}
+
 async function sendEmail(env: BookingEnv, payload: Record<string, unknown>, key: string) {
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -108,10 +117,49 @@ async function sendEmail(env: BookingEnv, payload: Record<string, unknown>, key:
   if (!response.ok) throw new Error(`Resend error: ${response.status} ${await response.text()}`);
 }
 
-async function notifyReview(env: BookingEnv, token: string, draft: ContactGuideDraft, reason: string, reply: string) {
+async function notifyBookingApproval(env: BookingEnv, token: string, draft: ContactGuideDraft, notificationId: string, reason?: string) {
   const admin = configured(env.CONTACT_ADMIN_EMAIL) ? env.CONTACT_ADMIN_EMAIL! : FALLBACK_ADMIN_EMAIL;
-  const text = `日程返信を自動確定できませんでした。\n\n理由: ${reason}\nお客様: ${draft.customerName}様 <${draft.customerEmail}>\n\n返信内容:\n${reply}\n\n候補日時:\n${draft.candidates.join("\n")}`;
-  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], subject: `【要確認】${draft.customerName}様の日程返信`, text, html: `<p><strong>日程返信を自動確定できませんでした。</strong></p><p>理由: ${escapeHtml(reason)}</p><p>お客様: ${escapeHtml(draft.customerName)}様 &lt;${escapeHtml(draft.customerEmail)}&gt;</p><p><strong>返信内容</strong><br>${escapeHtml(reply).replace(/\n/g, "<br>")}</p><p><strong>候補日時</strong><br>${draft.candidates.map(escapeHtml).join("<br>")}</p>` }, `booking-review-${token}`);
+  const siteUrl = configured(env.PUBLIC_SITE_URL) ? env.PUBLIC_SITE_URL! : "https://www.wani-san.com";
+  const approvalUrl = new URL(`/admin/booking/${token}`, siteUrl).toString();
+  const selected = draft.bookingSelectedLabel ?? "返信から候補日時を特定できませんでした。確認画面で選択してください。";
+  const mode = draft.meetingMode === "in-person" ? `対面${draft.meetingLocation ? `（${draft.meetingLocation}）` : "（場所未確定）"}` : "オンライン（Google Meet）";
+  const reasonText = reason ? `\n確認事項: ${reason}\n` : "";
+  const text = `お客様から日程の返信が届きました。\n\nお客様: ${draft.customerName}様 <${draft.customerEmail}>\n候補日時: ${selected}\n実施方法: ${mode}${reasonText}\n返信内容:\n${draft.bookingReply ?? ""}\n\n以下の確認画面で内容を確認し、問題なければ確定してください。\n${approvalUrl}`;
+  const html = `<p><strong>お客様から日程の返信が届きました。</strong></p><p>お客様: ${escapeHtml(draft.customerName)}様 &lt;${escapeHtml(draft.customerEmail)}&gt;<br>候補日時: ${escapeHtml(selected)}<br>実施方法: ${escapeHtml(mode)}</p>${reason ? `<p><strong>確認事項:</strong> ${escapeHtml(reason)}</p>` : ""}<p><strong>返信内容</strong><br>${escapeHtml(draft.bookingReply ?? "").replace(/\n/g, "<br>")}</p><p><a href="${escapeHtml(approvalUrl)}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#315b3a;color:#fff;text-decoration:none;font-weight:bold">日程を確認して確定する</a></p>`;
+  const idempotencySuffix = notificationId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64) || draft.bookingReplyReceivedAt?.replace(/[^0-9]/g, "") || "received";
+  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], reply_to: draft.customerEmail, subject: `【日程確認】${draft.customerName}様から返信が届きました`, text, html }, `booking-review-${token}-${idempotencySuffix}`);
+}
+
+export async function confirmBooking(env: BookingEnv, token: string, draft: ContactGuideDraft, input: { selectedStart: string; mode: "online" | "in-person"; location: string }) {
+  if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking environment is not configured");
+  if (draft.status === "booked") return draft;
+
+  const slots = draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt);
+  const selected = slots.find((slot) => slot.start === input.selectedStart);
+  if (!selected) throw new Error("選択された候補日時が正しくありません。");
+  if (input.mode === "in-person" && !input.location.trim()) throw new Error("対面の場合は場所を入力してください。");
+
+  const start = new Date(selected.start);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const accessToken = await getGoogleAccessToken(env);
+  const existingEvent = await getMeetingEvent(env, accessToken, token);
+  if (!existingEvent && !await isCalendarSlotFree(env, accessToken, start, end)) throw new Error("選択された時間に別の予定があります。候補日時を確認してください。");
+
+  const event = existingEvent ?? await createMeetingEvent(env, accessToken, { token, customerName: draft.customerName, customerEmail: draft.customerEmail, company: draft.company, start, end, mode: input.mode, location: input.location.trim() });
+  const meetUrl = input.mode === "online" ? getMeetUrl(event) : undefined;
+  if (input.mode === "online" && !meetUrl) throw new Error("Google Meet URLを発行できませんでした。");
+
+  const dateLabel = new Intl.DateTimeFormat("ja-JP", { dateStyle: "full", timeStyle: "short", timeZone: "Asia/Tokyo" }).format(start);
+  const placeText = input.mode === "online" ? `Google Meet\n${meetUrl}` : `場所\n${input.location.trim()}`;
+  const placeHtml = input.mode === "online" ? `<strong>Google Meet</strong><br><a href="${escapeHtml(meetUrl!)}">${escapeHtml(meetUrl!)}</a>` : `<strong>場所</strong><br>${escapeHtml(input.location.trim())}`;
+  const confirmationText = `${draft.customerName}様\n\n日程のご返信ありがとうございます。\n以下の内容で初回のお打ち合わせを承りました。\n\n日時\n${dateLabel}\n\n${placeText}\n\n当日はどうぞよろしくお願いいたします。\n\nWani san Web`;
+  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [draft.customerEmail], reply_to: configured(env.CONTACT_ADMIN_EMAIL) ? env.CONTACT_ADMIN_EMAIL : FALLBACK_ADMIN_EMAIL, subject: "【Wani san Web】初回お打ち合わせ日程確定のご案内", text: confirmationText, html: `<p>${escapeHtml(draft.customerName)}様</p><p>日程のご返信ありがとうございます。<br>以下の内容で初回のお打ち合わせを承りました。</p><p><strong>日時</strong><br>${escapeHtml(dateLabel)}</p><p>${placeHtml}</p><p>当日はどうぞよろしくお願いいたします。</p><p>Wani san Web</p>` }, `booking-confirm-${token}`);
+
+  const bookedAt = new Date().toISOString();
+  const booked = { ...draft, status: "booked" as const, bookedAt, bookedStart: selected.start, bookingSelectedLabel: selected.label, bookingSelectedStart: selected.start, meetingMode: input.mode, meetingLocation: input.mode === "in-person" ? input.location.trim() : undefined, calendarEventId: event.id, meetUrl } satisfies ContactGuideDraft;
+  await env.SESSION.put(contactGuideKey(token), JSON.stringify(booked), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
+  console.log(JSON.stringify({ event: "contact_booking_confirmed", token, eventId: event.id, bookedStart: selected.start, mode: input.mode }));
+  return booked;
 }
 
 export async function handleBookingReply(message: ForwardableEmailMessage, env: BookingEnv) {
@@ -138,36 +186,27 @@ export async function handleBookingReply(message: ForwardableEmailMessage, env: 
   if (!draft) { message.setReject("Scheduling request has expired"); return; }
   if (draft.status === "booked") return;
   const reply = visibleReply(mail.text);
-  if (message.from.toLowerCase() !== draft.customerEmail.toLowerCase()) {
-    await notifyReview(env, token, draft, "登録されたお客様と返信元アドレスが一致しません。", reply);
-    return;
-  }
-
   const slots = draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt);
   const selected = chooseSlot(reply, slots);
-  if (!selected) {
-    await env.SESSION.put(key, JSON.stringify({ ...draft, status: "needs-review" } satisfies ContactGuideDraft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
-    await notifyReview(env, token, draft, "候補日時を1件に特定できませんでした。", reply);
-    return;
-  }
+  const preference = meetingPreference(reply);
+  const replyReceivedAt = new Date().toISOString();
+  const updated = {
+    ...draft,
+    status: selected ? "awaiting-approval" as const : "needs-review" as const,
+    bookingReply: reply,
+    bookingReplyReceivedAt: replyReceivedAt,
+    bookingSelectedLabel: selected?.label,
+    bookingSelectedStart: selected?.start,
+    meetingMode: preference.mode,
+    meetingLocation: preference.location || undefined,
+  } satisfies ContactGuideDraft;
+  await env.SESSION.put(key, JSON.stringify(updated), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
 
-  const start = new Date(selected.start);
-  const end = new Date(start.getTime() + 60 * 60 * 1000);
-  const accessToken = await getGoogleAccessToken(env);
-  const existingEvent = await getMeetingEvent(env, accessToken, token);
-  if (!existingEvent && !await isCalendarSlotFree(env, accessToken, start, end)) {
-    await env.SESSION.put(key, JSON.stringify({ ...draft, status: "needs-review" } satisfies ContactGuideDraft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
-    await notifyReview(env, token, draft, "選択された時間に別の予定が入りました。", reply);
-    return;
-  }
-
-  const event = existingEvent ?? await createMeetingEvent(env, accessToken, { token, customerName: draft.customerName, customerEmail: draft.customerEmail, company: draft.company, start, end });
-  const meetUrl = getMeetUrl(event);
-  if (!meetUrl) throw new Error("Google Meet URL was not created");
-  const dateLabel = new Intl.DateTimeFormat("ja-JP", { dateStyle: "full", timeStyle: "short", timeZone: "Asia/Tokyo" }).format(start);
-  const confirmationText = `${draft.customerName}様\n\n日程のご返信ありがとうございます。\n${dateLabel}より承りました。\n\nGoogle Meet\n${meetUrl}\n\n当日は上記URLよりご参加ください。\nどうぞよろしくお願いいたします。\n\nWani san Web`;
-  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [draft.customerEmail], reply_to: configured(env.CONTACT_ADMIN_EMAIL) ? env.CONTACT_ADMIN_EMAIL : FALLBACK_ADMIN_EMAIL, subject: "【Wani san Web】初回お打ち合わせ日程確定のご案内", text: confirmationText, html: `<p>${escapeHtml(draft.customerName)}様</p><p>日程のご返信ありがとうございます。<br>${escapeHtml(dateLabel)}より承りました。</p><p><strong>Google Meet</strong><br><a href="${escapeHtml(meetUrl)}">${escapeHtml(meetUrl)}</a></p><p>当日は上記URLよりご参加ください。<br>どうぞよろしくお願いいたします。</p><p>Wani san Web</p>` }, `booking-confirm-${token}`);
-  const bookedAt = new Date().toISOString();
-  await env.SESSION.put(key, JSON.stringify({ ...draft, status: "booked", bookedAt, bookedStart: selected.start, calendarEventId: event.id, meetUrl } satisfies ContactGuideDraft), { expirationTtl: CONTACT_GUIDE_TTL_SECONDS });
-  console.log(JSON.stringify({ event: "contact_booking_confirmed", token, eventId: event.id, bookedStart: selected.start }));
+  const reasons = [
+    message.from.toLowerCase() !== draft.customerEmail.toLowerCase() ? "登録されたお客様と返信元アドレスが一致しません。" : "",
+    !selected ? "候補日時を1件に特定できませんでした。" : "",
+    preference.mode === "in-person" && !preference.location ? "対面希望ですが、場所を特定できませんでした。" : "",
+  ].filter(Boolean);
+  await notifyBookingApproval(env, token, updated, mail.messageId, reasons.join(" ") || undefined);
+  console.log(JSON.stringify({ event: "contact_booking_reply_received", token, selected: selected?.start ?? null, mode: preference.mode, needsReview: reasons.length > 0 }));
 }

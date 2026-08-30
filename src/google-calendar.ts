@@ -40,22 +40,27 @@ export async function isCalendarSlotFree(env: CalendarEnv, accessToken: string, 
   return (result.calendars?.[calendarId]?.busy ?? []).length === 0;
 }
 
-export async function createMeetingEvent(env: CalendarEnv, accessToken: string, input: { token: string; customerName: string; customerEmail: string; company: string; start: Date; end: Date }) {
+export async function createMeetingEvent(env: CalendarEnv, accessToken: string, input: { token: string; customerName: string; customerEmail: string; company: string; start: Date; end: Date; mode: "online" | "in-person"; location?: string }) {
   const calendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
   const eventId = `a${input.token}`;
   const endpoint = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
-  const response = await fetch(`${endpoint}?conferenceDataVersion=1&sendUpdates=all`, {
+  const eventBody: Record<string, unknown> = {
+    id: eventId,
+    summary: `Wani san Web 初回お打ち合わせ｜${input.company || `${input.customerName}様`}`,
+    description: "Webサイト制作に関する初回お打ち合わせ",
+    start: { dateTime: input.start.toISOString(), timeZone: "Asia/Tokyo" },
+    end: { dateTime: input.end.toISOString(), timeZone: "Asia/Tokyo" },
+    attendees: [{ email: input.customerEmail }],
+  };
+  if (input.mode === "online") {
+    eventBody.conferenceData = { createRequest: { requestId: `meet-${input.token}`, conferenceSolutionKey: { type: "hangoutsMeet" } } };
+  } else {
+    eventBody.location = input.location;
+  }
+  const response = await fetch(`${endpoint}?conferenceDataVersion=1&sendUpdates=none`, {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      id: eventId,
-      summary: `Wani san Web 初回お打ち合わせ｜${input.company || `${input.customerName}様`}`,
-      description: "Webサイト制作に関する初回お打ち合わせ",
-      start: { dateTime: input.start.toISOString(), timeZone: "Asia/Tokyo" },
-      end: { dateTime: input.end.toISOString(), timeZone: "Asia/Tokyo" },
-      attendees: [{ email: input.customerEmail }],
-      conferenceData: { createRequest: { requestId: `meet-${input.token}`, conferenceSolutionKey: { type: "hangoutsMeet" } } },
-    }),
+    body: JSON.stringify(eventBody),
   });
   if (response.status === 409) {
     const existing = await fetch(`${endpoint}/${eventId}?conferenceDataVersion=1`, { headers: { Authorization: `Bearer ${accessToken}` } });
@@ -64,7 +69,7 @@ export async function createMeetingEvent(env: CalendarEnv, accessToken: string, 
   }
   if (!response.ok) throw new Error(`Google event error: ${response.status} ${await response.text()}`);
   let event = await response.json() as CalendarEvent;
-  for (let attempt = 0; attempt < 3 && !getMeetUrl(event); attempt += 1) {
+  for (let attempt = 0; input.mode === "online" && attempt < 3 && !getMeetUrl(event); attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 400));
     const refreshed = await fetch(`${endpoint}/${eventId}?conferenceDataVersion=1`, { headers: { Authorization: `Bearer ${accessToken}` } });
     if (refreshed.ok) event = await refreshed.json() as CalendarEvent;

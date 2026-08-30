@@ -1,5 +1,6 @@
 declare namespace Cloudflare {
   interface Env {
+    PUBLIC_SITE_URL: string;
     PUBLIC_TURNSTILE_SITE_KEY: string;
     TURNSTILE_SECRET_KEY: string;
     RESEND_API_KEY: string;

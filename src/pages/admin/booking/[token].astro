@@ -1,0 +1,151 @@
+---
+import { env } from "cloudflare:workers";
+import { candidateSlots } from "../../../booking-reply";
+import { contactGuideKey, type ContactGuideDraft } from "../../../contact-guide";
+
+export const prerender = false;
+
+type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
+
+Astro.response.headers.set("Cache-Control", "no-store");
+Astro.response.headers.set("Referrer-Policy", "no-referrer");
+Astro.response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+
+const token = Astro.params.token ?? "";
+const validToken = /^[a-f0-9]{32}$/.test(token);
+const session = (env as RuntimeEnv).SESSION;
+const draft = validToken && session ? await session.get<ContactGuideDraft>(contactGuideKey(token), "json") : null;
+const slots = draft ? (draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt)) : [];
+const confirmed = Boolean(draft?.status === "booked" || Astro.url.searchParams.get("confirmed") === "1");
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta name="referrer" content="no-referrer" />
+    <title>日程回答の確認｜Wani san Web</title>
+    <style>
+      :root { color-scheme: light; font-family: "Noto Sans JP", system-ui, sans-serif; color: #172019; background: #f4f6f3; }
+      body { margin: 0; }
+      main { width: min(760px, calc(100% - 32px)); margin: 48px auto; }
+      .brand { margin-bottom: 20px; color: #315b3a; font-weight: 800; letter-spacing: .04em; }
+      .card { padding: clamp(24px, 5vw, 44px); border: 1px solid #dce3dc; border-radius: 20px; background: #fff; box-shadow: 0 12px 36px rgba(32, 57, 38, .08); }
+      h1 { margin: 0 0 12px; font-size: clamp(24px, 5vw, 34px); }
+      h2 { margin: 32px 0 12px; font-size: 18px; }
+      p { line-height: 1.8; }
+      dl { display: grid; grid-template-columns: 9em 1fr; gap: 10px 16px; margin: 28px 0; }
+      dt { color: #687269; }
+      dd { margin: 0; overflow-wrap: anywhere; }
+      pre { margin: 0; padding: 16px; border-radius: 12px; background: #f5f7f5; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; line-height: 1.7; }
+      label { display: block; margin-top: 18px; font-weight: 700; }
+      select, input { display: block; width: 100%; box-sizing: border-box; margin-top: 8px; padding: 13px 14px; border: 1px solid #b8c3b9; border-radius: 10px; background: #fff; font: inherit; }
+      button { display: inline-flex; justify-content: center; align-items: center; min-height: 50px; margin-top: 28px; padding: 0 24px; border: 1px solid #315b3a; border-radius: 999px; background: #315b3a; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+      button:disabled { opacity: .55; cursor: wait; }
+      .notice { padding: 18px; border-radius: 12px; background: #e8f4ea; color: #234a2c; }
+      .error { background: #fff0ef; color: #8b2e28; }
+      .hint { color: #687269; font-size: 14px; }
+      @media (max-width: 560px) { main { margin: 24px auto; } dl { grid-template-columns: 1fr; gap: 4px; } dd { margin-bottom: 8px; } button { width: 100%; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand">Wani san Web</div>
+      <section class="card">
+        {confirmed && draft ? (
+          <>
+            <h1>日程を確定しました</h1>
+            <p class="notice">お客様へ確定メールを送信し、Googleカレンダーへ予定を登録しました。</p>
+            <dl>
+              <dt>お客様</dt><dd>{draft.customerName}様（{draft.customerEmail}）</dd>
+              <dt>日時</dt><dd>{draft.bookingSelectedLabel ?? draft.bookedStart}</dd>
+              <dt>実施方法</dt><dd>{draft.meetingMode === "in-person" ? `対面（${draft.meetingLocation}）` : "オンライン（Google Meet）"}</dd>
+              {draft.meetUrl && <><dt>会議URL</dt><dd><a href={draft.meetUrl} target="_blank" rel="noreferrer">{draft.meetUrl}</a></dd></>}
+            </dl>
+          </>
+        ) : draft?.bookingReply ? (
+          <>
+            <h1>日程回答の確認</h1>
+            <p>返信内容と確定する日時・実施方法を確認してください。ボタンを押すまで、お客様への確定メール送信とカレンダー登録は行いません。</p>
+            <dl>
+              <dt>お客様</dt><dd>{draft.customerName}様（{draft.customerEmail}）</dd>
+              <dt>会社・屋号</dt><dd>{draft.company || "未入力"}</dd>
+              <dt>受信日時</dt><dd>{draft.bookingReplyReceivedAt ? new Date(draft.bookingReplyReceivedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) : "不明"}</dd>
+            </dl>
+            <h2>お客様からの返信</h2>
+            <pre>{draft.bookingReply}</pre>
+            <form method="post" action="/api/booking-confirm" data-booking-confirm-form>
+              <input type="hidden" name="token" value={token} />
+              <label>
+                確定する日時
+                <select name="selectedStart" required>
+                  <option value="" selected={!draft.bookingSelectedStart}>選択してください</option>
+                  {slots.map((slot) => <option value={slot.start} selected={slot.start === draft.bookingSelectedStart}>{slot.label}</option>)}
+                </select>
+              </label>
+              <label>
+                実施方法
+                <select name="meetingMode" data-meeting-mode required>
+                  <option value="online" selected={draft.meetingMode !== "in-person"}>オンライン（Google Meet）</option>
+                  <option value="in-person" selected={draft.meetingMode === "in-person"}>対面</option>
+                </select>
+              </label>
+              <label data-location-field>
+                対面場所
+                <input type="text" name="location" value={draft.meetingLocation ?? ""} maxlength="200" placeholder="例：東京都〇〇区の貴社会議室" />
+              </label>
+              <p class="hint" data-mode-hint>オンラインの場合は、確定時にGoogle Meet URLを発行してメールへ記載します。対面の場合は、入力した場所をカレンダーと確定メールへ記載します。</p>
+              <button type="submit">この内容で確定メールを送る</button>
+            </form>
+            <p id="submit-error" class="notice error" role="alert" hidden></p>
+          </>
+        ) : (
+          <>
+            <h1>日程回答を確認できません</h1>
+            <p class="notice error">URLが正しくないか、まだお客様から日程の返信が届いていません。</p>
+          </>
+        )}
+      </section>
+    </main>
+    <script>
+      const form = document.querySelector<HTMLFormElement>("[data-booking-confirm-form]");
+      const mode = document.querySelector("[data-meeting-mode]");
+      const locationField = document.querySelector<HTMLElement>("[data-location-field]");
+      const locationInput = locationField?.querySelector<HTMLInputElement>('input[name="location"]');
+      const errorMessage = document.querySelector<HTMLElement>("#submit-error");
+
+      const updateMode = () => {
+        const inPerson = (mode as Element & { value?: string } | null)?.value === "in-person";
+        if (locationField) locationField.hidden = !inPerson;
+        if (locationInput) locationInput.required = inPerson;
+      };
+      mode?.addEventListener("change", updateMode);
+      updateMode();
+
+      form?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        const data = new FormData(form);
+        const payload = {
+          token: String(data.get("token") ?? ""),
+          selectedStart: String(data.get("selectedStart") ?? ""),
+          meetingMode: String(data.get("meetingMode") ?? ""),
+          location: String(data.get("location") ?? ""),
+        };
+        if (submitButton) submitButton.disabled = true;
+        if (errorMessage) errorMessage.hidden = true;
+        try {
+          const response = await fetch(form.action, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload) });
+          if (response.redirected) { window.location.assign(response.url); return; }
+          const result = await response.json().catch(() => null) as { message?: string } | null;
+          if (!response.ok) throw new Error(result?.message || "日程を確定できませんでした。");
+        } catch (error) {
+          if (errorMessage) { errorMessage.textContent = error instanceof Error ? error.message : "日程を確定できませんでした。"; errorMessage.hidden = false; }
+          if (submitButton) submitButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

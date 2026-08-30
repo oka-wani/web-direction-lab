@@ -1,5 +1,5 @@
 import { handle } from "@astrojs/cloudflare/handler";
-import { handleBookingReply } from "./booking-reply";
+import { handleBookingReply, notifyBookingReplyFailure } from "./booking-reply";
 export { ProposalWorkflowV2 } from "./proposal-workflow-v2";
 
 export default {
@@ -14,6 +14,12 @@ export default {
     return handle(request, env, ctx);
   },
   async email(message: ForwardableEmailMessage, env: any) {
-    await handleBookingReply(message, env);
+    try {
+      await handleBookingReply(message, env);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "不明な受信処理エラー";
+      console.error(JSON.stringify({ event: "contact_booking_reply_error", from: message.from, to: message.to, reason }));
+      await notifyBookingReplyFailure(message, env, reason);
+    }
   },
 } satisfies ExportedHandler<any>;

@@ -6,7 +6,12 @@ export type CalendarEnv = {
 };
 
 type TokenResult = { access_token?: string };
-type FreeBusyResult = { calendars?: Record<string, { busy?: { start: string; end: string }[] }> };
+type BusyWindow = { start: string; end: string };
+type FreeBusyResult = { calendars?: Record<string, { busy?: BusyWindow[]; errors?: { reason?: string }[] }> };
+type CalendarListResult = {
+  items?: { id?: string; selected?: boolean; hidden?: boolean; deleted?: boolean }[];
+  nextPageToken?: string;
+};
 export type CalendarEvent = { id: string; htmlLink?: string; hangoutLink?: string; conferenceData?: { entryPoints?: { entryPointType?: string; uri?: string }[] } };
 
 const configured = (value: string | undefined) => Boolean(value && !value.startsWith("SET_IN_"));
@@ -28,16 +33,45 @@ export async function getGoogleAccessToken(env: CalendarEnv) {
   return result.access_token;
 }
 
-export async function isCalendarSlotFree(env: CalendarEnv, accessToken: string, start: Date, end: Date) {
-  const calendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+async function getAvailabilityCalendarIds(env: CalendarEnv, accessToken: string) {
+  const configuredCalendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+  const ids = new Set<string>([configuredCalendarId]);
+  let pageToken = "";
+  do {
+    const url = new URL("https://www.googleapis.com/calendar/v3/users/me/calendarList");
+    url.searchParams.set("maxResults", "250");
+    url.searchParams.set("showDeleted", "false");
+    url.searchParams.set("showHidden", "false");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const response = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!response.ok) throw new Error(`Google calendarList error: ${response.status}`);
+    const result = await response.json() as CalendarListResult;
+    for (const calendar of result.items ?? []) {
+      if (calendar.id && calendar.selected && !calendar.hidden && !calendar.deleted) ids.add(calendar.id);
+    }
+    pageToken = result.nextPageToken ?? "";
+  } while (pageToken);
+  return [...ids];
+}
+
+export async function getCalendarBusyWindows(env: CalendarEnv, accessToken: string, start: Date, end: Date) {
+  const calendarIds = await getAvailabilityCalendarIds(env, accessToken);
+  const queriedCalendarIds = calendarIds.slice(0, 50);
   const response = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ timeMin: start.toISOString(), timeMax: end.toISOString(), timeZone: "Asia/Tokyo", items: [{ id: calendarId }] }),
+    body: JSON.stringify({ timeMin: start.toISOString(), timeMax: end.toISOString(), timeZone: "Asia/Tokyo", calendarExpansionMax: 50, items: queriedCalendarIds.map((id) => ({ id })) }),
   });
   if (!response.ok) throw new Error(`Google freeBusy error: ${response.status}`);
   const result = await response.json() as FreeBusyResult;
-  return (result.calendars?.[calendarId]?.busy ?? []).length === 0;
+  const failedCalendars = queriedCalendarIds.filter((id) => (result.calendars?.[id]?.errors?.length ?? 0) > 0);
+  if (failedCalendars.length) throw new Error(`Google freeBusy calendar error: ${failedCalendars.length}`);
+  return queriedCalendarIds.flatMap((id) => result.calendars?.[id]?.busy ?? []);
+}
+
+export async function isCalendarSlotFree(env: CalendarEnv, accessToken: string, start: Date, end: Date) {
+  const busy = await getCalendarBusyWindows(env, accessToken, start, end);
+  return !busy.some((window) => new Date(window.start) < end && new Date(window.end) > start);
 }
 
 export async function createMeetingEvent(env: CalendarEnv, accessToken: string, input: { token: string; customerName: string; customerEmail: string; company: string; start: Date; end: Date; mode: "online" | "in-person"; location?: string }) {

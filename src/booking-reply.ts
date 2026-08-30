@@ -130,6 +130,17 @@ async function notifyBookingApproval(env: BookingEnv, token: string, draft: Cont
   await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], reply_to: draft.customerEmail, subject: `【日程確認】${draft.customerName}様から返信が届きました`, text, html }, `booking-review-${token}-${idempotencySuffix}`);
 }
 
+export async function notifyBookingReplyFailure(message: ForwardableEmailMessage, env: BookingEnv, reason: string, reply = "") {
+  if (!configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking reply notification environment is not configured");
+  const admin = configured(env.CONTACT_ADMIN_EMAIL) ? env.CONTACT_ADMIN_EMAIL! : FALLBACK_ADMIN_EMAIL;
+  const subject = message.headers.get("subject") ?? "件名なし";
+  const notificationId = (message.headers.get("message-id") ?? `${message.from}-${message.to}`).replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 80) || "unmatched";
+  const text = `日程返信を受信しましたが、自動で問い合わせ情報と紐付けできませんでした。\n\n返信元: ${message.from}\n返信先: ${message.to}\n件名: ${subject}\n確認事項: ${reason}\n\n返信内容:\n${reply || "本文を抽出できませんでした。元の返信メールをご確認ください。"}`;
+  const html = `<p><strong>日程返信を受信しましたが、自動で問い合わせ情報と紐付けできませんでした。</strong></p><p>返信元: ${escapeHtml(message.from)}<br>返信先: ${escapeHtml(message.to)}<br>件名: ${escapeHtml(subject)}<br>確認事項: ${escapeHtml(reason)}</p><p><strong>返信内容</strong><br>${escapeHtml(reply || "本文を抽出できませんでした。元の返信メールをご確認ください。").replace(/\n/g, "<br>")}</p>`;
+  await sendEmail(env, { from: env.CONTACT_FROM_EMAIL, to: [admin], reply_to: message.from, subject: "【要確認】お客様から日程返信が届きました", text, html }, `booking-unmatched-${notificationId}`);
+  console.error(JSON.stringify({ event: "contact_booking_reply_unmatched", from: message.from, to: message.to, reason }));
+}
+
 export async function confirmBooking(env: BookingEnv, token: string, draft: ContactGuideDraft, input: { selectedStart: string; mode: "online" | "in-person"; location: string }) {
   if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking environment is not configured");
   if (draft.status === "booked") return draft;
@@ -167,25 +178,25 @@ export async function handleBookingReply(message: ForwardableEmailMessage, env: 
   const legacyToken = recipient.match(new RegExp(`^schedule\\+([a-f0-9]{32})@${REPLY_DOMAIN.replace(/\./g, "\\.")}$`))?.[1];
   if (recipient !== SCHEDULE_REPLY_ADDRESS && !legacyToken) { message.setReject("Unknown scheduling address"); return; }
   if (!env.SESSION || !configured(env.RESEND_API_KEY) || !configured(env.CONTACT_FROM_EMAIL)) throw new Error("Booking reply environment is not configured");
-  if (message.rawSize > 1_000_000) { message.setReject("Message is too large"); return; }
+  if (message.rawSize > 1_000_000) { await notifyBookingReplyFailure(message, env, "メールサイズが大きいため本文を処理できませんでした。"); return; }
 
   const raw = new TextDecoder().decode(await new Response(message.raw).arrayBuffer());
   const mail = parseMail(raw);
+  const reply = visibleReply(mail.text);
   const scheduleId = legacyToken ?? `${mail.subject}\n${mail.text}`.match(/WSW-SCHEDULE-ID:\s*([a-f0-9]{12,32})/i)?.[1]?.toLowerCase();
-  if (!scheduleId) { message.setReject("Scheduling request ID was not found"); return; }
+  if (!scheduleId) { await notifyBookingReplyFailure(message, env, "日程管理IDをメールから読み取れませんでした。", reply); return; }
 
   let token = scheduleId;
   if (scheduleId.length < 32) {
     const matches = await env.SESSION.list({ prefix: contactGuideKey(scheduleId), limit: 2 });
-    if (matches.keys.length !== 1) { message.setReject("Scheduling request ID is invalid or ambiguous"); return; }
+    if (matches.keys.length !== 1) { await notifyBookingReplyFailure(message, env, "日程管理IDに対応する問い合わせを特定できませんでした。", reply); return; }
     token = matches.keys[0].name.slice(contactGuideKey("").length);
   }
 
   const key = contactGuideKey(token);
   const draft = await env.SESSION.get<ContactGuideDraft>(key, "json");
-  if (!draft) { message.setReject("Scheduling request has expired"); return; }
+  if (!draft) { await notifyBookingReplyFailure(message, env, "問い合わせ情報の有効期限が切れていました。", reply); return; }
   if (draft.status === "booked") return;
-  const reply = visibleReply(mail.text);
   const slots = draft.candidateSlots?.length ? draft.candidateSlots : candidateSlots(draft.candidates, draft.createdAt);
   const selected = chooseSlot(reply, slots);
   const preference = meetingPreference(reply);

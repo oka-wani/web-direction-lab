@@ -1,13 +1,12 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import { CONTACT_GUIDE_TTL_SECONDS, contactGuideKey, type ContactGuideDraft } from "../../contact-guide";
+import { getCalendarBusyWindows, getGoogleAccessToken, type CalendarEnv } from "../../google-calendar";
 
 export const prerender = false;
 
 type TurnstileResult = { success: boolean; action?: string; "error-codes"?: string[] };
-type GoogleTokenResult = { access_token?: string };
-type GoogleFreeBusyResult = { calendars?: Record<string, { busy?: { start: string; end: string }[] }> };
-type RuntimeEnv = typeof env & { SESSION?: KVNamespace };
+type RuntimeEnv = typeof env & CalendarEnv & { SESSION?: KVNamespace };
 
 const services = new Set([
   "Webサイトの新規作成",
@@ -24,7 +23,8 @@ const configured = (input: string | undefined) => Boolean(input && !input.starts
 
 const ADMIN_EMAIL = "contact@wani-san.com";
 const HEARING_URL = "https://www.wani-san.com/hearing/";
-const MEETING_START_HOUR = 19;
+const MEETING_START_HOUR = 9;
+const MEETING_END_HOUR = 19;
 const MEETING_DURATION_MINUTES = 60;
 const MEETING_CANDIDATE_COUNT = 3;
 const MEETING_SEARCH_DAYS = 21;
@@ -42,7 +42,8 @@ function addJstDays(base: Date, days: number) {
 }
 function formatCandidate(start: Date, index: number) {
   const formatter = new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", weekday: "short", timeZone: "Asia/Tokyo" });
-  return `第${index + 1}候補：${formatter.format(start)} ${String(MEETING_START_HOUR).padStart(2, "0")}:00〜`;
+  const time = new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Tokyo" }).format(start);
+  return `第${index + 1}候補：${formatter.format(start)} ${time}〜`;
 }
 function fallbackMeetingCandidates(base = new Date()) {
   const slots: Date[] = [];
@@ -52,28 +53,21 @@ function fallbackMeetingCandidates(base = new Date()) {
   }
   return slots.map(formatCandidate);
 }
-async function getGoogleAccessToken() {
-  if (!configured(env.GOOGLE_CALENDAR_CLIENT_ID) || !configured(env.GOOGLE_CALENDAR_CLIENT_SECRET) || !configured(env.GOOGLE_CALENDAR_REFRESH_TOKEN)) return null;
-  const body = new URLSearchParams({ client_id: env.GOOGLE_CALENDAR_CLIENT_ID, client_secret: env.GOOGLE_CALENDAR_CLIENT_SECRET, refresh_token: env.GOOGLE_CALENDAR_REFRESH_TOKEN, grant_type: "refresh_token" });
-  const response = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body });
-  if (!response.ok) throw new Error(`Google token error: ${response.status}`);
-  const result = await response.json() as GoogleTokenResult; if (!result.access_token) throw new Error("Google access token missing"); return result.access_token;
-}
 async function getMeetingCandidates(base = new Date()) {
   try {
-    const accessToken = await getGoogleAccessToken(); if (!accessToken) return fallbackMeetingCandidates(base);
-    const calendarId = configured(env.GOOGLE_CALENDAR_ID) ? env.GOOGLE_CALENDAR_ID : "primary";
+    const runtimeEnv = env as RuntimeEnv;
+    const accessToken = await getGoogleAccessToken(runtimeEnv);
     const queryStart = addJstDays(base, 1); const queryEnd = addJstDays(base, MEETING_SEARCH_DAYS + 1);
     const startParts = toJstParts(queryStart); const endParts = toJstParts(queryEnd);
-    const response = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", { method: "POST", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }, body: JSON.stringify({ timeMin: dateOnlyToIso(startParts.year, startParts.month, startParts.day, 0), timeMax: dateOnlyToIso(endParts.year, endParts.month, endParts.day, 23), timeZone: "Asia/Tokyo", items: [{ id: calendarId }] }) });
-    if (!response.ok) throw new Error(`Google freeBusy error: ${response.status}`);
-    const result = await response.json() as GoogleFreeBusyResult; const busy = result.calendars?.[calendarId]?.busy ?? []; const slots: Date[] = [];
+    const busy = await getCalendarBusyWindows(runtimeEnv, accessToken, new Date(dateOnlyToIso(startParts.year, startParts.month, startParts.day, 0)), new Date(dateOnlyToIso(endParts.year, endParts.month, endParts.day, 23))); const slots: Date[] = [];
     for (let offset = 1; slots.length < MEETING_CANDIDATE_COUNT && offset <= MEETING_SEARCH_DAYS; offset += 1) {
       const day = addJstDays(base, offset); const parts = toJstParts(day); if (parts.weekday === 0 || parts.weekday === 6) continue;
-      const slotStart = new Date(dateOnlyToIso(parts.year, parts.month, parts.day, MEETING_START_HOUR)); const slotEnd = new Date(slotStart.getTime() + MEETING_DURATION_MINUTES * 60 * 1000);
-      if (!busy.some((window) => new Date(window.start) < slotEnd && new Date(window.end) > slotStart)) slots.push(slotStart);
+      for (let hour = MEETING_START_HOUR; hour + MEETING_DURATION_MINUTES / 60 <= MEETING_END_HOUR; hour += 1) {
+        const slotStart = new Date(dateOnlyToIso(parts.year, parts.month, parts.day, hour)); const slotEnd = new Date(slotStart.getTime() + MEETING_DURATION_MINUTES * 60 * 1000);
+        if (!busy.some((window) => new Date(window.start) < slotEnd && new Date(window.end) > slotStart)) { slots.push(slotStart); break; }
+      }
     }
-    return slots.length >= MEETING_CANDIDATE_COUNT ? slots.map(formatCandidate) : fallbackMeetingCandidates(base);
+    return slots.length ? slots.map(formatCandidate) : fallbackMeetingCandidates(base);
   } catch (error) {
     console.error(JSON.stringify({ event: "calendar_availability_error", message: error instanceof Error ? error.message : String(error) })); return fallbackMeetingCandidates(base);
   }

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { SiteFooter, SiteHeader } from "./components/SiteChrome";
 import { HomeHero } from "./components/HomeHero";
 import { columnItems } from "./column/column-data";
@@ -21,9 +22,71 @@ const processSteps = [
   ["05", "公開", "最終確認後に本番反映"],
 ] as const;
 
+function HomeMotion() {
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>(".order-home");
+    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    root.classList.add("is-motion-ready");
+    const targets = Array.from(root.querySelectorAll<HTMLElement>([
+      ".order-section-heading",
+      ".order-strength-grid > article",
+      ".order-efficiency-note",
+      ".order-demo-grid > *",
+      ".order-quality-card",
+      ".order-process > li",
+      ".simple-column-grid > a",
+      ".order-news-item",
+      ".faq-list > details",
+      ".order-final-cta",
+    ].join(",")));
+
+    targets.forEach((target, index) => {
+      target.dataset.reveal = "";
+      target.style.setProperty("--reveal-order", String(index % 6));
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        (entry.target as HTMLElement).classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -9%", threshold: .12 });
+
+    targets.forEach((target) => observer.observe(target));
+
+    const hero = root.querySelector<HTMLElement>(".wsw-mv");
+    const updateHeroDepth = (event: PointerEvent) => {
+      if (!hero || event.pointerType === "touch") return;
+      const bounds = hero.getBoundingClientRect();
+      const x = ((event.clientX - bounds.left) / bounds.width - .5) * 2;
+      const y = ((event.clientY - bounds.top) / bounds.height - .5) * 2;
+      hero.style.setProperty("--mv-x", x.toFixed(3));
+      hero.style.setProperty("--mv-y", y.toFixed(3));
+    };
+    const resetHeroDepth = () => {
+      hero?.style.setProperty("--mv-x", "0");
+      hero?.style.setProperty("--mv-y", "0");
+    };
+    hero?.addEventListener("pointermove", updateHeroDepth);
+    hero?.addEventListener("pointerleave", resetHeroDepth);
+
+    return () => {
+      observer.disconnect();
+      hero?.removeEventListener("pointermove", updateHeroDepth);
+      hero?.removeEventListener("pointerleave", resetHeroDepth);
+      root.classList.remove("is-motion-ready");
+    };
+  }, []);
+
+  return null;
+}
+
 export default function Home() {
   return <main className="order-home">
     <SiteHeader current="home" />
+    <HomeMotion />
     <HomeHero />
 
     <section className="order-section">

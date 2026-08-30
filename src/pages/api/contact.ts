@@ -45,14 +45,7 @@ function formatCandidate(start: Date, index: number) {
   const time = new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Asia/Tokyo" }).format(start);
   return `第${index + 1}候補：${formatter.format(start)} ${time}〜`;
 }
-function fallbackMeetingCandidates(base = new Date()) {
-  const slots: Date[] = [];
-  for (let offset = 1; slots.length < MEETING_CANDIDATE_COUNT && offset <= MEETING_SEARCH_DAYS; offset += 1) {
-    const day = addJstDays(base, offset); const parts = toJstParts(day); if (parts.weekday === 0 || parts.weekday === 6) continue;
-    slots.push(new Date(dateOnlyToIso(parts.year, parts.month, parts.day, MEETING_START_HOUR)));
-  }
-  return slots.map(formatCandidate);
-}
+const manualCandidateWarning = () => ["Googleカレンダーの空き時間を取得できませんでした。候補日時を変更してください。"];
 async function getMeetingCandidates(base = new Date()) {
   try {
     const runtimeEnv = env as RuntimeEnv;
@@ -67,9 +60,9 @@ async function getMeetingCandidates(base = new Date()) {
         if (!busy.some((window) => new Date(window.start) < slotEnd && new Date(window.end) > slotStart)) { slots.push(slotStart); break; }
       }
     }
-    return slots.length ? slots.map(formatCandidate) : fallbackMeetingCandidates(base);
+    return slots.length ? slots.map(formatCandidate) : manualCandidateWarning();
   } catch (error) {
-    console.error(JSON.stringify({ event: "calendar_availability_error", message: error instanceof Error ? error.message : String(error) })); return fallbackMeetingCandidates(base);
+    console.error(JSON.stringify({ event: "calendar_availability_error", message: error instanceof Error ? error.message : String(error) })); return manualCandidateWarning();
   }
 }
 

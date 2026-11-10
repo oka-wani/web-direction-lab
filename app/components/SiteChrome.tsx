@@ -7,11 +7,9 @@ type Current = "home" | "learn" | "news" | "knowledge" | "column" | "tools" | "s
 
 const navigation = [
   { href: "/", label: "TOP", current: "home" },
+  { href: "/column", label: "記事一覧", current: "column" },
+  { href: "/news", label: "お知らせ", current: "news" },
   { href: "/services", label: "サービス", current: "services" },
-  { href: "/pricing", label: "料金", current: "pricing" },
-  { href: "/flow", label: "制作の流れ", current: "flow" },
-  { href: "/examples", label: "制作イメージ", current: "examples" },
-  { href: "/column", label: "コラム", current: "column" },
   { href: "/about", label: "WSWについて", current: "about" },
 ] as const;
 
@@ -35,7 +33,7 @@ export function SiteHeader({ current }: { current?: Current }) {
 
 export function SiteFooter() {
   return <footer className="site-footer">
-    <div className="footer-brand"><a className="logo" href="/"><BrandLogo /></a><p>早く・手頃に・ちゃんとしたWebサイトを。公開後の保守・改善まで分かりやすく支援します。</p></div>
+    <div className="footer-brand"><a className="logo" href="/"><BrandLogo /></a><p>Webサイトの制作・運用・改善に役立つ実務記事を届けます。</p></div>
     <div className="footer-nav-groups">
       <nav aria-label="サービス"><b>サービス</b><a href="/services">Webサイト制作</a><a href="/pricing">料金・プラン</a><a href="/flow">制作の流れ</a><a href="/services#support">公開後の保守・改善</a></nav>
       <nav aria-label="制作と品質"><b>制作と品質</b><a href="/examples">制作イメージ</a><a href="/examples/restaurant">飲食店サイト</a><a href="/quality">品質・技術について</a><a href="/quality/cms">CMSについて</a></nav>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { columnItems } from "./column-data";
 
 const columnCategories = ["すべて", "ホームページ制作", "運用・改善", "SEO・解析"];
@@ -14,6 +14,10 @@ const relatedService: Record<string, { label: string; href: string }> = {
 export default function ColumnList() {
   const [category, setCategory] = useState("すべて");
   const [visibleCount, setVisibleCount] = useState(12);
+  useEffect(() => {
+    const selected = new URLSearchParams(window.location.search).get("category");
+    if (selected && columnCategories.includes(selected)) setCategory(selected);
+  }, []);
   const shown = useMemo(
     () => columnItems.filter((item) => category === "すべて" || item.category === category),
     [category],
@@ -22,9 +26,16 @@ export default function ColumnList() {
 
   return <>
     <div className="column-filters category-filters" aria-label="カテゴリで絞り込む">
-      {columnCategories.map((item) => <button className={category === item ? "active" : ""} type="button" onClick={() => { setCategory(item); setVisibleCount(12); }} key={item}>{item}</button>)}
+      {columnCategories.map((item) => <button className={category === item ? "active" : ""} aria-pressed={category === item} type="button" onClick={() => {
+        setCategory(item);
+        setVisibleCount(12);
+        const url = new URL(window.location.href);
+        if (item === "すべて") url.searchParams.delete("category");
+        else url.searchParams.set("category", item);
+        window.history.replaceState(window.history.state, "", url);
+      }} key={item}>{item}</button>)}
     </div>
-    <p className="result-count"><b>{shown.length}</b> 件のコラム</p>
+    <p className="result-count" role="status"><b>{shown.length}</b> 件の記事</p>
     {shown.length > 0 ? <div className="column-card-grid">{visibleItems.map((item) => <article className="column-card" key={item.slug}>
       <a className="column-card-visual" href={`/column/${item.slug}`} style={{ backgroundImage:`url(${item.image})` }} aria-label={`${item.title}を読む`}><span>{item.category}</span></a>
       <div className="column-card-body"><div><time>{item.date}</time><span>WEB COLUMN</span></div><h2><a href={`/column/${item.slug}`}>{item.title}</a></h2><p className="column-card-summary">{item.summary}</p>{relatedService[item.category] && <a className="column-related-service" href={relatedService[item.category].href}>関連サービス：{relatedService[item.category].label}</a>}<a className="text-link card-read-link" href={`/column/${item.slug}`}><span>続きを読む</span><i>→</i></a></div>

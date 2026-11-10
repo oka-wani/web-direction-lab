@@ -9,16 +9,24 @@ interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
+  publication?: boolean;
 }
 
 const {
   title = "Wani san Web｜早く・手頃に・ちゃんとしたWebサイトを",
   description = "標準化した制作フローで、短期間・手頃な価格でも品質は妥協しないWebサイト制作。公開後の保守・改善まで対応します。",
   noindex = false,
+  publication = false,
 } = Astro.props;
 const siteUrl = Astro.site ?? new URL("https://www.wani-san.com");
 const canonical = new URL(Astro.url.pathname, siteUrl);
-const structuredData = {
+const structuredData = publication ? {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Wani san Web",
+  url: siteUrl.href,
+  description,
+} : {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
   name: "Wani san Web",

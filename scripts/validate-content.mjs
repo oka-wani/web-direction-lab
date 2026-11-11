@@ -1,5 +1,6 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
+import { validateColumn } from "./publish-column.mjs";
 
 const folders = ["automation/drafts", "automation/approved"];
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -203,4 +204,8 @@ for (const folder of folders) {
   }
 }
 
+for (const post of columnIndex.filter(item => item.generatedBy === "AI-assisted")) {
+  const errors = validateColumn(post, columnIndex.filter(item => item !== post));
+  if (errors.length) { failures++; console.error(`${post.slug}: ${errors.join(", ")}`); }
+}
 if (failures) process.exit(1);

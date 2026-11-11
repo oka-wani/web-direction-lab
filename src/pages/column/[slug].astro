@@ -6,4 +6,4 @@ export function getStaticPaths() { return columnItems.map((item) => ({ params: {
 const { slug } = Astro.params;
 const { item } = Astro.props;
 ---
-<BaseLayout title={`${item.title}｜コラム`} description={item.summary}><Page client:load slug={slug!} /></BaseLayout>
+<BaseLayout title={`${item.seo?.metaTitle ?? item.title}｜Wani san Web`} description={item.seo?.metaDescription ?? item.summary} publication><script is:inline type="application/ld+json" set:html={JSON.stringify({"@context":"https://schema.org","@type":"Article",headline:item.title,description:item.summary,datePublished:item.date.replaceAll('.', '-'),author:{"@type":"Organization",name:"Wani san Web"},mainEntityOfPage:new URL(`/column/${item.slug}/`, Astro.site).href}).replaceAll('<', '\\u003c')} /><Page client:load slug={slug!} /></BaseLayout>

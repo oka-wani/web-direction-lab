@@ -102,6 +102,7 @@ export default function ConfirmForm() {
       const response = await fetch("/api/contact", { method: "POST", body: formData, headers: { Accept: "application/json" } });
       const result = await response.json().catch(() => null) as { message?: string } | null;
       if (!response.ok) throw new Error(result?.message || "送信できませんでした。時間を置いてもう一度お試しください。");
+      sessionStorage.setItem("wsw-contact-success", "1");
       sessionStorage.removeItem(STORAGE_KEY);
       window.location.assign("/contact/thanks/");
     } catch (error) {

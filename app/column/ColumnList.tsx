@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { columnItems } from "./column-data";
-
-const columnCategories = ["すべて", "ホームページ制作", "運用・改善", "SEO・解析"];
+import { columnItems, columnCategories } from "./column-data";
 
 const relatedService: Record<string, { label: string; href: string }> = {
   "ホームページ制作": { label: "Web制作", href: "/services/web-production" },

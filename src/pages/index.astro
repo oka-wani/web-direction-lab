@@ -4,20 +4,22 @@ import { SiteHeader, SiteFooter } from "../../app/components/SiteChrome";
 import { columnItems } from "../../app/column/column-data";
 
 const topics = [
+  { title: "UX・CX", description: "使いやすさと顧客体験から考える", label: "EXPERIENCE" },
+  { title: "マーケティング", description: "集客から選ばれる理由まで考える", label: "MARKETING" },
   { title: "ホームページ制作", description: "費用・ページ構成・CMSを考える", label: "PLAN" },
   { title: "運用・改善", description: "公開後の課題を見つけて改善する", label: "IMPROVE" },
   { title: "SEO・解析", description: "検索とアクセスのデータを読む", label: "MEASURE" },
 ];
 const latest = [...columnItems].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
 ---
-<BaseLayout title="Wani san Web｜Web制作・運用・改善の実務メディア" description="Webサイトの企画から公開後の改善まで。ホームページ制作、CMS、SEO、アクセス解析の判断に役立つ記事を届けます。" publication>
+<BaseLayout title="Wani san Web｜UX・CXとマーケティングの実務メディア" description="UX・CX、マーケティング、Web制作・運用・改善の実務に役立つコラムを届けます。" publication>
   <SiteHeader client:load current="home" />
   <main class="editorial">
     <section class="intro">
       <div class="wrap">
         <p class="eyebrow">WANI SAN WEB JOURNAL</p>
         <h1>Webサイトをつくる。<br />育てる。考える。</h1>
-        <p class="intro-copy">企画・制作から公開後の運用まで。<br />Web担当者が、次の一手を決めるための実務メディア。</p>
+        <p class="intro-copy">UX・CX、マーケティングからWebの運用・改善まで。<br />次の一手を決めるためのコラムを、毎日届けます。</p>
         <a class="primary" href="#latest">新着記事を読む <span aria-hidden="true">↓</span></a>
       </div>
     </section>

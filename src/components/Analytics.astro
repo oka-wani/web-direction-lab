@@ -1,0 +1,13 @@
+---
+import analytics from "../../content/analytics.json";
+const enabled = /^GTM-[A-Z0-9]+$/.test(analytics.gtmContainerId) && Astro.url.hostname === "www.wani-san.com" && !Astro.url.pathname.startsWith("/admin/");
+const containerId = analytics.gtmContainerId;
+---
+{enabled && <script is:inline define:vars={{ containerId }}>
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js', page_location: window.location.origin + window.location.pathname });
+  var tag = document.createElement('script');
+  tag.async = true;
+  tag.src = 'https://www.googletagmanager.com/gtm.js?id=' + containerId;
+  document.head.appendChild(tag);
+</script>}

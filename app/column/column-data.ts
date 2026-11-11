@@ -1,3 +1,7 @@
+import publishedColumns from "../../content/column/columns.json";
+
+export const columnCategories = ["すべて", "UX・CX", "マーケティング", "ホームページ制作", "運用・改善", "SEO・解析"];
+
 export type ColumnItem = {
   slug: string;
   category: string;
@@ -8,9 +12,12 @@ export type ColumnItem = {
   image: string;
   lead: string;
   sections: { title: string; body: string }[];
+  sources?: { name: string; url: string }[];
+  generatedBy?: string;
+  seo?: { metaTitle: string; metaDescription: string; keywords: string[] };
 };
 
-export const columnItems: ColumnItem[] = [
+const seedColumns: ColumnItem[] = [
   {
     slug: "website-cost-guide",
     category: "ホームページ制作",
@@ -72,6 +79,11 @@ export const columnItems: ColumnItem[] = [
     ],
   },
 ];
+
+export const columnItems: ColumnItem[] = [
+  ...(publishedColumns as ColumnItem[]),
+  ...seedColumns.filter((seed) => !(publishedColumns as ColumnItem[]).some((item) => item.slug === seed.slug)),
+].sort((a, b) => b.date.localeCompare(a.date));
 
 export function getColumn(slug: string) {
   return columnItems.find((item) => item.slug === slug);

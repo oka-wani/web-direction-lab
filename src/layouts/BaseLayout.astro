@@ -4,6 +4,7 @@ import "../../app/content-refresh.css";
 import "../../app/platform.css";
 import "../../app/order-site.css";
 import "../../app/mv-refresh.css";
+import Analytics from "../components/Analytics.astro";
 
 interface Props {
   title?: string;
@@ -55,6 +56,7 @@ const structuredData = publication ? {
     <meta property="og:image" content={new URL("/images/og-default.svg", siteUrl)} />
     <meta name="twitter:card" content="summary_large_image" />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <Analytics />
   </head>
   <body>
     <slot />

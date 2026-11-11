@@ -14,3 +14,11 @@ import { SiteFooter, SiteHeader } from "../../../app/components/SiteChrome";
     <SiteFooter />
   </main>
 </BaseLayout>
+<script>
+  if (sessionStorage.getItem("wsw-contact-success") === "1") {
+    sessionStorage.removeItem("wsw-contact-success");
+    const trackingWindow = window as Window & { dataLayer?: Record<string, unknown>[] };
+    trackingWindow.dataLayer = trackingWindow.dataLayer || [];
+    trackingWindow.dataLayer.push({ event: "generate_lead", form_id: "contact" });
+  }
+</script>
